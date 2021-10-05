@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -32,9 +34,39 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     /**
      * @var string The hashed password
-     * @ORM\Column(type="string")
+     * @ORM\Column(type="string", nullable=true)
      */
     private $password;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $KeycloakId;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $username;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Realm::class, inversedBy="users")
+     */
+    private $realm;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=PersonaFisica::class, inversedBy="users")
+     */
+    private $personaFisica;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Solicitud::class, mappedBy="usuario")
+     */
+    private $solicitudes;
+
+    public function __construct()
+    {
+        $this->solicitudes = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -123,5 +155,78 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
+    }
+
+    public function getKeycloakId(): ?string
+    {
+        return $this->KeycloakId;
+    }
+
+    public function setKeycloakId(?string $KeycloakId): self
+    {
+        $this->KeycloakId = $KeycloakId;
+
+        return $this;
+    }
+
+    public function setUsername(string $username): self
+    {
+        $this->username = $username;
+
+        return $this;
+    }
+
+    public function getRealm(): ?Realm
+    {
+        return $this->realm;
+    }
+
+    public function setRealm(?Realm $realm): self
+    {
+        $this->realm = $realm;
+
+        return $this;
+    }
+
+    public function getPersonaFisica(): ?PersonaFisica
+    {
+        return $this->personaFisica;
+    }
+
+    public function setPersonaFisica(?PersonaFisica $personaFisica): self
+    {
+        $this->personaFisica = $personaFisica;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Solicitud[]
+     */
+    public function getSolicitudes(): Collection
+    {
+        return $this->solicitudes;
+    }
+
+    public function addSolicitude(Solicitud $solicitude): self
+    {
+        if (!$this->solicitudes->contains($solicitude)) {
+            $this->solicitudes[] = $solicitude;
+            $solicitude->setUsuario($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSolicitude(Solicitud $solicitude): self
+    {
+        if ($this->solicitudes->removeElement($solicitude)) {
+            // set the owning side to null (unless already changed)
+            if ($solicitude->getUsuario() === $this) {
+                $solicitude->setUsuario(null);
+            }
+        }
+
+        return $this;
     }
 }
