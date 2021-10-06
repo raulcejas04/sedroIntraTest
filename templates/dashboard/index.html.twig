@@ -1,25 +1,36 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello DashboardController!{% endblock %}
+{% block title %}DashBoard{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
-
-<div class="example-wrapper">
-    {% if is_granted('ROLE_USER') %}
-	<h1>Sr. {{ app.user.email }} esta logueado</h1>
-        <a class="nav-link" href="{{ path('oauth_logout') }}">Signup</a>
-    {% else %}
-	<h1>No esta logueado</h1>
-    {% endif %}
-    <h1>Hello {{ controller_name }}! ✅</h1>
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code><a href="{{ '/pendrive/www/symf5/TestKeycloak/src/Controller/DashboardController.php'|file_link(0) }}">src/Controller/DashboardController.php</a></code></li>
-        <li>Your template at <code><a href="{{ '/pendrive/www/symf5/TestKeycloak/templates/dashboard/index.html.twig'|file_link(0) }}">templates/dashboard/index.html.twig</a></code></li>
-    </ul>
-</div>
+    <h1 class="text-center">Dashboard</h1>
+    <div class="row justify-content-md-center">
+        <div class="col-6">
+            <div class="text-center">
+                <div class="center-block">
+                    <a href="{{ path('nueva-solicitud') }}" class="btn btn-success btn-lg">Nueva solicitud</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="text-center">
+                <div class="center-block">
+                    <a href="asddd" class="btn btn-success btn-lg">Otro botón que no hace nada</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br>
+    <br>
+    <br>
+    <div class="row">
+        <p>Ya le vamos a meter onda a este dashboard... quizá bajando una plantilla html free</p>
+        <br>
+    </div>
+    <div class="row">
+        <a href="#" class="btn btn-lg btn-primary">Botón que hará algo en el futuro</a>
+    </div>
+    <br>
+    <br>
+    <br>
 {% endblock %}

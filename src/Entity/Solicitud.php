@@ -7,6 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass=SolicitudRepository::class)
+ * @ORM\HasLifecycleCallbacks()
  */
 class Solicitud
 {
@@ -86,6 +87,14 @@ class Solicitud
      * @ORM\ManyToOne(targetEntity=Dispositivo::class, inversedBy="solicitudes")
      */
     private $dispositivo;
+
+    /**
+     * @ORM\PrePersist
+     */
+    public function setCreatedAtValue(): void
+    {
+        $this->fechaAlta = new \DateTimeImmutable();
+    }
 
     public function getId(): ?int
     {

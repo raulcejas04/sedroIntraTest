@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nueva Solicitud{% endblock %}
+
+{% block body %}
+    <h1 class="text-center">Nueva Solicitud</h1>
+    <div class="row justify-content-md-center">
+        <div class="col-6">
+            {{ form_start(form)}}
+            {{ form_row(form.cuit) }}
+            {{ form_row(form.cuil) }}
+            {{ form_row(form.nicname) }}
+            {{ form_row(form.mail.first) }}
+            {{ form_row(form.mail.second) }}
+            {{ form_rest(form)}}
+            <br>
+            <div class="text-center">
+                <div class="center-block">
+                    <button type="submit" class="btn btn-primary">Enviar</button>
+                </div>
+            </div>
+            {{ form_end(form)}}
+        </div>
+    </div>
+       <br>
+    <br>
+    <br>
+    <a href="{{ path('dashboard') }}" class="btn btn-lg btn-success">Volver</a>
+    <br>
+    <br>
+    <br>
+
+{% endblock %}

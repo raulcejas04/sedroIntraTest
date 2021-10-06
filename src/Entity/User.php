@@ -44,7 +44,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private $KeycloakId;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $username;
 
@@ -66,6 +66,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function __construct()
     {
         $this->solicitudes = new ArrayCollection();
+    }
+
+    public function __toString()
+    {
+        return $this->getEmail();
     }
 
     public function getId(): ?int
