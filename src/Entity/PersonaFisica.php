@@ -9,6 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass=PersonaFisicaRepository::class)
+ * @ORM\HasLifecycleCallbacks()
  */
 class PersonaFisica
 {
@@ -83,10 +84,30 @@ class PersonaFisica
      */
     private $tipoDocumento;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Representacion::class, mappedBy="personaFisica")
+     */
+    private $representaciones;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
         $this->solicitudes = new ArrayCollection();
+        $this->representaciones = new ArrayCollection();
+    }
+
+    public function __toString()
+    {
+        return $this->getApellido() . ', ' . $this->getNombres();
+    }
+
+    /**
+     * @ORM\PrePersist
+     */
+    public function setUppers(): void
+    {
+        $this->setApellido(mb_convert_case($this->getApellido(), MB_CASE_UPPER, "UTF-8"));        
+        $this->setNombres(mb_convert_case($this->getNombres(), MB_CASE_TITLE, "UTF-8"));
     }
 
     public function getId(): ?int
@@ -270,6 +291,36 @@ class PersonaFisica
     public function setTipoDocumento(?TipoDocumento $tipoDocumento): self
     {
         $this->tipoDocumento = $tipoDocumento;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Representacion[]
+     */
+    public function getRepresentaciones(): Collection
+    {
+        return $this->representaciones;
+    }
+
+    public function addRepresentacione(Representacion $representacione): self
+    {
+        if (!$this->representaciones->contains($representacione)) {
+            $this->representaciones[] = $representacione;
+            $representacione->setPersonaFisica($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRepresentacione(Representacion $representacione): self
+    {
+        if ($this->representaciones->removeElement($representacione)) {
+            // set the owning side to null (unless already changed)
+            if ($representacione->getPersonaFisica() === $this) {
+                $representacione->setPersonaFisica(null);
+            }
+        }
 
         return $this;
     }

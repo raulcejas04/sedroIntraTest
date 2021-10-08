@@ -39,6 +39,11 @@ class Nacionalidad
         $this->personasFisicas = new ArrayCollection();
     }
 
+    public function __toString()
+    {
+        return $this->getPais();
+    }
+    
     public function getId(): ?int
     {
         return $this->id;

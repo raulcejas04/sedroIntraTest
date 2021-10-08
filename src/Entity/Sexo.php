@@ -39,6 +39,11 @@ class Sexo
         $this->personasFisicas = new ArrayCollection();
     }
 
+    public function __toString()
+    {
+        return $this->getSexo();
+    }
+
     public function getId(): ?int
     {
         return $this->id;

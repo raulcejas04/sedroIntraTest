@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Completar Solicitud{% endblock %}
+
+{% block body %}
+    <h1 class="text-center">Completar Solicitud</h1>
+    <div class="row justify-content-md-center">
+    <h2>ATENCION!!<small>no podemos mostrarle al pastor Joao esta template (es de administradores de Sedronar)!! ¿¿tenemos que hacer otra específica (base2.html.twig)??</small></h2>
+        <div class="col-6">
+
+            <p><b>Solicitud:</b> {{ solicitud.nicname }}</p>            
+            <p><b>Cuit:</b> {{ solicitud.cuit }}
+            <br>
+            <br>
+            {{ form_start(form)}}
+            
+            {{ form_rest(form)}}
+            <br>
+            <div class="text-center">
+                <div class="center-block">
+                    <button type="submit" class="btn btn-primary">Enviar</button>
+                </div>
+            </div>
+            {{ form_end(form)}}
+        </div>
+    </div>
+    <br>
+    <br>
+    <br>
+    <br>
+
+{% endblock %}

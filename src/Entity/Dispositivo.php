@@ -49,6 +49,11 @@ class Dispositivo
         $this->solicitudes = new ArrayCollection();
     }
 
+    public function __toString()
+    {
+        return $this->getNicname();
+    }
+
     public function getId(): ?int
     {
         return $this->id;

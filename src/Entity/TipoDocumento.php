@@ -34,6 +34,11 @@ class TipoDocumento
         $this->personaFisicas = new ArrayCollection();
     }
 
+    public function __toString()
+    {
+        return $this->getTipoDocumento();
+    }
+
     public function getId(): ?int
     {
         return $this->id;

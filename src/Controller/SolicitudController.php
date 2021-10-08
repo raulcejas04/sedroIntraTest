@@ -2,14 +2,17 @@
 
 namespace App\Controller;
 
+use App\Entity\Representacion;
 use App\Entity\Solicitud;
 use App\Form\NuevaSolicitudType;
+use App\Form\RepresentacionType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class SolicitudController extends AbstractController
 {
@@ -22,7 +25,8 @@ class SolicitudController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            //TODO: Verificar el CUIT y/o el CUIL que sean correctos y válidos
+            //TODO: Verificar el CUIT y/o el CUIL que sean correctos y válidos (Preguntar a Gustavo del algoritmo de verificación)
+            //TODO: Verificar que el email y/o CUIT/CUIL no estén repetidos
 
             //TODO: Este no es el hash solicitado por la documentación: (openssl_encrypt, cifrado 'AES-256-CBC')
             $hash = md5(uniqid(rand(), true));
@@ -32,6 +36,7 @@ class SolicitudController extends AbstractController
             $entityManager->persist($solicitud);
             $entityManager->flush();
 
+            $url = $this->generateUrl('solicitud-paso-2', ['hash' => $hash], UrlGeneratorInterface::ABSOLUTE_URL);
             $email = (new Email())
             ->from('hello@example.com')
             ->to($solicitud->getMail())
@@ -40,8 +45,8 @@ class SolicitudController extends AbstractController
             //->replyTo('fabien@example.com')
             //->priority(Email::PRIORITY_HIGH)
             ->subject('Invitación para dar de alta usuario y dispositivo nuevo')
-            //TODO: Enviar link para completar el formulario del paso 2 en el email una vez hecho ese paso.
-            ->text('Hola ' . $solicitud->getNicname() . '! Por favor, ingrese a este link para completar su solicitud')
+            //TODO: Enviar email con HTML!            
+            ->text('Hola ' . $solicitud->getNicname() . '! Por favor, ingrese a este link ' . $url . ' para completar su solicitud')
             //->html('<p>See Twig integration for better HTML integration!</p>')
             ;
 
@@ -57,10 +62,28 @@ class SolicitudController extends AbstractController
     }
 
     /**
-     * @Route("Route", name="RouteName")
+     * @Route("nueva-solicitud/{hash}/completar", name="solicitud-paso-2")
      */
-    public function pasoDos(Request $request): Response
+    public function pasoDos(Request $request, $hash): Response
     {
-        return $this->render('$0.html.twig', []);
+        $entityManager = $this->getDoctrine()->getManager();
+        $solicitud = $entityManager->getRepository('App:Solicitud')->findOneByHash($hash);
+
+        $representacion = new Representacion;
+        $form = $this->createForm(RepresentacionType::class, $representacion);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            $entityManager->persist($representacion);
+            $entityManager->flush();
+            //TODO: agregar el flashbag;
+            return $this->redirectToRoute('dashboard');
+        }
+
+        return $this->renderForm('solicitud/paso2.html.twig', [
+            'form' => $form,
+            'solicitud' => $solicitud
+        ]);
     }
 }

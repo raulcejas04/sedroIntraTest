@@ -9,6 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass=PersonaJuridicaRepository::class)
+ * @ORM\HasLifecycleCallbacks()
  */
 class PersonaJuridica
 {
@@ -49,10 +50,21 @@ class PersonaJuridica
      */
     private $dispositivos;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Representacion::class, mappedBy="personaJuridica")
+     */
+    private $representaciones;
+
     public function __construct()
     {
         $this->solicitudes = new ArrayCollection();
         $this->dispositivos = new ArrayCollection();
+        $this->representaciones = new ArrayCollection();
+    }
+
+    public function __toString()
+    {
+        return $this->getRazonSocial();
     }
 
     public function getId(): ?int
@@ -162,6 +174,36 @@ class PersonaJuridica
             // set the owning side to null (unless already changed)
             if ($dispositivo->getPersonaJuridica() === $this) {
                 $dispositivo->setPersonaJuridica(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Representacion[]
+     */
+    public function getRepresentaciones(): Collection
+    {
+        return $this->representaciones;
+    }
+
+    public function addRepresentacione(Representacion $representacione): self
+    {
+        if (!$this->representaciones->contains($representacione)) {
+            $this->representaciones[] = $representacione;
+            $representacione->setPersonaJuridica($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRepresentacione(Representacion $representacione): self
+    {
+        if ($this->representaciones->removeElement($representacione)) {
+            // set the owning side to null (unless already changed)
+            if ($representacione->getPersonaJuridica() === $this) {
+                $representacione->setPersonaJuridica(null);
             }
         }
 

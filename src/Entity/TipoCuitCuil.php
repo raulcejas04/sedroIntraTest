@@ -34,6 +34,11 @@ class TipoCuitCuil
         $this->personasFisicas = new ArrayCollection();
     }
 
+    public function __toString()
+    {
+        return $this->getTipoCuitCuil();
+    }
+
     public function getId(): ?int
     {
         return $this->id;

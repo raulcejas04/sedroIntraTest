@@ -34,6 +34,11 @@ class EstadoCivil
         $this->personasFisicas = new ArrayCollection();
     }
 
+    public function __toString()
+    {
+        return $this->getEstadoCivil();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
