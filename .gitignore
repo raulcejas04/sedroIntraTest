@@ -1,5 +1,7 @@
 
 ###> symfony/framework-bundle ###
+.env
+/.env
 /.env.local
 /.env.local.php
 /.env.*.local
@@ -27,4 +29,3 @@ node_modules
 npm-debug.log
 yarn-error.log
 ###< symfony/webpack-encore-bundle ###
-.env

@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Dispositivo;
 use App\Entity\Representacion;
 use App\Entity\Solicitud;
 use App\Form\NuevaSolicitudType;
@@ -16,7 +17,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class SolicitudController extends AbstractController
 {
-    #[Route('/nueva-solicitud', name: 'nueva-solicitud')]
+    #[Route('/dashboard/nueva-solicitud', name: 'nueva-solicitud')]
     public function nuevaSolicitud(Request $request, MailerInterface $mailer): Response
     {
         $solicitud = new Solicitud;
@@ -75,7 +76,21 @@ class SolicitudController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
 
+            $postData = $request->request->get('representacion[personaJuridica]');
+            $nicname = $postData['dispositivo'];
+
+            //$nicname = 
+
+            $dispositivo = new Dispositivo;
+            $dispositivo->setNicname($nicname);
+            $dispositivo->setPersonaJuridica($representacion->getPersonaJuridica());
+
+            $solicitud->setPersonaFisica($representacion->getPersonaFisica());
+            $solicitud->setPersonaJuridica($representacion->getPersonaJuridica());
+            $solicitud->setFechaUso(new \DateTime('now'));
+
             $entityManager->persist($representacion);
+            $entityManager->persist($solicitud);
             $entityManager->flush();
             //TODO: agregar el flashbag;
             return $this->redirectToRoute('dashboard');

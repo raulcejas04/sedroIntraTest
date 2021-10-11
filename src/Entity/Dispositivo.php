@@ -40,7 +40,7 @@ class Dispositivo
     private $solicitudes;
 
     /**
-     * @ORM\ManyToOne(targetEntity=PersonaJuridica::class, inversedBy="dispositivos")
+     * @ORM\ManyToOne(targetEntity=PersonaJuridica::class, inversedBy="dispositivos", cascade={"persist"})
      */
     private $personaJuridica;
 

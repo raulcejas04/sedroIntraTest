@@ -7,6 +7,8 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use App\Form\DispositivoType;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 
 class PersonaJuridicaCollectionType extends AbstractType
 {
@@ -23,6 +25,14 @@ class PersonaJuridicaCollectionType extends AbstractType
             ->add('razonSocial', TextType::class, [
                 'label' => "Razón Social",
                 'required' => true,
+                'attr' => [
+                    'class' => 'form-control'
+                ]
+            ])
+            ->add('dispositivo', TextType::class, [
+                'label' => "Nombre del dispositivo",
+                'required' => true,
+                'mapped' => false,
                 'attr' => [
                     'class' => 'form-control'
                 ]

@@ -35,15 +35,6 @@ class NuevaSolicitudType extends AbstractType
                     'class' => "form-control"
                 ]
             ])
-            /*
-            ->add('mail', TextType::class, [
-                'label' => "E-Mail",
-                'required' => true,
-                'attr' => [
-                    'class' => "form-control"
-                ]
-            ])
-            */
             ->add('mail', RepeatedType::class, [
                 'type' => TextType::class,
                 'invalid_message' => 'Los emails deben ser iguales',
