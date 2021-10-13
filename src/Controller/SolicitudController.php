@@ -36,7 +36,7 @@ class SolicitudController extends AbstractController
 
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($solicitud);
-            //$entityManager->flush();
+            $entityManager->flush();
 
             $url = $this->generateUrl('solicitud-paso-2', ['hash' => $hash], UrlGeneratorInterface::ABSOLUTE_URL);
             $email = (new TemplatedEmail())
