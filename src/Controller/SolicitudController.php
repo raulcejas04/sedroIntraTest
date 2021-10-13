@@ -71,10 +71,14 @@ class SolicitudController extends AbstractController
      * @Route("nueva-solicitud/{hash}/completar", name="solicitud-paso-2")
      */
     public function pasoDos(Request $request, $hash): Response
-    {
-        //TODO: Que el invitado solo pueda cargar estos datos una única vez
+    {        
         $entityManager = $this->getDoctrine()->getManager();
-        $solicitud = $entityManager->getRepository('App:Solicitud')->findOneByHash($hash);        
+        $solicitud = $entityManager->getRepository('App:Solicitud')->findOneByHash($hash);
+        if ($solicitud->getUsada() == true){
+            $this->addFlash('danger', 'Ya ha ingresado los datos anteriormente para ésta solicitud');
+            //TODO: que redirija al home cuando el mismo esté listo
+            return $this->redirectToRoute('dashboard');
+        }
         
         $representacion = new Representacion;
         
@@ -101,6 +105,7 @@ class SolicitudController extends AbstractController
             $solicitud->setPersonaJuridica($representacion->getPersonaJuridica());
             $solicitud->setFechaUso(new \DateTime('now'));
             $solicitud->setDispositivo($dispositivo);
+            $solicitud->setUsada(true);
             
             $dispositivo->setPersonaJuridica($personaJuridica);
 

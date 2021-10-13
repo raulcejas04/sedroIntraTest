@@ -89,6 +89,11 @@ class Solicitud
     private $dispositivo;
 
     /**
+     * @ORM\Column(type="boolean", nullable=true)
+     */
+    private $usada;
+
+    /**
      * @ORM\PrePersist
      */
     public function setCreatedAtValue(): void
@@ -265,6 +270,18 @@ class Solicitud
     public function setDispositivo(?Dispositivo $dispositivo): self
     {
         $this->dispositivo = $dispositivo;
+
+        return $this;
+    }
+
+    public function getUsada(): ?bool
+    {
+        return $this->usada;
+    }
+
+    public function setUsada(bool $usada): self
+    {
+        $this->usada = $usada;
 
         return $this;
     }
