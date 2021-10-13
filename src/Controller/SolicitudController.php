@@ -3,6 +3,8 @@
 namespace App\Controller;
 
 use App\Entity\Dispositivo;
+use App\Entity\PersonaFisica;
+use App\Entity\PersonaJuridica;
 use App\Entity\Representacion;
 use App\Entity\Solicitud;
 use App\Form\NuevaSolicitudType;
@@ -37,7 +39,6 @@ class SolicitudController extends AbstractController
             //TODO: Este no es el hash solicitado por la documentación: (openssl_encrypt, cifrado 'AES-256-CBC')
             $hash = md5(uniqid(rand(), true));
             $solicitud->setHash($hash);
-
             
             $entityManager->persist($solicitud);
             $entityManager->flush();
@@ -71,25 +72,37 @@ class SolicitudController extends AbstractController
      */
     public function pasoDos(Request $request, $hash): Response
     {
+        //TODO: Que el invitado solo pueda cargar estos datos una única vez
         $entityManager = $this->getDoctrine()->getManager();
-        $solicitud = $entityManager->getRepository('App:Solicitud')->findOneByHash($hash);
-
+        $solicitud = $entityManager->getRepository('App:Solicitud')->findOneByHash($hash);        
+        
         $representacion = new Representacion;
+        
+        //todo esto de acá abajo hasta el $form es para que el formulario se renderice con datos en readonly
+        $personaFisica = new PersonaFisica;
+        $personaJuridica = new PersonaJuridica;        
+        $dispositivo = new Dispositivo;
+
+        $dispositivo->setNicname($solicitud->getNicname());
+        
+        $representacion->setPersonaFisica($personaFisica);
+        $representacion->getPersonaFisica()->setCuitCuil($solicitud->getCuil());
+        
+        $representacion->setPersonaJuridica($personaJuridica);
+        $representacion->getPersonaJuridica()->setCuit($solicitud->getCuit());
+        
+        $representacion->getPersonaJuridica()->getDispositivos()->add($dispositivo);
+        
         $form = $this->createForm(RepresentacionType::class, $representacion);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
-            $postData = $request->request->all();
-            $nicname = $postData['representacion']['personaJuridica']['dispositivo'];
-
-            $dispositivo = new Dispositivo;
-            $dispositivo->setNicname($nicname);
-            $dispositivo->setPersonaJuridica($representacion->getPersonaJuridica());
-
             $solicitud->setPersonaFisica($representacion->getPersonaFisica());
             $solicitud->setPersonaJuridica($representacion->getPersonaJuridica());
             $solicitud->setFechaUso(new \DateTime('now'));
+            $solicitud->setDispositivo($dispositivo);
+            
+            $dispositivo->setPersonaJuridica($personaJuridica);
 
             $entityManager->persist($representacion);            
             $entityManager->persist($solicitud);

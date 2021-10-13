@@ -19,7 +19,8 @@ class PersonaJuridicaCollectionType extends AbstractType
                 'label' => "CUIT Persona Jurídica",
                 'required' => true,
                 'attr' => [
-                    'class' => 'form-control'
+                    'class' => 'form-control',
+                    'readonly' => true,
                 ]
             ])
             ->add('razonSocial', TextType::class, [
@@ -29,13 +30,9 @@ class PersonaJuridicaCollectionType extends AbstractType
                     'class' => 'form-control'
                 ]
             ])
-            ->add('dispositivo', TextType::class, [
-                'label' => "Nombre del dispositivo",
-                'required' => true,
-                'mapped' => false,
-                'attr' => [
-                    'class' => 'form-control'
-                ]
+            ->add('dispositivos', CollectionType::class, [                
+                'entry_type' => DispositivoType::class,
+                'required' => true,                                
             ])
             //->add('fechaAlta')
             //->add('fechaBaja')

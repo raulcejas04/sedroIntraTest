@@ -56,21 +56,7 @@ class PersonaFisicaCollectionType extends AbstractType
             ])
             ->add('estadoCivil', EntityType::class, [
                 'class' => 'App:EstadoCivil',
-                'label' => "CUIT",
-                'required' => true,
-                'attr' => [
-                    'class' => 'form-control'
-                ]
-            ])
-            ->add('cuitCuil', TextType::class, [                
-                'label' => "Número CUIT/CUIT",                
-                'required' => true,
-                'attr' => [
-                    'class' => 'form-control'
-                ]
-            ])
-            ->add('fechaNac', BirthdayType::class, [
-                'label' => "Fecha de Nacimiento",
+                'label' => "Estado Civil",
                 'required' => true,
                 'attr' => [
                     'class' => 'form-control'
@@ -84,7 +70,21 @@ class PersonaFisicaCollectionType extends AbstractType
                     'class' => 'form-control'
                 ]
             ])
-            
+            ->add('cuitCuil', TextType::class, [                
+                'label' => "Número CUIT/CUIL",                
+                'required' => true,
+                'attr' => [
+                    'class' => 'form-control',
+                    'readonly' => true,
+                ]
+            ])
+            ->add('fechaNac', BirthdayType::class, [
+                'label' => "Fecha de Nacimiento",
+                'required' => true,
+                'attr' => [
+                    'class' => 'form-control'
+                ]
+            ])
             ->add('nacionalidad', EntityType::class, [
                 'class' => 'App:Nacionalidad',
                 'label' => "Nacionalidad Actual",
