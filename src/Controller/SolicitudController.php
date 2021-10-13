@@ -14,6 +14,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 
 class SolicitudController extends AbstractController
 {
@@ -35,19 +36,23 @@ class SolicitudController extends AbstractController
 
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($solicitud);
-            $entityManager->flush();
+            //$entityManager->flush();
 
             $url = $this->generateUrl('solicitud-paso-2', ['hash' => $hash], UrlGeneratorInterface::ABSOLUTE_URL);
-            $email = (new Email())
+            $email = (new TemplatedEmail())
             ->from('hello@example.com')
             ->to($solicitud->getMail())
             //->cc('cc@example.com')
             //->bcc('bcc@example.com')
             //->replyTo('fabien@example.com')
             //->priority(Email::PRIORITY_HIGH)
-            ->subject('Invitación para dar de alta usuario y dispositivo nuevo')
-            //TODO: Enviar email con HTML!            
-            ->text('Hola ' . $solicitud->getNicname() . '! Por favor, ingrese a este link ' . $url . ' para completar su solicitud')
+            ->subject('Invitación para dar de alta usuario y dispositivo nuevo')            
+            ->htmlTemplate('emails/invitacionPasoUno.html.twig')
+            ->context([
+                'nicname' => $solicitud->getNicname(),
+                'url' => $url
+            ])
+            //->text('Hola ' . $solicitud->getNicname() . '! Por favor, ingrese a este link ' . $url . ' para completar su solicitud')
             //->html('<p>See Twig integration for better HTML integration!</p>')
             ;
 
@@ -76,10 +81,8 @@ class SolicitudController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $postData = $request->request->get('representacion[personaJuridica]');
-            $nicname = $postData['dispositivo'];
-
-            //$nicname = 
+            $postData = $request->request->all();
+            $nicname = $postData['representacion']['personaJuridica']['dispositivo'];
 
             $dispositivo = new Dispositivo;
             $dispositivo->setNicname($nicname);
@@ -89,10 +92,12 @@ class SolicitudController extends AbstractController
             $solicitud->setPersonaJuridica($representacion->getPersonaJuridica());
             $solicitud->setFechaUso(new \DateTime('now'));
 
-            $entityManager->persist($representacion);
+            $entityManager->persist($representacion);            
             $entityManager->persist($solicitud);
+            $entityManager->persist($dispositivo);
             $entityManager->flush();
             //TODO: agregar el flashbag;
+            //TODO: Que el redirectToRoute vaya al home cuando el mismo esté listo
             return $this->redirectToRoute('dashboard');
         }
 
@@ -100,5 +105,13 @@ class SolicitudController extends AbstractController
             'form' => $form,
             'solicitud' => $solicitud
         ]);
+    }
+
+    /**
+     * @Route("dashboard/{hash}/generar-usuario", name="generarNuevoUsuario")
+     */
+    public function pasoTres(Request $request): Response
+    {
+        return $this->render('$0.html.twig', []);
     }
 }
