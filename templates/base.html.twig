@@ -68,8 +68,9 @@
 		</nav>
 		
 		<main id="main" class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+      {{ include('flashAlerts.html.twig') }}
 			{% block body %}
-			    	{{include('main_content.html.twige')}}
+			    	{{include('main_content.html.twig')}}
             
 			{% endblock body %}    		    	
 		</main>

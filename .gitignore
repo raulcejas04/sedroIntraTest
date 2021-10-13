@@ -9,6 +9,8 @@
 /public/bundles/
 /var/
 /vendor/
+/.vscode/
+/.nbproject/
 ###< symfony/framework-bundle ###
 
 ###> symfony/phpunit-bridge ###
@@ -30,3 +32,4 @@ npm-debug.log
 yarn-error.log
 ###< symfony/webpack-encore-bundle ###
 /nbproject/private/
+nbproject/project.properties
