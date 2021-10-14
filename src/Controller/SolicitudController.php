@@ -17,6 +17,9 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
+use Symfony\Component\HttpClient\CurlHttpClient;
+use Symfony\Component\HttpClient\NativeHttpClient;
+use Symfony\Component\HttpClient\HttpClient;
 
 class SolicitudController extends AbstractController
 {
@@ -129,10 +132,48 @@ class SolicitudController extends AbstractController
     /**
      * @Route("dashboard/{hash}/generar-usuario", name="generarNuevoUsuario")
      */
-    public function pasoTresUno(Request $request): Response
+    public function pasoTresUno(Request $request, $hash): Response
     {
-        return $this->render('$0.html.twig', []);
+        $entityManager = $this->getDoctrine()->getManager();
+        //$solicitud = $entityManager->getRepository('App:Solicitud')->findOneByHash($hash);
+
+        
+        /*
+        * Hay que seguir este tutorial.
+        * https://www.appsdeveloperblog.com/keycloak-rest-api-create-a-new-user/
+        */
+        $client = new CurlHttpClient();
+
+        //TODO: La URL de keycloak esta hardcodeada... debemos hacer una variable con la misma y llamarla aquí
+        $response = $client->request('POST', 'http://localhost:8180/auth/realms/master/protocol/openid-connect/token', [
+            'headers' => [
+                'Connection' => 'keep-alive',
+                'Content-Type' => 'application/x-www-form-urlencoded',
+                ],
+            'body' => [
+                'grant_type' => 'client_credentials',
+                'client_id' => 'admin-cli',
+                'client_secret' => 'e98435b1-0982-4c07-bdd2-ca292fe8f8bf'
+            ],
+        ]);
+
+        $token = $response->getContent();
+        $accessToken = json_decode($token);
+        
+        //$this->addFlash('success', 'Nuevo usuario creado con éxito! se ha enviado un email a la casilla ' . $solicitud->getMail() . ' con los datos de acceso');
+        return $this->redirectToRoute('dashboard');
     }
+
+
+
+
+
+
+
+
+
+
+
 
     private function verificarSolicitudPreexistente($solicitud){
         $entityManager = $this->getDoctrine()->getManager();
