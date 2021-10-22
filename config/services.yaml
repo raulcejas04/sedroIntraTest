@@ -4,10 +4,22 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
-    keycloak_realm: '%env(KEYCLOAK_REALM)%'
-    keycloak_secret: '%env(KEYCLOAK_SECRET)%'
-    keycloak_clientid: '%env(KEYCLOAK_CLIENTID)%'
-    keycloak_url: '%env(KEYCLOAK_APP_URL)%'
+    keycloak_realm:               '%env(KEYCLOAK_REALM)%'
+    keycloak_secret:              '%env(KEYCLOAK_SECRET)%'
+    keycloak_clientid:            '%env(KEYCLOAK_CLIENTID)%'
+    keycloak_url:                 '%env(KEYCLOAK_APP_URL)%'
+    
+    keycloak-server-url:          '%env(KEYCLOAK_APP_URL)%'    
+    keycloak_admin_realm:         '%env(KEYCLOAK_ADMIN_REALM)%'    
+    keycloak_admin_username:      '%env(KEYCLOAK_ADMIN_USERNAME)%'
+    keycloak_admin_password:      '%env(KEYCLOAK_ADMIN_PASSWORD)%'
+    keycloak_admin_grant_type:    '%env(KEYCLOAK_ADMIN_GRANT_TYPE)%'
+    keycloak_admin_client_id:     '%env(KEYCLOAK_ADMIN_CLIENT_ID)%'
+    Keycloak_admin_client_secret: '%env(KEYCLOAK_ADMIN_SECRET)%'
+
+    extranet_url:                 '%env(EXTRANET_URL)%'
+
+    direccion_email_salida:       '%env(DIRECCION_EMAIL_SALIDA_SOLICITUD)%'
 
 services:
     # default configuration for services in *this* file
