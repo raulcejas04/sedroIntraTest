@@ -17,6 +17,10 @@ parameters:
     keycloak_admin_client_id:     '%env(KEYCLOAK_ADMIN_CLIENT_ID)%'
     Keycloak_admin_client_secret: '%env(KEYCLOAK_ADMIN_SECRET)%'
 
+    keycloack_extranet_realm:     '%env(KEYCLOAK_EXTRANET_REALM)%'
+    keycloack_extranet_secret:    '%env(KEYCLOAK_EXTRANET_SECRET)%'
+    keycloack_extranet_clientid : '%env(KEYCLOAK_EXTRANET_CLIENTID)%'
+
     extranet_url:                 '%env(EXTRANET_URL)%'
 
     direccion_email_salida:       '%env(DIRECCION_EMAIL_SALIDA_SOLICITUD)%'

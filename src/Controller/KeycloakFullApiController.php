@@ -5,6 +5,7 @@ namespace App\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use GuzzleHttp;
 
@@ -47,6 +48,8 @@ class KeycloakFullApiController extends AbstractController
 		return $data;
 	}
 
+	
+	//Crea un nuevo usuario
 	public function postUsuario( $username, $email, $firstname, $lastname, $password, $temporary)
 	{
 		// Testing created user: http://localhost:8180/auth/realms/Testkeycloak/account
@@ -86,6 +89,78 @@ class KeycloakFullApiController extends AbstractController
 		return $response;
 	}
 	
+
+	public function setPassword( $username, $newpassword )
+	{
+		// Testing created user: http://localhost:8180/auth/realms/Testkeycloak/account
+		// Testing http trafic sudo tcpflow -i any -C port 8180 (https://www.it-swarm-es.com/es/linux/cual-es-la-forma-mas-facil-de-detectar-tcp-datos-de-trafico-en-linux/957498336/ )
+		// example creating user https://www.appsdeveloperblog.com/keycloak-rest-api-create-a-new-user/
+	
+	
+		$user=$this->getUserByUsername( $username );
+		//dd($user);
+		$token = $this->getTokenAdmin();
+		$base_uri_keycloak = $this->getParameter('keycloak-server-url');
+		$uri = $base_uri_keycloak.'/admin/realms/{realm}/users/{user_id}/reset-password';
+		$realm=$this->getParameter('keycloak_realm');
+		$uri = str_replace("{realm}", $realm, $uri);
+		$uri = str_replace("{user_id}", $user[0]->id, $uri);
+
+		$params = [
+				'headers' => [
+				'Content-Type' => 'application/json',
+				'Authorization' => "Bearer ".$token->access_token],
+				'debug'=>true,
+				'json' => [	
+
+							'type'=>'password',
+							'value'=>$newpassword,
+							'temporary'=>'false'
+					]
+		        ];
+		
+		$res = $this->client->put($uri, $params);
+
+		
+		$data = json_decode($res->getBody());
+		dd($data);		
+		return $data;
+	}
+
+	public function updateUsuario( $username, $modif )
+	{
+		// Testing created user: http://localhost:8180/auth/realms/Testkeycloak/account
+		// Testing http trafic sudo tcpflow -i any -C port 8180 (https://www.it-swarm-es.com/es/linux/cual-es-la-forma-mas-facil-de-detectar-tcp-datos-de-trafico-en-linux/957498336/ )
+		// example creating user https://www.appsdeveloperblog.com/keycloak-rest-api-create-a-new-user/
+	
+	
+		$user=$this->getUserByUsername( $username );
+		$token = $this->getTokenAdmin();
+		$base_uri_keycloak = $this->getParameter('keycloak-server-url');
+		$uri = $base_uri_keycloak.'/admin/realms/{realm}/users/{user_id}';
+		$realm=$this->getParameter('keycloak_realm');
+		$uri = str_replace("{realm}", $realm, $uri);
+		$uri = str_replace("{user_id}", $user[0]->id, $uri);
+
+
+		$params = [
+				'headers' => [
+				'Content-Type' => 'application/json',
+				'Authorization' => "Bearer ".$token->access_token],
+				'debug'=>true,
+				'json' => $modif
+		        ];
+		        
+	//dd($params);
+		
+		$res = $this->client->put($uri, $params);
+
+		
+		$data = json_decode($res->getBody());
+		dd($data);		
+		return $data;
+	}
+
     /** 
 	 * GET /admin/realms/{realm}/users/{id}/groups
      */
@@ -170,12 +245,12 @@ class KeycloakFullApiController extends AbstractController
 	 * List all users in the realm
 	 * GET /admin/realms/{realm}/users
 	 */
-	public function getUsers(){
+	public function getUsers($realm){
 		$token = $this->getTokenAdmin();
 		
 		$auth_url = $this->getParameter('keycloak-server-url');
 		$uri = $auth_url . "/admin/realms/{realm}/users";
-		$realm=$this->getParameter('keycloak-realm');
+		//$realm=$this->getParameter($realm);
 		$uri = str_replace("{realm}", $realm, $uri);
 		
 		$params = ['headers' => ['Authorization' => "Bearer ".$token->access_token]
@@ -186,7 +261,7 @@ class KeycloakFullApiController extends AbstractController
 		$res = $this->client->get($uri, $params);
 		$data = json_decode($res->getBody());
 		
-		return $data;
+		return new JsonResponse($data);
 	}
 
 	/**
@@ -357,6 +432,40 @@ class KeycloakFullApiController extends AbstractController
 	
 	public function findAllUsuariosOrganigrama($org){
 		return $this->findAllUsuariosOrganigramaByTerm($org, '');
+	}
+
+
+	public function disableUser( $id, $realm )
+	{
+		// Testing created user: http://localhost:8180/auth/realms/Testkeycloak/account
+		// Testing http trafic sudo tcpflow -i any -C port 8180 (https://www.it-swarm-es.com/es/linux/cual-es-la-forma-mas-facil-de-detectar-tcp-datos-de-trafico-en-linux/957498336/ )
+		// example creating user https://www.appsdeveloperblog.com/keycloak-rest-api-create-a-new-user/
+	
+	
+		$token = $this->getTokenAdmin();
+		
+		$base_uri_keycloak = $this->getParameter('keycloak-server-url');
+		$uri = $base_uri_keycloak.'/admin/realms/{realm}/users/{user_id}';
+		$uri = str_replace("{realm}", $realm, $uri);
+		$uri = str_replace("{user_id}", $id, $uri);
+
+		$params = [
+			'headers' => [
+			'Content-Type' => 'application/json',
+			'Authorization' => "Bearer ".$token->access_token],
+			'debug'=>true,
+			'json' => [						
+					'enabled' => false,					
+					]
+			];
+	
+		
+		$res = $this->client->put($uri, $params);
+
+		
+		$data = json_decode($res->getBody());
+		dd($data);		
+		return $data;
 	}
 	
 }

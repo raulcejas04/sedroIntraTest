@@ -8,6 +8,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
+use Symfony\Component\Form\Extension\Core\Type\EmailType;
 
 class NuevaSolicitudType extends AbstractType
 {
@@ -15,28 +16,28 @@ class NuevaSolicitudType extends AbstractType
     {
         $builder
             ->add('cuit', TextType::class, [
-                'label' => "CUIT",
+                'label' => "CUIT Persona Jurídica",
                 'required' => true,
                 'attr' => [
                     'class' => "form-control"
                 ]
             ])
             ->add('cuil', TextType::class, [
-                'label' => "CUIL",
+                'label' => "CUIL Persona Física",
                 'required' => true,
                 'attr' => [
                     'class' => "form-control"
                 ]
             ])
             ->add('nicname', TextType::class, [
-                'label' => "NicName",
+                'label' => "NicName (cambiarlo)",
                 'required' => true,
                 'attr' => [
                     'class' => "form-control"
                 ]
             ])
             ->add('mail', RepeatedType::class, [
-                'type' => TextType::class,
+                'type' => EmailType::class,
                 'invalid_message' => 'Los emails deben ser iguales',
                 'options' => ['attr' => ['class' => 'form-control']],
                 'required' => true,

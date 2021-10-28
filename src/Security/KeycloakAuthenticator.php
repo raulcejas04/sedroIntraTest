@@ -90,6 +90,7 @@ class KeycloakAuthenticator extends SocialAuthenticator
         $user = new User();
         $user->setKeycloakId($keycloakUser->getId());
         $user->setEmail($keycloakUser->getEmail());
+        //TODO: Ver esto! ROLE_ADMIN
         $user->setRoles(['ROLE_USER']);
         $user->setPassword('');
         $this->em->persist($user);
