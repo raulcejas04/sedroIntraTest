@@ -50,7 +50,7 @@ class KeycloakFullApiController extends AbstractController
 
 	
 	//Crea un nuevo usuario
-	public function postUsuario( $username, $email, $firstname, $lastname, $password, $temporary)
+	public function postUsuario( $username, $email, $firstname, $lastname, $password, $temporary, $realm)
 	{
 		// Testing created user: http://localhost:8180/auth/realms/Testkeycloak/account
 		// Testing http trafic sudo tcpflow -i any -C port 8180 (https://www.it-swarm-es.com/es/linux/cual-es-la-forma-mas-facil-de-detectar-tcp-datos-de-trafico-en-linux/957498336/ )
@@ -59,7 +59,7 @@ class KeycloakFullApiController extends AbstractController
 		$token = $this->getTokenAdmin();
 		$base_uri_keycloak = $this->getParameter('keycloak-server-url');
 		$uri = $base_uri_keycloak.'/admin/realms/{realm}/users';
-		$realm=$this->getParameter('keycloak_realm');
+		//$realm=$this->getParameter('keycloak_realm');
 		$uri = str_replace("{realm}", $realm, $uri);
 		$params = [
 				'headers' => [

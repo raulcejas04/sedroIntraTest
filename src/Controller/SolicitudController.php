@@ -225,7 +225,7 @@ class SolicitudController extends AbstractController
 
         //Crea usuario en keycloak
         //TODO: Crear usuario en el keycloak de la EXTANET! (ahora está en la intranet para probar)
-        $password = substr(md5(uniqid(rand(1,6))), 1, 9);
+        $password = substr(md5(uniqid(rand(1,6))), 1, 6);
         $this->crearUsuario($solicitud, $password);
 
         //Envía un email
@@ -260,7 +260,8 @@ class SolicitudController extends AbstractController
             'firstname'  => $solicitud->getPersonaFisica()->getNombres(),
             'lastname' => $solicitud->getPersonaFisica()->getApellido(),
             'password' => $password,
-            'temporary' => 'true'
+            'temporary' => 'true',
+            'realm' => $this->getParameter('keycloack_extranet_realm')
         ]); 
         
         if ($data->getStatusCode() == 500 ) {
