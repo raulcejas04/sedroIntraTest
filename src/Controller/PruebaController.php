@@ -19,7 +19,7 @@ class PruebaController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()){
-            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager = $this->getDoctrine()->findById();
             $entityManager->persist($prueba);
             $entityManager->flush();
 
