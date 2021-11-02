@@ -21,6 +21,74 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
+-- Name: menu; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.menu (
+    id integer NOT NULL,
+    name character varying(100),
+    app character varying(15),
+    active smallint DEFAULT 1,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    deleted_at timestamp without time zone,
+    created_by integer,
+    updated_by integer,
+    deleted_by integer
+);
+
+
+ALTER TABLE public.menu OWNER TO postgres;
+
+--
+-- Name: menu_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.menu_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.menu_id_seq OWNER TO postgres;
+
+--
+-- Name: menu_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.menu_id_seq OWNED BY public.menu.id;
+
+
+--
+-- Name: menuitem; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.menuitem (
+    id integer NOT NULL,
+    menu_id integer,
+    parent_id integer,
+    rolecompany character varying(20),
+    name character varying(50) NOT NULL,
+    nametree character varying(50),
+    icon character varying(100),
+    link character varying(50),
+    active smallint DEFAULT 1,
+    orderlist1 integer DEFAULT 0,
+    orderlist integer,
+    type_id character varying(1),
+    availablesel smallint DEFAULT 1,
+    module character varying(80),
+    action character varying(80),
+    divider smallint DEFAULT 0 NOT NULL
+);
+
+
+ALTER TABLE public.menuitem OWNER TO postgres;
+
+--
 -- Name: role; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -148,6 +216,39 @@ ALTER SEQUENCE public.role_id_seq OWNED BY public.role.id;
 
 
 --
+-- Name: rolemenu; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.rolemenu (
+    role_id integer NOT NULL,
+    menu_id integer NOT NULL
+);
+
+
+ALTER TABLE public.rolemenu OWNER TO postgres;
+
+--
+-- Name: COLUMN rolemenu.role_id; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON COLUMN public.rolemenu.role_id IS 'ID del rol.';
+
+
+--
+-- Name: COLUMN rolemenu.menu_id; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON COLUMN public.rolemenu.menu_id IS 'ID del menu.';
+
+
+--
+-- Name: menu id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.menu ALTER COLUMN id SET DEFAULT nextval('public.menu_id_seq'::regclass);
+
+
+--
 -- Name: role id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -155,21 +256,19 @@ ALTER TABLE ONLY public.role ALTER COLUMN id SET DEFAULT nextval('public.role_id
 
 
 --
--- Data for Name: role; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Name: menu menu_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-COPY public.role (id, company_id, code, name, active, createdby, createdat, updatedby, updatedat, deletedby, deletedat, orderlist) FROM stdin;
-2	\N	ROLE_ADMIN	Administrador	1	1	2013-07-08 00:00:00	1	2017-03-03 04:24:18	\N	\N	\N
-1	1	ROLE_SYSADMIN	Sysadmin	1	1	2013-07-08 00:00:00	1	2019-01-03 15:44:02	\N	\N	\N
-3	\N	ROLE_USER	Consulta dispositivos	1	1	2013-07-08 00:00:00	1	2018-06-21 12:07:25	\N	\N	\N
-\.
+ALTER TABLE ONLY public.menu
+    ADD CONSTRAINT menu_pk PRIMARY KEY (id);
 
 
 --
--- Name: role_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+-- Name: menuitem menu_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.role_id_seq', 14, true);
+ALTER TABLE ONLY public.menuitem
+    ADD CONSTRAINT menu_pkey PRIMARY KEY (id);
 
 
 --
@@ -178,6 +277,28 @@ SELECT pg_catalog.setval('public.role_id_seq', 14, true);
 
 ALTER TABLE ONLY public.role
     ADD CONSTRAINT role_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: rolemenu rolemenu_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.rolemenu
+    ADD CONSTRAINT rolemenu_pkey PRIMARY KEY (role_id, menu_id);
+
+
+--
+-- Name: public_menu_action2_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX public_menu_action2_idx ON public.menuitem USING btree (action);
+
+
+--
+-- Name: public_menu_parent_id1_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX public_menu_parent_id1_idx ON public.menuitem USING btree (parent_id);
 
 
 --
@@ -209,6 +330,36 @@ CREATE INDEX public_role_updatedby3_idx ON public.role USING btree (updatedby);
 
 
 --
+-- Name: public_rolemenu_menu_id1_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX public_rolemenu_menu_id1_idx ON public.rolemenu USING btree (menu_id);
+
+
+--
+-- Name: public_rolemenu_role_id2_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX public_rolemenu_role_id2_idx ON public.rolemenu USING btree (role_id);
+
+
+--
+-- Name: menuitem menu_parent_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.menuitem
+    ADD CONSTRAINT menu_parent_id_fkey FOREIGN KEY (parent_id) REFERENCES public.menuitem(id) ON UPDATE RESTRICT ON DELETE RESTRICT;
+
+
+--
+-- Name: rolemenu rolemenu_role_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.rolemenu
+    ADD CONSTRAINT rolemenu_role_id_fkey FOREIGN KEY (role_id) REFERENCES public.role(id) ON DELETE CASCADE;
+
+
+--
 -- Name: TABLE role; Type: ACL; Schema: public; Owner: postgres
 --
 
@@ -220,6 +371,13 @@ GRANT ALL ON TABLE public.role TO vincularusr;
 --
 
 GRANT ALL ON SEQUENCE public.role_id_seq TO vincularusr;
+
+
+--
+-- Name: TABLE rolemenu; Type: ACL; Schema: public; Owner: postgres
+--
+
+GRANT ALL ON TABLE public.rolemenu TO vincularusr;
 
 
 --

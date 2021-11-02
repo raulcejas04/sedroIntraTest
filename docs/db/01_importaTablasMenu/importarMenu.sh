@@ -10,8 +10,6 @@
 #  ./importarMenu.sh
 #
 
-pg_dump -d sedro_intra -f menu.sql
-pg_dump -d sedro_intra -f role.sql
-pg_dump -d sedro_intra -f menuitem.sql
-pg_dump -d sedro_intra -f rolemenu.sql
+psql -d sedro_intra -f rolesmenu.sql
+psql -d sedro_intra -f rolesmenudata.sql
 
