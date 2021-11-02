@@ -54,7 +54,10 @@
         {% set alertcount = 8 %}
         {% if alertcount is defined %}
             {% if alertcount>0 %}
-            <li class="nav-item"><a class="nav-link active" aria-current="page" href="/alertas"> <span class="badge bg-danger">8</span> <i class="bi bi-bell"></i> </a></li>
+            {# TODO: hacer funcionar las notificaciones #}
+            <li class="nav-item"><a class="nav-link active" aria-current="page" href="/alertas"> <span class="badge bg-danger">8</span> 
+                <i class="bi bi-bell"></i> </a>
+            </li>
             {% endif%}
         {% endif%}
         <!--FIN:ALERTAS-->
@@ -62,7 +65,8 @@
         <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="navbarUser" role="button" data-bs-toggle="dropdown" aria-expanded="false">Rol-ADMIN</a>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
-                <li><a class="dropdown-item" href="#">Rol-USER</a></li>
+                {# TODO: Hacer que se muestren las opciones de acuerdo al rol del usuario (jugar con la herencia de roles en security.yaml) #}
+                <li><a class="dropdown-item" href="#">Rol-USER</a></li>                
                 <li><a class="dropdown-item" href="#">Rol-SYSADMIN</a></li>
             </ul>
         </li>
@@ -70,7 +74,7 @@
             <a class="nav-link dropdown-toggle" href="#" id="navbarUser" role="button" data-bs-toggle="dropdown" aria-expanded="false">RCejas</a>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
                 <li><a class="dropdown-item" href="#">Cambio de password</a></li>
-                <li><a class="dropdown-item" href="#">Desconectarse</a></li>
+                <li><a class="dropdown-item" href="{{ path('oauth_logout') }}">Desconectarse</a></li>
             </ul>
         </li>
     </ul>    
