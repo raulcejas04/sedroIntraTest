@@ -3,8 +3,13 @@
 <div class="position-sticky pt-3">
     <ul class="nav flex-column">
         {% for id, prop in opcionesLateral %}
+            {%  if prop.link =='' %}
+               {%  set lnk = "#"  %}
+            {%  else  %}
+                {%  set lnk = app.request.baseUrl ~ '/' ~ prop.link  %}
+            {%  endif %}
         <li class="nav-item">
-            <a class="nav-link" href="{{prop.link}}"><span data-feather="opside_{{prop.id}}"></span>{{prop.name}}</a>
+            <a class="nav-link" href="{{lnk}}"><span data-feather="opside_{{prop.id}}"></span>{{prop.name}}</a>
         </li>
         {% endfor %}
     </ul>

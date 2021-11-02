@@ -16,10 +16,12 @@ class AccionesExtranetController extends AbstractController
     {
 
         $usuarios = $this->getAllExtranetUsers();
+        
+       // print_r($usuarios); die()
         $response = $this->render('acciones_extranet/usuariosExtranet.html.twig', [
             'usuarios' => $usuarios,
         ]);
-        return new Response($response);
+        return $response;
     }
 
     /**

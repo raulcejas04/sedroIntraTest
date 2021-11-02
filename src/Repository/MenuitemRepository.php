@@ -45,7 +45,16 @@ class MenuitemRepository extends ServiceEntityRepository
         return $stmt->fetchAllAssociative();
     }
 
+    public function itemsMenu(int $menuId): array
+    {
+        $conn = $this->getEntityManager()->getConnection();
+        $sql="SELECT * FROM menuitem m WHERE m.availablesel=1 and m.menu_id={$menuId} ORDER BY orderlist";
 
+        $stmt = $conn->executeQuery($sql);
+
+        // returna un array asociativo con arrays
+        return $stmt->fetchAllAssociative();
+    }
     
     // /**
     //  * @return Menuitem[] Returns an array of Menuitem objects
