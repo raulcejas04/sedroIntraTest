@@ -11,8 +11,14 @@
         {% if items[0] is defined %}
         <ul class="navbar-nav">
         {% for id_n0, props_n0 in items[0] %}
+            {%  if props_n0.link =='' %}
+               {%  set lnk = "#"  %}
+            {%  else  %}
+                {%  set lnk = app.request.baseUrl ~ '/' ~ props_n0.link  %}
+            {%  endif %}
+
             <li class="nav-item {% if items[props_n0['id']] is defined %}dropdown{% endif%}"  id="menu_{{id_n0}}">
-                <a class="nav-link {% if items[props_n0['id']] is defined %}dropdown-toggle{% endif%}" href="#" id="navbarDropdownMenuLink" role="button" {% if items[props_n0['id']] is defined %}data-bs-toggle="dropdown"{% endif%} aria-expanded="false">{{ props_n0.nombre }}</a>
+                <a class="nav-link {% if items[props_n0['id']] is defined %}dropdown-toggle{% endif%}" href="{{ lnk }}" id="navbarDropdownMenuLink" role="button" {% if items[props_n0['id']] is defined %}data-bs-toggle="dropdown"{% endif%} aria-expanded="false">{{ props_n0.nombre }}</a>
                 <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
                     {% if items[props_n0['id']] is defined %}
                     {% for id_n1, props_n1 in items[props_n0['id']] %}
