@@ -223,9 +223,8 @@ class SolicitudController extends AbstractController
         $entityManager->persist($solicitud);
         $entityManager->flush();
 
-        //Crea usuario en keycloak
-        //TODO: Crear usuario en el keycloak de la EXTANET! (ahora está en la intranet para probar)
-        $password = substr(md5(uniqid(rand(1,6))), 1, 6);
+        //Crea usuario en keycloak        
+        $password = substr(md5(uniqid(rand(1,100))), 1, 6);
         $this->crearUsuario($solicitud, $password);
 
         //Envía un email

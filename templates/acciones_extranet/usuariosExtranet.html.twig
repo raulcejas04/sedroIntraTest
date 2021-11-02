@@ -22,8 +22,7 @@
                     {% for usuario in usuarios %}
                         <tr>
                             <td class="align-middle">
-                                {{ usuario.username }}<br>
-                                {{ usuario.id }}
+                                {{ usuario.username }}
                             </td>
 
                             <td class="align-middle">
@@ -50,7 +49,7 @@
                                 {% endif %}
                                 
                                 <br>
-                                <a href="#" class="btn btn-primary">Blanquear Clave</a>
+                                <a href="{{ path('blanquear_password_usuario', {id: usuario.id} )}}" class="btn btn-primary">Blanquear Clave</a>
                                 
                             </td>
                         </tr>

@@ -5,13 +5,15 @@ namespace App\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 
 /**
- * 
+ * @Route("/acciones-extranet")
  */
 class AccionesExtranetController extends AbstractController
 {
-    #[Route('/acciones-extranet/lista', name: 'usuarios_extranet')]
+    #[Route('/lista', name: 'usuarios_extranet')]
     public function listaUsuariosExtranet(): Response
     {
 
@@ -27,28 +29,62 @@ class AccionesExtranetController extends AbstractController
 
     //TODO: estas 2 fucniones se pueden unir en una sola. Solamente hay que pasar un parámetro TRUE o FALSE para activar o desactivar un usuario
     /**
-     * @Route("/acciones-extranet/{id}/deshabilitar-usuario", name="deshabilitar_usuario")
+     * @Route("/{id}/deshabilitar-usuario", name="deshabilitar_usuario")
      */
     public function disableUser($id): Response
     {
 
-        $usuariosExtranet = $this->forward('App\Controller\KeycloakFullApiController::disableUser', [
+        $this->forward('App\Controller\KeycloakFullApiController::disableUser', [
             'id' => $id,
-            'realm' => 'Extranet'
+            'realm' => $this->getParameter('keycloack_extranet_realm')
         ]);
         
         return $this->redirectToRoute('usuarios_extranet');
     }
 
     /**
-     * @Route("/acciones-extranet/{id}/rehabilitar-usuario", name="rehabilitar_usuario")
+     * @Route("/{id}/rehabilitar-usuario", name="rehabilitar_usuario")
      */
     public function reactivateUser($id): Response
     {
-        $usuariosExtranet = $this->forward('App\Controller\KeycloakFullApiController::reactivateUser', [
+        $this->forward('App\Controller\KeycloakFullApiController::reactivateUser', [
             'id' => $id,
-            'realm' => 'Extranet'
+            'realm' => $this->getParameter('keycloack_extranet_realm')
         ]);
+        
+        return $this->redirectToRoute('usuarios_extranet');
+    }
+
+    /**
+     * @Route("/{id}/blanquear-password", name="blanquear_password_usuario")
+     */
+    public function blanquearPassword($id, MailerInterface $mailer): Response
+    {
+
+        $password = substr(md5(uniqid(rand(1,100))), 1, 6);
+        $this->forward('App\Controller\KeycloakFullApiController::resetPasswordUser', [
+            'id' => $id,
+            'realm' => $this->getParameter('keycloack_extranet_realm'),
+            'password' => $password
+        ]);
+
+        /*
+        TODO: Enviarle un email al pastor Joao con el nuevo password temporal. Luego él debería cambiarlo por uno propio
+        $email = (new TemplatedEmail())            
+            ->from($this->getParameter('direccion_email_salida'))
+            ->to($solicitud->getMail())
+            ->subject('Solicitud aprobada: Datos de acceso')            
+            ->htmlTemplate('emails/invitacionPasoTres.html.twig')
+            ->context([
+                'nicname' => $solicitud->getNicname(),
+                'user' => $solicitud->getPersonaFisica()->getCuitCuil(),
+                'password' => $password,
+                'url' => $url
+            ])
+            ;
+
+        $mailer->send($email);
+        */
         
         return $this->redirectToRoute('usuarios_extranet');
     }
