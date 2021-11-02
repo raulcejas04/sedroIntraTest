@@ -24,6 +24,8 @@ class AccionesExtranetController extends AbstractController
         return $response;
     }
 
+
+    //TODO: estas 2 fucniones se pueden unir en una sola. Solamente hay que pasar un parámetro TRUE o FALSE para activar o desactivar un usuario
     /**
      * @Route("/acciones-extranet/{id}/deshabilitar-usuario", name="deshabilitar_usuario")
      */
@@ -31,6 +33,19 @@ class AccionesExtranetController extends AbstractController
     {
 
         $usuariosExtranet = $this->forward('App\Controller\KeycloakFullApiController::disableUser', [
+            'id' => $id,
+            'realm' => 'Extranet'
+        ]);
+        
+        return $this->redirectToRoute('usuarios_extranet');
+    }
+
+    /**
+     * @Route("/acciones-extranet/{id}/rehabilitar-usuario", name="rehabilitar_usuario")
+     */
+    public function reactivateUser($id): Response
+    {
+        $usuariosExtranet = $this->forward('App\Controller\KeycloakFullApiController::reactivateUser', [
             'id' => $id,
             'realm' => 'Extranet'
         ]);

@@ -464,8 +464,40 @@ class KeycloakFullApiController extends AbstractController
 
 		
 		$data = json_decode($res->getBody());
-		dd($data);		
+		//dd($data);		
 		return $data;
 	}
+
+	public function reactivateUser( $id, $realm )
+	{
+		// Testing created user: http://localhost:8180/auth/realms/Testkeycloak/account
+		// Testing http trafic sudo tcpflow -i any -C port 8180 (https://www.it-swarm-es.com/es/linux/cual-es-la-forma-mas-facil-de-detectar-tcp-datos-de-trafico-en-linux/957498336/ )
+		// example creating user https://www.appsdeveloperblog.com/keycloak-rest-api-create-a-new-user/
 	
+	
+		$token = $this->getTokenAdmin();
+		
+		$base_uri_keycloak = $this->getParameter('keycloak-server-url');
+		$uri = $base_uri_keycloak.'/admin/realms/{realm}/users/{user_id}';
+		$uri = str_replace("{realm}", $realm, $uri);
+		$uri = str_replace("{user_id}", $id, $uri);
+
+		$params = [
+			'headers' => [
+			'Content-Type' => 'application/json',
+			'Authorization' => "Bearer ".$token->access_token],
+			'debug'=>true,
+			'json' => [						
+					'enabled' => true,					
+					]
+			];
+	
+		
+		$res = $this->client->put($uri, $params);
+
+		
+		$data = json_decode($res->getBody());
+		//dd($data);		
+		return $data;
+	}
 }
