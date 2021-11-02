@@ -3,12 +3,12 @@
 {% block title %}Verificar Solicitudes{% endblock %}
 
 {% block body %}
-    <h2 class="text-center">Usuarios en la Extranet</h2>
+    <h2 class="m-t-2">Usuarios en la Extranet</h2>
     <div class="row justify-content-md-center">
     
         <div class="col-10">
 
-            <table class="table table-striped table-hover" id="tablaSolicitudes">
+            <table class="table table-responsive-poncho">
                 <thead>
                     <tr>
                         <th>Usuario</th>
@@ -22,8 +22,7 @@
                     {% for usuario in usuarios %}
                         <tr>
                             <td class="align-middle">
-                                {{ usuario.username }}<br>
-                                {{ usuario.id }}
+                                {{ usuario.username }}
                             </td>
 
                             <td class="align-middle">
@@ -38,16 +37,20 @@
                                 {% if usuario.enabled == true %}
                                     <span class="badge rounded-pill bg-success">Activo</span>
                                 {% else %}
-                                    <span class="badge rounded-pill bg-warning">Rechazado</span>
+                                    <span class="badge rounded-pill bg-warning">Deshabilitado</span>
                                 {% endif %}
                             </td>
 
                             <td class="align-middle">
-                                <a href="#" class="btn btn-danger">Desactivar</a>
+                                {% if usuario.enabled == true %}
+                                    <a href="{{ path('deshabilitar_usuario', {id: usuario.id} )}}" class="btn btn-danger">Desactivar</a>
+                                {% else %}
+                                    <a href="{{ path('rehabilitar_usuario', {id: usuario.id} )}}" class="btn btn-danger">Reactivar</a>
+                                {% endif %}
+                                
                                 <br>
-                                <a href="#" class="btn btn-primary">Blanquear Clave</a>
-                                <br>
-                                <a href="#" class="btn btn-info">alguna otra accion</a>
+                                <a href="{{ path('blanquear_password_usuario', {id: usuario.id} )}}" class="btn btn-primary">Blanquear Clave</a>
+                                
                             </td>
                         </tr>
                     {% endfor %}
