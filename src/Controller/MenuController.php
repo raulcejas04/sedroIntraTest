@@ -19,12 +19,6 @@ class MenuController extends AbstractController
 
         $isLogued = true;
         $items = array();
-            
-//        $sql = "SELECT * FROM rolemenu r LEFT JOIN menu m ON m.id=r.menu_id AND r.role_id={$user['role_id']} ".
-//               "WHERE ((type_id='1') or (type_id='2')) AND m.availablesel='1' and m.systemop='0' AND menu_id={$MENU_ID}";
-//        $sql = "SELECT * FROM rolemenu r LEFT JOIN menu m ON m.id=r.menu_id AND r.role_id={$user['role_id']} ".
-//               "WHERE ((type_id='1') or (type_id='2')) AND m.availablesel='1' and m.systemop='0' AND menu_id={$MENU_ID}";
-//        $menues = $app['db']->fetchAll($sql);
 
         $entityManager = $this->getDoctrine()->getManager();
         $menues = $entityManager->getRepository('App:Menuitem')->findAllByMenuYRole($MENU_ID, $ROLE_ID);
@@ -42,9 +36,7 @@ class MenuController extends AbstractController
                   'parentId' => $menu['parent_id'] == null? 0: $menu['parent_id']
                 );
         }
-        
-        
-        //echo "<pre>"; print_r($items); echo "</pre> <hr>";
+                
         $aux = array();
         foreach ($items as $id => $item)
         {                        
@@ -52,9 +44,6 @@ class MenuController extends AbstractController
         }
 
         $isLogued = true;
-        
-        //echo "<pre>"; print_r($aux); echo "</pre>"; die();
-        
 
         $view['alertcount'] = 0;
         $view['items'] = $aux;
