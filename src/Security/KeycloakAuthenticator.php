@@ -47,7 +47,7 @@ class KeycloakAuthenticator extends SocialAuthenticator
     	$credentials=$this->fetchAccessToken($this->getKeycloakClient());
     	$refreshToken=$credentials->getRefreshToken();
     	$token= $credentials->getToken();
-	$session = new Session();
+	    $session = new Session();
         $session->set('refreshToken', $refreshToken );
         $session->set('token', $token );
         
@@ -90,7 +90,8 @@ class KeycloakAuthenticator extends SocialAuthenticator
         $user = new User();
         $user->setKeycloakId($keycloakUser->getId());
         $user->setEmail($keycloakUser->getEmail());
-        //TODO: Ver esto! ROLE_ADMIN
+        $user->setUsername($keycloakUser->getPreferredUsername());
+        //TODO: Ver esto! ROLE_ADMIN--- Podría ser preguntando de cual Realm proviene el usuario que nos de el ROLE_*??
         $user->setRoles(['ROLE_USER']);
         $user->setPassword('');
         $this->em->persist($user);

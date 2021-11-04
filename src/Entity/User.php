@@ -63,9 +63,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     private $solicitudes;
 
+    /**
+     * @ORM\OneToMany(targetEntity=UsuarioDispositivo::class, mappedBy="usuario")
+     */
+    private $usuarioDispositivos;
+
     public function __construct()
     {
         $this->solicitudes = new ArrayCollection();
+        $this->usuarioDispositivos = new ArrayCollection();
     }
 
     public function __toString()
@@ -97,7 +103,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function getUserIdentifier(): string
     {
-        return (string) $this->email;
+        return (string) $this->username;
     }
 
     /**
@@ -105,7 +111,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function getUsername(): string
     {
-        return (string) $this->email;
+        return (string) $this->username;
     }
 
     /**
@@ -174,7 +180,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function setUsername(string $username): self
+    //public function setUsername(string $username): self
+    public function setUsername(string $username)
     {
         $this->username = $username;
 
@@ -229,6 +236,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($solicitude->getUsuario() === $this) {
                 $solicitude->setUsuario(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|UsuarioDispositivo[]
+     */
+    public function getUsuarioDispositivos(): Collection
+    {
+        return $this->usuarioDispositivos;
+    }
+
+    public function addUsuarioDispositivo(UsuarioDispositivo $usuarioDispositivo): self
+    {
+        if (!$this->usuarioDispositivos->contains($usuarioDispositivo)) {
+            $this->usuarioDispositivos[] = $usuarioDispositivo;
+            $usuarioDispositivo->setUsuario($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUsuarioDispositivo(UsuarioDispositivo $usuarioDispositivo): self
+    {
+        if ($this->usuarioDispositivos->removeElement($usuarioDispositivo)) {
+            // set the owning side to null (unless already changed)
+            if ($usuarioDispositivo->getUsuario() === $this) {
+                $usuarioDispositivo->setUsuario(null);
             }
         }
 
