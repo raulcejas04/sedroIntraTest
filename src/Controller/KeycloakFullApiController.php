@@ -523,4 +523,35 @@ class KeycloakFullApiController extends AbstractController
 		$data = json_decode($res->getBody());
 		return $data;
 	}
+
+	public function changeUserPassword( $id, $realm, $password )
+	{
+		$token = $this->getTokenAdmin();
+		
+		$base_uri_keycloak = $this->getParameter('keycloak-server-url');
+		$uri = $base_uri_keycloak.'/admin/realms/{realm}/users/{user_id}';
+		$uri = str_replace("{realm}", $realm, $uri);
+		$uri = str_replace("{user_id}", $id, $uri);
+
+		$params = [
+			'headers' => [
+			'Content-Type' => 'application/json',
+			'Authorization' => "Bearer ".$token->access_token],
+			'debug'=>true,
+			'json' => [					
+				'credentials' => 
+						[ 0 => [
+							'type'=>'password',
+							'value'=>$password,
+							'temporary'=>false
+						]
+					]
+				]
+		];
+		
+		$res = $this->client->put($uri, $params);
+		
+		$data = json_decode($res->getStatusCode());
+		return new JsonResponse($data);
+	}
 }

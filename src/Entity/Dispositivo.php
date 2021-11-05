@@ -49,6 +49,11 @@ class Dispositivo
      */
     private $usuarioDispositivos;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=TipoDispositivo::class, inversedBy="dispositivos")
+     */
+    private $tipoDispositivo;
+
     public function __construct()
     {
         $this->solicitudes = new ArrayCollection();
@@ -169,6 +174,18 @@ class Dispositivo
                 $usuarioDispositivo->setDispositivo(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getTipoDispositivo(): ?TipoDispositivo
+    {
+        return $this->tipoDispositivo;
+    }
+
+    public function setTipoDispositivo(?TipoDispositivo $tipoDispositivo): self
+    {
+        $this->tipoDispositivo = $tipoDispositivo;
 
         return $this;
     }
