@@ -68,15 +68,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     private $usuarioDispositivos;
 
+    /**
+     * @ORM\ManyToMany(targetEntity=Grupo::class, mappedBy="usuarios")
+     */
+    private $usuarios;
+
     public function __construct()
     {
         $this->solicitudes = new ArrayCollection();
         $this->usuarioDispositivos = new ArrayCollection();
+        $this->usuarios = new ArrayCollection();
     }
 
     public function __toString()
     {
-        return $this->getEmail();
+        return $this->getUserIdentifier();
     }
 
     public function getId(): ?int
@@ -267,6 +273,33 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             if ($usuarioDispositivo->getUsuario() === $this) {
                 $usuarioDispositivo->setUsuario(null);
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Grupo[]
+     */
+    public function getUsuarios(): Collection
+    {
+        return $this->usuarios;
+    }
+
+    public function addUsuario(Grupo $usuario): self
+    {
+        if (!$this->usuarios->contains($usuario)) {
+            $this->usuarios[] = $usuario;
+            $usuario->addUsuario($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUsuario(Grupo $usuario): self
+    {
+        if ($this->usuarios->removeElement($usuario)) {
+            $usuario->removeUsuario($this);
         }
 
         return $this;
