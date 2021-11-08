@@ -90,7 +90,7 @@ class KeycloakAuthenticator extends SocialAuthenticator
         $user = new User();
         $user->setKeycloakId($keycloakUser->getId());
         $user->setEmail($keycloakUser->getEmail());
-        $user->setUsername($keycloakUser->getPreferredUsername());
+        //$user->setUsername($keycloakUser->getPreferredUsername());
         //TODO: Ver esto! ROLE_ADMIN--- Podría ser preguntando de cual Realm proviene el usuario que nos de el ROLE_*??
         $user->setRoles(['ROLE_USER']);
         $user->setPassword('');
