@@ -285,7 +285,8 @@ class SolicitudController extends AbstractController
         //TODO: ver el keycloakId
         //$usuario->setKeycloakId(hacer algo con $data);
 
-
+        $entityManager->persist($usuario);
+        $entityManager->flush();
 
         return;
     }
