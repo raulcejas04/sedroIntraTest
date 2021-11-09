@@ -14,7 +14,7 @@ class MenuController extends AbstractController
     {
         $MENU_ID = 1; //// HARDCODEADO PARA PROBAR
         $ROLE_ID = 2; //// HARDCODEADO ROLE
-        
+
         $user = 'rcejas';
 
         $isLogued = true;
@@ -36,7 +36,7 @@ class MenuController extends AbstractController
                   'parentId' => $menu['parent_id'] == null? 0: $menu['parent_id']
                 );
         }
-                
+
         $aux = array();
         foreach ($items as $id => $item)
         {                        
@@ -49,9 +49,8 @@ class MenuController extends AbstractController
         $view['items'] = $aux;
         $view['isLogued'] = $isLogued;
         $view['user'] = $user;
-        
-        return $this->render('menu/index.html.twig', $view);
 
+        return $this->render('menu/index.html.twig', $view);
     }
   
     function orderMultiDimensionalArray ($toOrderArray, $field, $inverse = false) {  
@@ -72,6 +71,5 @@ class MenuController extends AbstractController
         }  
         return $returnArray;  
     }
-        
 
 }
