@@ -39,7 +39,7 @@ class SolicitudController extends AbstractController
             $entityManager = $this->getDoctrine()->getManager();
             
             //Verifica si ya existe una solicitud con el Cuit, Cuil o Mail
-            if ($this->verificarSolicitudPreexistente($solicitud) == true){
+            if ($this->verificarSolicitud($solicitud) == true){
                 return $this->redirectToRoute('dashboard');
             }
             
@@ -212,7 +212,7 @@ class SolicitudController extends AbstractController
     }
 
     /**
-     * @Route("dashboard/solicitud/{hash}/aceptada", name="aceptarSolicitud")
+     * @Route("dashboard/solicitud/{hash}/aceptar-solicitud", name="aceptarSolicitud")
      */
     public function aceptarSolicitud($hash, MailerInterface $mailer): Response
     {
@@ -228,8 +228,7 @@ class SolicitudController extends AbstractController
         $password = substr(md5(uniqid(rand(1,100))), 1, 6);
         $this->crearUsuario($solicitud, $password);
 
-        //Envía un email
-        //TODO: Enviar, en el email, la URL para que el usuario pueda ingresar con sus datos
+        //Envía un email    
         $url = $this->getParameter('extranet_url');
         $email = (new TemplatedEmail())            
             ->from($this->getParameter('direccion_email_salida'))
@@ -273,7 +272,6 @@ class SolicitudController extends AbstractController
         //TODO: verificar si ya existe el usuario
         $entityManager = $this->getDoctrine()->getManager();
 
-
         $usuario = new User;
         $usuario->setPersonaFisica($solicitud->getPersonaFisica());
         $usuario->setUsername($solicitud->getPersonaFisica()->getCuitCuil());
@@ -291,8 +289,33 @@ class SolicitudController extends AbstractController
         return;
     }
 
-    private function verificarSolicitudPreexistente($solicitud){
+    /**
+     * 7 escenarios posibles: (habrán más?)     
+     * --------------------- 
+     * 1) Nueva solicitud de un usuario nuevo
+     * 2) Nueva solicitud de un usuario que ya existe
+     * 3) Solicitud ya aprobada con el mismo nicname
+     * 4) Solicitud rechazada con el mismo nicname
+     * 5) Solicitud vencida con el mismo nicname
+     * 6) Solicitud activa sin que el usuario haya enviado los datos
+     * 7) Solicitud activa con los datos ya enviados por el usuario
+     */
+    private function verificarSolicitud($solicitud){
         $entityManager = $this->getDoctrine()->getManager();
+
+        //escenario 1 y 2: Buscamos un usuario en keycloak
+        $usuario = $this->forward('App\Controller\KeycloakFullApiController::getUserByUsername', [
+            'username'  => $solicitud->getCuil(),
+            'realm' => $this->getParameter('keycloak_realm')
+        ]);
+
+        if ($usuario) {
+            $a = true;
+        } else {
+            $a = false;
+        }
+        
+
         //TODO: Verificar el CUIT y/o el CUIL que sean correctos y válidos (Preguntar a Gustavo del algoritmo de verificación)
         $verificarMailExistente = $entityManager->getRepository('App\Entity\Solicitud')->findOneByMail($solicitud->getMail());
         $verificarCuilExistente = $entityManager->getRepository('App\Entity\Solicitud')->findOneByCuil($solicitud->getCuil());
