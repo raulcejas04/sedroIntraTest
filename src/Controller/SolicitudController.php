@@ -12,6 +12,7 @@ use App\Form\NuevaSolicitudType;
 use App\Form\RepresentacionType;
 use App\Service\KeycloakApiSrv;
 use App\Controller\KeyCloakFullApiController;
+use App\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
@@ -223,7 +224,7 @@ class SolicitudController extends AbstractController
         $entityManager->persist($solicitud);
         $entityManager->flush();
 
-        //Crea usuario en keycloak        
+        //Crea usuario en keycloak y en la tabla usuarios
         $password = substr(md5(uniqid(rand(1,100))), 1, 6);
         $this->crearUsuario($solicitud, $password);
 
@@ -268,6 +269,24 @@ class SolicitudController extends AbstractController
                     
             return $this->redirectToRoute('dashboard');
         }
+
+        //TODO: verificar si ya existe el usuario
+        $entityManager = $this->getDoctrine()->getManager();
+
+
+        $usuario = new User;
+        $usuario->setPersonaFisica($solicitud->getPersonaFisica());
+        $usuario->setUsername($solicitud->getPersonaFisica()->getCuitCuil());
+        //TODO: crear registros REALM en la tabla (ver esta línea de acá abajo)
+        //$usuario->setRealm($this->getParameter('keycloack_extranet_realm'));
+        $usuario->setEmail($solicitud->getMail());
+        //TODO: Ver el tema de los roles en algún futuro
+        $usuario->setRoles(['ROLE_USER']);
+        //TODO: ver el keycloakId
+        //$usuario->setKeycloakId(hacer algo con $data);
+
+        $entityManager->persist($usuario);
+        $entityManager->flush();
 
         return;
     }
