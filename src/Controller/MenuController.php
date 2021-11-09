@@ -8,7 +8,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class MenuController extends AbstractController
 {
-        
+
     #[Route('/menu', name: 'menu')]
     public function index(): Response
     {
@@ -52,7 +52,20 @@ class MenuController extends AbstractController
 
         return $this->render('menu/index.html.twig', $view);
     }
-  
+
+    #[Route('/sidebarcontrol', name: 'sidebarcontrol')]
+    public function sidebarcontrol(): Response
+    {
+        ///ATENCION: Debera recuperarse el ID de usuario de la session
+        $USER_ID = 1;//// HARDCODEADO PARA PROBAR
+
+        $entityManager = $this->getDoctrine()->getManager();
+        $view['listaDispositivos'] = $entityManager->getRepository('App:Dispositivo')->findByPersonaFisica($USER_ID);
+        
+        return $this->render('menu/sidebarcontrol.html.twig', $view);
+    }
+
+    
     function orderMultiDimensionalArray ($toOrderArray, $field, $inverse = false) {  
         $position = array();
         $newRow = array();

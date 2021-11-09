@@ -18,7 +18,24 @@ class DispositivoRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Dispositivo::class);
     }
+    
+    /**
+     * Recupera los dispositivos segun la persona fisica
+     * @param int $personaFisicaId
+     * @return array 
+     */
+    public function findByPersonaFisica(int $personaFisicaId): array
+    {
+        $conn = $this->getEntityManager()->getConnection();
+        $sql="SELECT d.id, d.nicname as name
+              FROM dispositivo d left join representacion r on r.persona_juridica_id = d.persona_juridica_id 
+              WHERE r.persona_fisica_id ={$personaFisicaId}"; //and r.persona_fisica_id>100
 
+        $stmt = $conn->executeQuery($sql);
+        return $stmt->fetchAllAssociative();
+    }
+    
+    
     // /**
     //  * @return Dispositivo[] Returns an array of Dispositivo objects
     //  */

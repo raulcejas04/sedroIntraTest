@@ -14,24 +14,23 @@
 </head>
 <body>
     {{ render( app.request.baseUrl ~ '/menu' ) }}
-	{{include('sidebarcontrol.html.twig')}}
-        
+    {{ render( app.request.baseUrl ~ '/sidebarcontrol' ) }}
+    
     <div class="container-fluid">
         <div class="row">
 
             {% if opcionesLateral is defined  %}
                 {% include 'sidebar.html.twig' with opcionesLateral  %}
-            
             {% endif %}
-            {#{{ include('flashAlerts.html.twig') }}#}
+
             <main id="main" class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
             {#<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">#}
             <div class="justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                
-                {{include('flashAlerts.html.twig')}}
-                {% block body %}
-                    {{include('main_content.html.twig')}}
-                {% endblock body %}
+
+            {{include('flashAlerts.html.twig')}}
+            {% block body %}
+                {{include('main_content.html.twig')}}
+            {% endblock body %}
 
             </div>
             <canvas class="my-4 w-100" id="myChart" width="900" height="380"></canvas>
