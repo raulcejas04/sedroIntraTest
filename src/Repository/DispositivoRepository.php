@@ -29,7 +29,7 @@ class DispositivoRepository extends ServiceEntityRepository
         $conn = $this->getEntityManager()->getConnection();
         $sql="SELECT d.id, d.nicname as name
               FROM dispositivo d left join representacion r on r.persona_juridica_id = d.persona_juridica_id 
-              WHERE r.persona_fisica_id ={$personaFisicaId} and r.persona_fisica_id>100"; //and r.persona_fisica_id>100
+              WHERE r.persona_fisica_id ={$personaFisicaId}"; //and r.persona_fisica_id>100
 
         $stmt = $conn->executeQuery($sql);
         return $stmt->fetchAllAssociative();
