@@ -56,8 +56,9 @@ class MenuController extends AbstractController
     #[Route('/sidebarcontrol', name: 'sidebarcontrol')]
     public function sidebarcontrol(): Response
     {
-        ///ATENCION: Debera recuperarse el ID de usuario de la session
-        $USER_ID = 1;//// HARDCODEADO PARA PROBAR
+        //$USER_ID = $this->getUser()->getPersonaFisica->getId();
+        $USER_ID = 1;
+        //echo "UserID : {$USER_ID}";
 
         $entityManager = $this->getDoctrine()->getManager();
         $view['listaDispositivos'] = $entityManager->getRepository('App:Dispositivo')->findByPersonaFisica($USER_ID);
