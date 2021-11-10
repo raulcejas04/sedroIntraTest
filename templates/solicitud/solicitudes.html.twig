@@ -38,23 +38,36 @@
 
                             <td class="text-left">
                                 <ul>
-                                    <li>{{ solicitud.personaFisica.apellido }}, {{ solicitud.personaFisica.nombres }}</li>
-                                    {% if solicitud.personaFisica.cuitCuil %}
-                                        <li><b>CUIT: </b>{{ solicitud.personaFisica.cuitCuil }}</li>
-                                    {% endif %}
-                            </td>
-
-                            <td class="text-left align-middle">
-                                <ul>
-                                    <li>{{ solicitud.personaJuridica.razonSocial }}</li>
-                                    {% if solicitud.personaJuridica.cuit %}
-                                        <li><b>CUIT: </b>{{ solicitud.personaJuridica.cuit }}</li>
+                                    {% if solicitud.personaFisica %}
+                                        <li>{{ solicitud.personaFisica.apellido }}, {{ solicitud.personaFisica.nombres }}</li>
+                                        {% if solicitud.personaFisica.cuitCuil %}
+                                            <li><b>CUIT: </b>{{ solicitud.personaFisica.cuitCuil }}</li>
+                                        {% endif %}
+                                    {% else %}
+                                        <li>S/D</li>
                                     {% endif %}
                                 </ul>
                             </td>
 
                             <td class="text-left align-middle">
-                                {{ solicitud.dispositivo.nicname }}
+                                <ul>
+                                    {% if solicitud.personaJuridica %}
+                                        <li>{{ solicitud.personaJuridica.razonSocial }}</li>
+                                        {% if solicitud.personaJuridica.cuit %}
+                                            <li><b>CUIT: </b>{{ solicitud.personaJuridica.cuit }}</li>
+                                        {% endif %}
+                                    {% else %}
+                                        <li>S/D</li>
+                                    {% endif %}
+                                </ul>
+                            </td>
+
+                            <td class="text-left align-middle">
+                                {% if solicitud.dispositivo %}
+                                    {{ solicitud.dispositivo.nicname }}
+                                {% else %}
+                                    S/D
+                                {% endif %}
                             </td>
 
                             <td class="text-left align-middle">

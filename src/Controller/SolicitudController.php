@@ -18,8 +18,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\HttpClient\CurlHttpClient;
 use Symfony\Component\HttpClient\NativeHttpClient;
@@ -290,23 +289,27 @@ class SolicitudController extends AbstractController
     }
 
     /**
-     * 7 escenarios posibles: (habrán más?)     
+     * 9 escenarios posibles: (habrán más?)     
      * --------------------- 
-     * 1) Nueva solicitud de un usuario nuevo
-     * 2) Nueva solicitud de un usuario que ya existe
-     * 3) Solicitud ya aprobada con el mismo nicname
-     * 4) Solicitud rechazada con el mismo nicname
-     * 5) Solicitud vencida con el mismo nicname
+     * 1) Nueva solicitud de un usuario nuevo (no existe el usuario ni el dispositivo)
+     * 2) Nueva solicitud de un usuario que ya existe (existe el usuario no existe el dispositivo)
+     * 3) Solicitud ya aprobada con el mismo nicname (Existe el usuario, existe el dispositivo y hay una relación entre ambos)
+     * 4) Solicitud rechazada con el mismo nicname (Existe el usuario, existe el dispositivo y hay una relación entre ambos)
+     * 5) Solicitud vencida
      * 6) Solicitud activa sin que el usuario haya enviado los datos
-     * 7) Solicitud activa con los datos ya enviados por el usuario
+     * 7) Solicitud activa con los datos ya enviados por el usuario (falta la aprobación o el rechazo de la misma)
+     * 8) existe el usuario y el dispositivo y no existe la relación
+     * 9) no existe el usuario existe el dispositivo
+     * 
      */
     private function verificarSolicitud($solicitud){
         $entityManager = $this->getDoctrine()->getManager();
 
-        //escenario 1 y 2: Buscamos un usuario en keycloak
+        //Buscamos un usuario en keycloak de la extranet
         $usuario = $this->forward('App\Controller\KeycloakFullApiController::getUserByUsername', [
             'username'  => $solicitud->getCuil(),
-            'realm' => $this->getParameter('keycloak_realm')
+            'realm' => $this->getParameter('keycloack_extranet_realm')
+                                            
         ]);
 
         if ($usuario) {

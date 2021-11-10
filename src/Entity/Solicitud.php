@@ -19,17 +19,17 @@ class Solicitud
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=11, nullable=true)
+     * @ORM\Column(type="string", length=13, nullable=true)
      */
     private $cuit;
 
     /**
-     * @ORM\Column(type="string", length=11, nullable=true)
+     * @ORM\Column(type="string", length=13, nullable=true)
      */
     private $cuil;
 
     /**
-     * @ORM\Column(type="string", length=20)
+     * @ORM\Column(type="string", length=150)
      */
     private $nicname;
 
