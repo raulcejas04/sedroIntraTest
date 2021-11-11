@@ -286,29 +286,6 @@ class KeycloakFullApiController extends AbstractController
 		return $data;
 	}
 
-	/**
-	 * List one user in the realm by username and realm
-	 * GET /admin/realms/{realm}/users
-	 */
-	public function getUserByUsernameAndRealm( $username, $realm){
-		$token = $this->getTokenAdmin();
-
-		$auth_url = $this->getParameter('keycloak-server-url');
-		$uri = $auth_url . "/admin/realms/{realm}/users";
-		//$realm=$this->getParameter('keycloak-realm');
-
-		$uri = str_replace("{realm}", $realm, $uri);
-		$uri = $uri."?username=".$username;
-		
-		$params = ['headers' => ['Authorization' => "Bearer ".$token->access_token]
-		];
-		//echo $uri."<br>";
-		$res = $this->client->get($uri, $params);
-		$data = json_decode($res->getBody());
-		return new JsonResponse($data[0]);
-	}
-
-
 
 	/**
 	 * GET /admin/realms/{realm}/users/{id}

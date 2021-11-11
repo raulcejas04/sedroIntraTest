@@ -223,8 +223,8 @@ class SolicitudController extends AbstractController
         $entityManager->persist($solicitud);
         $entityManager->flush();
 
-        //Crea usuario en keycloak y en la tabla usuarios
         $password = substr(md5(uniqid(rand(1,100))), 1, 6);
+        //Crea usuario en keycloak y en la tabla usuarios
         $this->crearUsuario($solicitud, $password);
 
         //Envía un email    
@@ -279,6 +279,8 @@ class SolicitudController extends AbstractController
         $usuario->setEmail($solicitud->getMail());
         //TODO: Ver el tema de los roles en algún futuro
         $usuario->setRoles(['ROLE_USER']);
+        //Si el password no se setea en blanco, por default toma nulo. Si es nulo va a tirar error al loguear en el extra.
+        $usuario->setPassword('');
         //TODO: ver el keycloakId
         //$usuario->setKeycloakId(hacer algo con $data);
 
@@ -342,4 +344,13 @@ class SolicitudController extends AbstractController
             return false;
         }
     }
+
+    private function validaUsuarioExistente($username){
+        $res = $this->forward('App\Controller\KeycloakFullApiController::getUserByUsernameAndRealm', [
+            'username'  => $username,
+            'realm' => $this->getParameter('keycloack_extranet_realm')
+        ]);
+        return json_decode($res->getContent());
+    }
+
 }
