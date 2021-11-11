@@ -1,0 +1,66 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Lista de personas{% endblock %}
+
+{% block body %}
+    <h1 class="text-center">Lista de personas</h1>
+    <div class="row justify-content-md-center">
+        <table class="table table-striped table-hover" id="tablaSolicitudes">
+                <thead>
+                    <tr>
+                        <th class="text-center">Ver</th>
+                        <th class="text-center">Nombre (PF)</th>                                    
+                        <th class="text-center">Razón Social (PJ)</th>                                    
+                        <th class="text-center">Dispositivos</th>                        
+                    </tr>
+                </thead>
+                <tbody>                                
+                    {% for pf in pfs %}
+                        <tr>
+                            <td class="text-center  align-middle">
+                                <a href="#">
+                                    <i class="align-middle" data-feather="eye"></i>ver</a>
+                            </td>
+
+                            <td class="text-left">
+                                <ul>
+                                    
+                                    <li>{{ pf.apellido }}, {{ pf.nombres }}</li>
+                                    
+                                </ul>
+                            </td>
+
+                            <td class="text-left align-middle">
+                                <ul>
+                                    {% if pf.relaciones %}
+                                        {% for relacion in pf.relaciones %}
+                                            <li>{{ relacion.personaJuridica.razonSocial }}</li>
+                                        
+                                            {% if relacion.personaJuridica.cuit %}
+                                                <li><b>CUIT: </b>{{ relacion.personaJuridica.cuit }}</li>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% else %}
+                                        <li>S/D</li>
+                                    {% endif %}
+                                </ul>
+                            </td>
+
+                            <td class="text-left align-middle">
+                                {#{% if solicitud.dispositivo %}
+                                    {{ solicitud.dispositivo.nicname }}
+                                {% else %}
+                                    S/D
+                                {% endif %}
+                                #}
+                                S/D
+                            </td>
+
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+    </div>
+    <br>
+</div>
+{% endblock %}

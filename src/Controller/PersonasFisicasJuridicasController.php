@@ -13,15 +13,11 @@ class PersonasFisicasJuridicasController extends AbstractController
     public function index(): Response
     {
         $entityManager = $this->getDoctrine()->getManager();
-        $personasFisicas = $entityManager->getRepository('App:PersonaFisica')->findAll();
-        $personasJuridicas = $entityManager->getRepository('App:PersonaJuridica')->findAll();
-        $dispositivos = $entityManager->getRepository('App:Dispositivo')->findAll();
-        $usuarios = $entityManager->getRepository('App:User')->findAll();
-        return $this->render('personas_fisicas_juridicas/index.html.twig', [
-            'personasFisicas' => $personasFisicas,
-            'personasJuridicas' => $personasJuridicas,
-            'dispositivos' => $dispositivos,
-            'usuarios' => $usuarios,
+
+        $pfs = $entityManager->getRepository('App:PersonaFisica')->findAll();        
+
+        return $this->render('personas_fisicas_juridicas/lista.html.twig', [
+            'pfs' => $pfs,
         ]);
     }
 }

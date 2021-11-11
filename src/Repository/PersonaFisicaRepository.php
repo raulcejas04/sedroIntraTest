@@ -19,6 +19,17 @@ class PersonaFisicaRepository extends ServiceEntityRepository
         parent::__construct($registry, PersonaFisica::class);
     }
 
+    public function personasFisicas()
+    {
+        return $this->createQueryBuilder('pf')            
+            ->leftJoin('pf.representaciones', 'r')
+            ->leftJoin('r.personaJuridica', 'pj')
+            ->leftJoin('pj.dispositivos', 'd')
+            ->leftJoin('pj.solicitudes', 's')
+            ->getQuery()
+            ->getResult();
+    }
+
     // /**
     //  * @return PersonaFisica[] Returns an array of PersonaFisica objects
     //  */
