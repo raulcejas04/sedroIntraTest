@@ -1,0 +1,17 @@
+INSERT INTO public.menuitem (id,menu_id,parent_id,rolecompany,"name",nametree,icon,link,active,orderlist1,orderlist,type_id,availablesel,"module","action",divider) VALUES
+	 (2000,1,NULL,NULL,'Usuarios','Usuarios',NULL,NULL,1,2000,2000,'1',1,NULL,NULL,0),
+	 (3000,1,NULL,NULL,'Dispositivos','Dispositivos',NULL,NULL,1,3000,3000,'1',1,NULL,NULL,0),
+	 (2130,1,2000,NULL,'Menues','Menues',NULL,NULL,1,2130,2130,'2',1,NULL,NULL,0),
+	 (2100,1,2000,NULL,'Lista Usuarios','Lista Usuarios',NULL,NULL,1,2100,2100,'2',1,NULL,NULL,0),
+	 (2120,1,2000,NULL,'Roles','Roles',NULL,NULL,1,2120,2120,'2',1,NULL,NULL,0),
+	 (2140,1,2130,NULL,'Lista menues','Lista Menues',NULL,NULL,1,2140,2140,'3',1,NULL,NULL,0),
+	 (3200,1,3000,NULL,'Lista a confirmar','Lista a confirmar',NULL,NULL,1,3200,3200,'2',1,NULL,NULL,0),
+	 (3100,1,3000,NULL,'Lista dispositivos','Lista dispositivos',NULL,'acciones-extranet/lista',1,3100,3100,'2',1,NULL,NULL,0),
+	 (3150,1,3000,NULL,'Invitacion a persona','Invitacion a persona',NULL,'dashboard/nueva-solicitud',1,3150,3150,'2',1,NULL,NULL,0),
+	 (1000,1,NULL,NULL,'Home','Home',NULL,'dashboard',1,1000,1000,'1',1,NULL,NULL,0),
+	 (10000,2,NULL,NULL,'Dashboard','Dashboard',NULL,'dashboard',1,10000,10000,'1',1,NULL,NULL,0),
+	 (20000,2,NULL,NULL,'Orders','Orders',NULL,NULL,1,20000,20000,'1',1,NULL,NULL,0),
+	 (30000,2,NULL,NULL,'Products','Products',NULL,NULL,1,30000,30000,'1',1,NULL,NULL,0),
+	 (40000,2,NULL,NULL,'Customers','Customers',NULL,NULL,1,40000,40000,'1',1,NULL,NULL,0),
+	 (50000,2,NULL,NULL,'Reports','Reports',NULL,NULL,1,50000,50000,'1',1,NULL,NULL,0),
+	 (60000,2,NULL,NULL,'Integrations','Integrations',NULL,NULL,1,60000,60000,'1',1,NULL,NULL,0);
