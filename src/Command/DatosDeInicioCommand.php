@@ -5,11 +5,12 @@ namespace App\Command;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 class CreateUserCommand extends Command
 {
     // the name of the command (the part after "bin/console")
-    protected static $defaultName = 'app:datos-de-inicio';
+    protected static $defaultName = 'datos-de-inicio';
 
     private $em;
 
@@ -25,7 +26,7 @@ class CreateUserCommand extends Command
         $this
             // Descripción corta cuando hacés un "php bin/console list"
             ->setDescription('Crea los datos de inicio de la aplicación')
-            ->setHelp('Este comando crea los datos de inicio de la aplicación')
+            ->setHelp('Este comando crea los datos de inicio de la aplicación');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
