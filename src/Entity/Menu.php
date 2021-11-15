@@ -2,23 +2,19 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
 
 /**
- * Menu
- *
- * @ORM\Table(name="menu")
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="App\Repository\MenuRepository")
  */
-class Menu
-{
+class Menu {
+
     /**
-     * @var int
-     *
-     * @ORM\Column(name="id", type="integer", nullable=false)
      * @ORM\Id
-     * @ORM\GeneratedValue(strategy="SEQUENCE")
-     * @ORM\SequenceGenerator(sequenceName="menu_id_seq", allocationSize=1, initialValue=1)
+     * @ORM\GeneratedValue
+     * @ORM\Column(type="integer")
      */
     private $id;
 
@@ -85,118 +81,138 @@ class Menu
      */
     private $deletedBy;
 
-    public function getId(): ?int
-    {
+    /**
+     * @ORM\OneToMany(targetEntity=Menuitem::class, mappedBy="menuId")
+     */
+    private $items;
+
+    public function __construct() {
+        $this->items = new ArrayCollection();
+    }
+
+    public function setId(int $id) {
+        $this->id = $id;
+    }
+
+    public function getId(): ?int {
         return $this->id;
     }
 
-    public function getName(): ?string
-    {
+    public function getName(): ?string {
         return $this->name;
     }
 
-    public function setName(?string $name): self
-    {
+    public function setName(?string $name): self {
         $this->name = $name;
 
         return $this;
     }
 
-    public function getApp(): ?string
-    {
+    public function getApp(): ?string {
         return $this->app;
     }
 
-    public function setApp(?string $app): self
-    {
+    public function setApp(?string $app): self {
         $this->app = $app;
 
         return $this;
     }
 
-    public function getActive(): ?int
-    {
+    public function getActive(): ?int {
         return $this->active;
     }
 
-    public function setActive(?int $active): self
-    {
+    public function setActive(?int $active): self {
         $this->active = $active;
 
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeInterface
-    {
+    public function getCreatedAt(): ?\DateTimeInterface {
         return $this->createdAt;
     }
 
-    public function setCreatedAt(?\DateTimeInterface $createdAt): self
-    {
+    public function setCreatedAt(?\DateTimeInterface $createdAt): self {
         $this->createdAt = $createdAt;
 
         return $this;
     }
 
-    public function getUpdatedAt(): ?\DateTimeInterface
-    {
+    public function getUpdatedAt(): ?\DateTimeInterface {
         return $this->updatedAt;
     }
 
-    public function setUpdatedAt(?\DateTimeInterface $updatedAt): self
-    {
+    public function setUpdatedAt(?\DateTimeInterface $updatedAt): self {
         $this->updatedAt = $updatedAt;
 
         return $this;
     }
 
-    public function getDeletedAt(): ?\DateTimeInterface
-    {
+    public function getDeletedAt(): ?\DateTimeInterface {
         return $this->deletedAt;
     }
 
-    public function setDeletedAt(?\DateTimeInterface $deletedAt): self
-    {
+    public function setDeletedAt(?\DateTimeInterface $deletedAt): self {
         $this->deletedAt = $deletedAt;
 
         return $this;
     }
 
-    public function getCreatedBy(): ?int
-    {
+    public function getCreatedBy(): ?int {
         return $this->createdBy;
     }
 
-    public function setCreatedBy(?int $createdBy): self
-    {
+    public function setCreatedBy(?int $createdBy): self {
         $this->createdBy = $createdBy;
 
         return $this;
     }
 
-    public function getUpdatedBy(): ?int
-    {
+    public function getUpdatedBy(): ?int {
         return $this->updatedBy;
     }
 
-    public function setUpdatedBy(?int $updatedBy): self
-    {
+    public function setUpdatedBy(?int $updatedBy): self {
         $this->updatedBy = $updatedBy;
 
         return $this;
     }
 
-    public function getDeletedBy(): ?int
-    {
+    public function getDeletedBy(): ?int {
         return $this->deletedBy;
     }
 
-    public function setDeletedBy(?int $deletedBy): self
-    {
+    public function setDeletedBy(?int $deletedBy): self {
         $this->deletedBy = $deletedBy;
 
         return $this;
     }
 
+    /**
+     * @return Collection|Menuitem[]
+     */
+    public function getItems(): Collection {
+        return $this->items;
+    }
+
+    public function addItem(Menuitem $item): self {
+        if (!$this->items->contains($item)) {
+            $this->items[] = $item;
+            $item->setMenuId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeItem(Menuitem $item): self {
+        if ($this->items->removeElement($item)) {
+            // set the owning side to null (unless already changed)
+            if ($item->getMenuId() === $this) {
+                $item->setMenuId(null);
+            }
+        }
+
+        return $this;
+    }
 
 }
