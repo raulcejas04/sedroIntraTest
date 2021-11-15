@@ -62,29 +62,31 @@ class AccionesExtranetController extends AbstractController
     {
 
         $password = substr(md5(uniqid(rand(1,100))), 1, 6);
-        $this->forward('App\Controller\KeycloakFullApiController::resetPasswordUser', [
+        $data = $this->forward('App\Controller\KeycloakFullApiController::resetPasswordUser', [
             'id' => $id,
             'realm' => $this->getParameter('keycloack_extranet_realm'),
             'password' => $password
         ]);
 
-        /*
-        TODO: Enviarle un email al pastor Joao con el nuevo password temporal. Luego él debería cambiarlo por uno propio
+        $data = json_decode($data->getContent(), true);
+
+        
+        //TODO: Enviarle un email al pastor Joao con el nuevo password temporal. Luego él debería cambiarlo por uno propio
         $email = (new TemplatedEmail())            
             ->from($this->getParameter('direccion_email_salida'))
-            ->to($solicitud->getMail())
-            ->subject('Solicitud aprobada: Datos de acceso')            
-            ->htmlTemplate('emails/invitacionPasoTres.html.twig')
+            ->to($data['usuario']['email'])
+            ->subject('Contraseña blanqueada: Datos de acceso')            
+            ->htmlTemplate('emails/blanqueoDePassword.html.twig')
             ->context([
-                'nicname' => $solicitud->getNicname(),
-                'user' => $solicitud->getPersonaFisica()->getCuitCuil(),
+                'name' => $data['usuario']['firstName'] . ' ' . $data['usuario']['lastName'],           
+                'user' => $data['usuario']['username'],
                 'password' => $password,
-                'url' => $url
+                'url' => $this->getParameter('extranet_url') . '/dashboard'
             ])
             ;
 
         $mailer->send($email);
-        */
+        
         
         return $this->redirectToRoute('usuarios_extranet');
     }

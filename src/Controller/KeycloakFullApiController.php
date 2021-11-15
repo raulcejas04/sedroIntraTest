@@ -308,6 +308,22 @@ class KeycloakFullApiController extends AbstractController
 		return new JsonResponse($data[0]);
 	}
 
+	public function getUserByIdAndRealm($id, $realm){
+		$token = $this->getTokenAdmin();
+	
+		$auth_url = $this->getParameter('keycloak-server-url');
+		$uri = $auth_url . "/admin/realms/{realm}/users/{id}";		
+		$uri = str_replace("{realm}", $realm, $uri);
+		$uri = str_replace("{id}", $id, $uri);
+	
+		$params = ['headers' => ['Authorization' => "Bearer ".$token->access_token]];
+	
+		$res = $this->client->get($uri, $params);
+		$data = json_decode($res->getBody());
+	
+		return $data;
+	}
+
 
 
 	/**
@@ -542,9 +558,11 @@ class KeycloakFullApiController extends AbstractController
 		];
 		
 		$res = $this->client->put($uri, $params);
-		
-		$data = json_decode($res->getBody());
-		return $data;
+		$statusCode = $res->getStatusCode();
+		$usuario = $this->getUserByIdAndRealm($id, $realm);
+		//$data = json_decode($res->getBody());
+		$data = array('statusCode'=>$statusCode, 'usuario'=>$usuario);
+		return new JsonResponse($data);
 	}
 
 	public function changeUserPassword( $id, $realm, $password )
