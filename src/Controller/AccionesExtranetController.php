@@ -70,8 +70,6 @@ class AccionesExtranetController extends AbstractController
 
         $data = json_decode($data->getContent(), true);
 
-        
-        //TODO: Enviarle un email al pastor Joao con el nuevo password temporal. Luego él debería cambiarlo por uno propio
         $email = (new TemplatedEmail())            
             ->from($this->getParameter('direccion_email_salida'))
             ->to($data['usuario']['email'])
@@ -87,7 +85,7 @@ class AccionesExtranetController extends AbstractController
 
         $mailer->send($email);
         
-        
+        $this->addFlash('success', 'El usuario ' . $data['usuario']['firstName'] . ' ' . $data['usuario']['lastName'] . ' ha sido blanqueado. Se ha enviado un email con los datos de acceso.');
         return $this->redirectToRoute('usuarios_extranet');
     }
 
