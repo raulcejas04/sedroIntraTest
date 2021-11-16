@@ -1,0 +1,27 @@
+simple_things_entity_audit:
+    audited_entities:
+        - App\Entity\Dispositivo
+#        - App\Entity\EstadoCivil
+        - App\Entity\Grupo
+        - App\Entity\KeycloakId
+        - App\Entity\Menu
+        - App\Entity\Menuitem
+#        - App\Entity\Nacionalidad
+        - App\Entity\Parametros
+        - App\Entity\PersonaFisica
+        - App\Entity\PersonaJuridica
+        - App\Entity\Realm
+        - App\Entity\Representacion
+        - App\Entity\Rol
+        - App\Entity\Role
+        - App\Entity\Rolemenu
+#        - App\Entity\Sexo
+        - App\Entity\Solicitud
+#        - App\Entity\TipoCuitCuil
+        - App\Entity\TipoDispositivo
+#        - App\Entity\TipoDocumento
+        - App\Entity\User
+        - App\Entity\UsuarioDispositivo
+#    global_ignore_columns:
+#        - created_at
+#        - updated_at

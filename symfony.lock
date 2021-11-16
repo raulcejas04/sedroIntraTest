@@ -264,6 +264,9 @@
             "config/packages/sensio_framework_extra.yaml"
         ]
     },
+    "sonata-project/entity-audit-bundle": {
+        "version": "1.6.0"
+    },
     "stevenmaguire/oauth2-keycloak": {
         "version": "2.2.2"
     },
