@@ -21,26 +21,4 @@ class DashboardController extends AbstractController
         ]);
     }
     
-    #[Route('/testflash', name: 'testflash')]
-    public function testflash(): Response
-    {
-        $opcionesLateral = $this->getDoctrine()->getManager()->getRepository('App:Menuitem')->itemsMenu( 2 );
-        $idActive = '12'; //hardcodeado. Habria que tomar la opcion que actualmente se seleccionó
-       
-        //--- coloca 2 mensajes de cada tipo
-        $listaBanners=array('success','warning','danger','info');
-        foreach ($listaBanners as $v){
-            $this->addFlash($v, 'Primer mensajex!');
-            $this->addFlash($v, 'Segundo mensajex!');
-        }
-        
-        return $this->render('dashboard/index.html.twig', [
-            'controller_name' => 'DashboardController',
-            'opcionesLateral' => $opcionesLateral,
-            'opcionActive' => $idActive,
-        ]);
-    }
-    
-    
-    
 }

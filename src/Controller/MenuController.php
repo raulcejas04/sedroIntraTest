@@ -12,15 +12,18 @@ class MenuController extends AbstractController
     #[Route('/menu', name: 'menu')]
     public function index(): Response
     {
+        $entityManager = $this->getDoctrine()->getManager();
+
         $MENU_ID = 1; //// HARDCODEADO PARA PROBAR
         $ROLE_ID = 2; //// HARDCODEADO ROLE
-
+        $USER_ID = $this->getUser()->getPersonaFisica()->getId();
+        $alertcount = $entityManager->getRepository('App:Alertas')->cantidadPorPersona($USER_ID);
+        
         $user = 'rcejas';
 
         $isLogued = true;
         $items = array();
-
-        $entityManager = $this->getDoctrine()->getManager();
+        
         $menues = $entityManager->getRepository('App:Menuitem')->findAllByMenuYRole($MENU_ID, $ROLE_ID);
 
         foreach ($menues as $menu){
@@ -44,8 +47,7 @@ class MenuController extends AbstractController
         }
 
         $isLogued = true;
-
-        $view['alertcount'] = 0;
+        $view['alertcount'] = $alertcount;
         $view['items'] = $aux;
         $view['isLogued'] = $isLogued;
         $view['user'] = $user;
@@ -56,14 +58,12 @@ class MenuController extends AbstractController
     #[Route('/sidebarcontrol', name: 'sidebarcontrol')]
     public function sidebarcontrol(): Response
     {
-        //$USER_ID = $this->getUser()->getPersonaFisica->getId();
-        $USER_ID = 1;
-        //echo "UserID : {$USER_ID}";
-
-        $entityManager = $this->getDoctrine()->getManager();
-        $view['listaDispositivos'] = $entityManager->getRepository('App:Dispositivo')->findByPersonaFisica($USER_ID);
+        //$USER_ID = $this->getUser()->getPersonaFisica()->getId();
+        //$USER_ID = 1;
+//        $entityManager = $this->getDoctrine()->getManager();
+//        $view['listaDispositivos'] = $entityManager->getRepository('App:Dispositivo')->findByPersonaFisica($USER_ID);
         
-        return $this->render('menu/sidebarcontrol.html.twig', $view);
+        return $this->render('menu/sidebarcontrol.html.twig');
     }
 
     
