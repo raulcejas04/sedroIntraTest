@@ -51,11 +51,10 @@
     <ul class="navbar-nav flex-row flex-wrap ms-md-auto justify-content-end">
 
         <!--ALERTAS-->
-        {% set alertcount = 8 %}
         {% if alertcount is defined %}
             {% if alertcount>0 %}
             {# TODO: hacer funcionar las notificaciones #}
-            <li class="nav-item"><a class="nav-link active" aria-current="page" href="/alertas"> <span class="badge bg-danger">8</span> 
+            <li class="nav-item"><a class="nav-link active" aria-current="page" href="/alertas"> <span class="badge bg-danger">{{ alertcount }}</span> 
                 <i class="bi bi-bell"></i> </a>
             </li>
             {% endif%}
