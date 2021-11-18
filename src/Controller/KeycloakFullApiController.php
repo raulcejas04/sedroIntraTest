@@ -595,4 +595,29 @@ class KeycloakFullApiController extends AbstractController
 		$data = json_decode($res->getStatusCode());
 		return new JsonResponse($data);
 	}
+
+	public function createKeycloakGroupInRealm($realm, $name){
+		$token = $this->getTokenAdmin();
+		
+		$base_uri_keycloak = $this->getParameter('keycloak-server-url');
+		$uri = $base_uri_keycloak.'/admin/realms/{realm}/groups';
+		
+		$uri = str_replace("{realm}", $realm, $uri);
+		
+
+		$params = [
+			'headers' => [
+			'Content-Type' => 'application/json',
+			'Authorization' => "Bearer ".$token->access_token],
+			'debug'=>false,
+			'json' => [					
+				'name' => $name
+				]
+		];
+		
+		$res = $this->client->put($uri, $params);
+		
+		$data = json_decode($res->getStatusCode());
+		return new JsonResponse($data);
+	}
 }

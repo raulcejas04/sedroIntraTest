@@ -1,0 +1,35 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}GrupoKeycloak index{% endblock %}
+
+{% block body %}
+    <h1>GrupoKeycloak index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Nombre</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for grupo_keycloak in grupo_keycloaks %}
+            <tr>
+                <td>{{ grupo_keycloak.id }}</td>
+                <td>{{ grupo_keycloak.nombre }}</td>
+                <td>
+                    <a href="{{ path('grupo_keycloak_show', {'id': grupo_keycloak.id}) }}">show</a>
+                    <a href="{{ path('grupo_keycloak_edit', {'id': grupo_keycloak.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="3">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('grupo_keycloak_new') }}">Create new</a>
+{% endblock %}

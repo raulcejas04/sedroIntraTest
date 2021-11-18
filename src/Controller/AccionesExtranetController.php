@@ -36,7 +36,7 @@ class AccionesExtranetController extends AbstractController
 
         $this->forward('App\Controller\KeycloakFullApiController::disableUser', [
             'id' => $id,
-            'realm' => $this->getParameter('keycloack_extranet_realm')
+            'realm' => $this->getParameter('keycloak_extranet_realm')
         ]);
         
         return $this->redirectToRoute('usuarios_extranet');
@@ -49,7 +49,7 @@ class AccionesExtranetController extends AbstractController
     {
         $this->forward('App\Controller\KeycloakFullApiController::reactivateUser', [
             'id' => $id,
-            'realm' => $this->getParameter('keycloack_extranet_realm')
+            'realm' => $this->getParameter('keycloak_extranet_realm')
         ]);
         
         return $this->redirectToRoute('usuarios_extranet');
@@ -64,7 +64,7 @@ class AccionesExtranetController extends AbstractController
         $password = substr(md5(uniqid(rand(1,100))), 1, 6);
         $data = $this->forward('App\Controller\KeycloakFullApiController::resetPasswordUser', [
             'id' => $id,
-            'realm' => $this->getParameter('keycloack_extranet_realm'),
+            'realm' => $this->getParameter('keycloak_extranet_realm'),
             'password' => $password
         ]);
 
@@ -91,7 +91,7 @@ class AccionesExtranetController extends AbstractController
 
     private function getAllExtranetUsers(){
         $usuariosExtranet = $this->forward('App\Controller\KeycloakFullApiController::getUsers', [
-            'realm' => $this->getParameter('keycloack_extranet_realm')
+            'realm' => $this->getParameter('keycloak_extranet_realm')
         ]);
 
         $usuarios = json_decode($usuariosExtranet->getContent(), TRUE);

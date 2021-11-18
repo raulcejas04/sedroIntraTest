@@ -17,9 +17,11 @@ parameters:
     keycloak_admin_client_id:     '%env(KEYCLOAK_ADMIN_CLIENT_ID)%'
     Keycloak_admin_client_secret: '%env(KEYCLOAK_ADMIN_SECRET)%'
 
-    keycloack_extranet_realm:     '%env(KEYCLOAK_EXTRANET_REALM)%'
-    keycloack_extranet_secret:    '%env(KEYCLOAK_EXTRANET_SECRET)%'
-    keycloack_extranet_clientid : '%env(KEYCLOAK_EXTRANET_CLIENTID)%'
+    keycloak_extranet_realm:     '%env(KEYCLOAK_EXTRANET_REALM)%'
+    keycloak_extranet_secret:    '%env(KEYCLOAK_EXTRANET_SECRET)%'
+    keycloak_extranet_clientid : '%env(KEYCLOAK_EXTRANET_CLIENTID)%'
+    keycloak_extranet_url:       '%env(KEYCLOAK_EXTRANET_APP_URL)%'
+    keycloak_extranet_app_url:   '%env(KEYCLOAK_EXTRANET_APP_URL)%'
 
     extranet_url:                 '%env(EXTRANET_URL)%'
 

@@ -1,0 +1,39 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}RolKeycloak index{% endblock %}
+
+{% block body %}
+    <h1>RolKeycloak index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Nombre</th>
+                <th>RoleSymfony</th>
+                <th>Descripcion</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for rol_keycloak in rol_keycloaks %}
+            <tr>
+                <td>{{ rol_keycloak.id }}</td>
+                <td>{{ rol_keycloak.nombre }}</td>
+                <td>{{ rol_keycloak.roleSymfony }}</td>
+                <td>{{ rol_keycloak.descripcion }}</td>
+                <td>
+                    <a href="{{ path('rol_keycloak_show', {'id': rol_keycloak.id}) }}">show</a>
+                    <a href="{{ path('rol_keycloak_edit', {'id': rol_keycloak.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="5">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('rol_keycloak_new') }}">Create new</a>
+{% endblock %}

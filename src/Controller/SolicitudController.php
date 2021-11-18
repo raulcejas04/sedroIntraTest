@@ -259,7 +259,7 @@ class SolicitudController extends AbstractController
             'lastname' => $solicitud->getPersonaFisica()->getApellido(),
             'password' => $password,
             'temporary' => 'true',
-            'realm' => $this->getParameter('keycloack_extranet_realm')
+            'realm' => $this->getParameter('keycloak_extranet_realm')
         ]); 
         
         if ($data->getStatusCode() == 500 ) {
@@ -275,7 +275,7 @@ class SolicitudController extends AbstractController
         $usuario->setPersonaFisica($solicitud->getPersonaFisica());
         $usuario->setUsername($solicitud->getPersonaFisica()->getCuitCuil());
         //TODO: crear registros REALM en la tabla (ver esta línea de acá abajo)
-        //$usuario->setRealm($this->getParameter('keycloack_extranet_realm'));
+        //$usuario->setRealm($this->getParameter('keycloak_extranet_realm'));
         $usuario->setEmail($solicitud->getMail());
         //TODO: Ver el tema de los roles en algún futuro
         $usuario->setRoles(['ROLE_USER']);
@@ -310,7 +310,7 @@ class SolicitudController extends AbstractController
         //Buscamos un usuario en keycloak de la extranet
         $usuario = $this->forward('App\Controller\KeycloakFullApiController::getUserByUsername', [
             'username'  => $solicitud->getCuil(),
-            'realm' => $this->getParameter('keycloack_extranet_realm')
+            'realm' => $this->getParameter('keycloak_extranet_realm')
                                             
         ]);
 
@@ -348,7 +348,7 @@ class SolicitudController extends AbstractController
     private function validaUsuarioExistente($username){
         $res = $this->forward('App\Controller\KeycloakFullApiController::getUserByUsernameAndRealm', [
             'username'  => $username,
-            'realm' => $this->getParameter('keycloack_extranet_realm')
+            'realm' => $this->getParameter('keycloak_extranet_realm')
         ]);
         return json_decode($res->getContent());
     }

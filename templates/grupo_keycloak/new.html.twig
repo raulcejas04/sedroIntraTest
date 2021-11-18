@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New GrupoKeycloak{% endblock %}
+
+{% block body %}
+    <h1>Create new GrupoKeycloak</h1>
+
+    {{ include('grupo_keycloak/_form.html.twig') }}
+
+    <a href="{{ path('grupo_keycloak_index') }}">back to list</a>
+{% endblock %}

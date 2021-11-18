@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit RolKeycloak{% endblock %}
+
+{% block body %}
+    <h1>Edit RolKeycloak</h1>
+
+    {{ include('rol_keycloak/_form.html.twig', {'button_label': 'Update'}) }}
+
+    <a href="{{ path('rol_keycloak_index') }}">back to list</a>
+
+    {{ include('rol_keycloak/_delete_form.html.twig') }}
+{% endblock %}

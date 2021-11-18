@@ -26,7 +26,7 @@ class ChangePasswordController extends AbstractController
             
             $this->forward('App\Controller\KeycloakFullApiController::resetPasswordUser', [
                 'id' => $id,
-                'realm' => $this->getParameter('keycloack_extranet_realm'),
+                'realm' => $this->getParameter('keycloak_extranet_realm'),
                 'password' => $password
             ]);
             $exito = $this->forward('App\Controller\KeycloakFullApiController::changeUserPassword', [
