@@ -29,15 +29,9 @@ class Grupo
      */
     private $tipoDispositivo;
 
-    /**
-     * @ORM\ManyToMany(targetEntity=Rol::class, inversedBy="grupos")
-     */
-    private $roles;
-
     public function __construct()
     {
         $this->usuarios = new ArrayCollection();
-        $this->roles = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -81,27 +75,4 @@ class Grupo
         return $this;
     }
 
-    /**
-     * @return Collection|Rol[]
-     */
-    public function getRoles(): Collection
-    {
-        return $this->roles;
-    }
-
-    public function addRole(Rol $role): self
-    {
-        if (!$this->roles->contains($role)) {
-            $this->roles[] = $role;
-        }
-
-        return $this;
-    }
-
-    public function removeRole(Rol $role): self
-    {
-        $this->roles->removeElement($role);
-
-        return $this;
-    }
 }

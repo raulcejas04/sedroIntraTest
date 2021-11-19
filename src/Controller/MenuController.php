@@ -17,7 +17,7 @@ class MenuController extends AbstractController {
         $USER_ID = $this->getUser() && $this->getUser()->getPersonaFisica() ? $this->getUser()->getPersonaFisica()->getId() : 0;
         $alertcount = $entityManager->getRepository('App:Alertas')->cantidadPorPersona($USER_ID);
 
-        $user = 'rcejas';
+        $user = $this->getUser()->getUsername();
 
         $isLogued = true;
         $items = array();

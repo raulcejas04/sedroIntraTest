@@ -603,7 +603,6 @@ class KeycloakFullApiController extends AbstractController
 		$uri = $base_uri_keycloak.'/admin/realms/{realm}/groups';
 		
 		$uri = str_replace("{realm}", $realm, $uri);
-		
 
 		$params = [
 			'headers' => [
@@ -620,4 +619,28 @@ class KeycloakFullApiController extends AbstractController
 		$data = json_decode($res->getStatusCode());
 		return new JsonResponse($data);
 	}
+
+	public function addUserToGroup($realm, $userId, $groupId){
+		$token = $this->getTokenAdmin();
+		
+		$base_uri_keycloak = $this->getParameter('keycloak-server-url');
+		$uri = $base_uri_keycloak.'/admin/realms/{realm}/users/{user_id}/groups/{group_id}';
+		
+		$uri = str_replace("{realm}", $realm, $uri);
+		$uri = str_replace("{user_id}", $userId, $uri);
+		$uri = str_replace("{group_id}", $groupId, $uri);
+
+		$params = [
+			'headers' => [
+			'Content-Type' => 'application/json',
+			'Authorization' => "Bearer ".$token->access_token],
+			'debug'=>true,
+			
+		];
+		$res = $this->client->put($uri, $params);
+		
+		$data = json_decode($res->getStatusCode());
+		return new JsonResponse($data);
+	}
+
 }
