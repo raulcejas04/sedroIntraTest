@@ -1,4 +1,4 @@
-
+.gitignore
 ###> symfony/framework-bundle ###
 /.env.local
 /.env.local.php
@@ -25,3 +25,4 @@ nbproject/project.properties
 .vscode/launch.json
 nbproject/private/private.properties
 nbproject/private/private.xml
+.idea/
