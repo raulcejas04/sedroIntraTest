@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Repository\RoleRepository;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -56,7 +57,7 @@ class Role {
     /**
      * @var \DateTime
      *
-     * @ORM\Column(name="createdat", type="datetime", nullable=false, options={"comment"="Fecha de creacion del registro."})
+     * @ORM\Column(name="createdat", type="datetime", nullable=true, options={"comment"="Fecha de creacion del registro."})
      */
     private $createdat;
 
@@ -70,7 +71,7 @@ class Role {
     /**
      * @var \DateTime
      *
-     * @ORM\Column(name="updatedat", type="datetime", nullable=false, options={"comment"="Fecha de modificacion del registro."})
+     * @ORM\Column(name="updatedat", type="datetime", nullable=true, options={"comment"="Fecha de modificacion del registro."})
      */
     private $updatedat;
 
@@ -110,9 +111,13 @@ class Role {
      */
     private $userRoles;
 
+    public function __toString() {
+        return $this->getName();
+    }
+
     public function __construct() {
-         $this->menus = new ArrayCollection();
-         $this->userRoles = new ArrayCollection();
+        $this->menus = new ArrayCollection();
+        $this->userRoles = new ArrayCollection();
     }
 
     public function getId(): ?int {
@@ -256,68 +261,61 @@ class Role {
         return $this;
     }
 
-public function getMenu(): ?Rolemenu
-{
-    return $this->menu;
-}
-
-public function setMenu(?Rolemenu $menu): self
-{
-    // unset the owning side of the relation if necessary
-    if ($menu === null && $this->menu !== null) {
-        $this->menu->setRole(null);
+    public function getMenu(): ?Rolemenu {
+        return $this->menu;
     }
 
-    // set the owning side of the relation if necessary
-    if ($menu !== null && $menu->getRole() !== $this) {
-        $menu->setRole($this);
-    }
-
-    $this->menu = $menu;
-
-    return $this;
-}
-
-public function getKeycloakRoleId(): ?string
-{
-    return $this->keycloakRoleId;
-}
-
-public function setKeycloakRoleId(?string $keycloakRoleId): self
-{
-    $this->keycloakRoleId = $keycloakRoleId;
-
-    return $this;
-}
-
-/**
- * @return Collection|UserRole[]
- */
-public function getUserRoles(): Collection
-{
-    return $this->userRoles;
-}
-
-public function addUserRole(UserRole $userRole): self
-{
-    if (!$this->userRoles->contains($userRole)) {
-        $this->userRoles[] = $userRole;
-        $userRole->setRole($this);
-    }
-
-    return $this;
-}
-
-public function removeUserRole(UserRole $userRole): self
-{
-    if ($this->userRoles->removeElement($userRole)) {
-        // set the owning side to null (unless already changed)
-        if ($userRole->getRole() === $this) {
-            $userRole->setRole(null);
+    public function setMenu(?Rolemenu $menu): self {
+        // unset the owning side of the relation if necessary
+        if ($menu === null && $this->menu !== null) {
+            $this->menu->setRole(null);
         }
+
+        // set the owning side of the relation if necessary
+        if ($menu !== null && $menu->getRole() !== $this) {
+            $menu->setRole($this);
+        }
+
+        $this->menu = $menu;
+
+        return $this;
     }
 
-    return $this;
-}
+    public function getKeycloakRoleId(): ?string {
+        return $this->keycloakRoleId;
+    }
+
+    public function setKeycloakRoleId(?string $keycloakRoleId): self {
+        $this->keycloakRoleId = $keycloakRoleId;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|UserRole[]
+     */
+    public function getUserRoles(): Collection {
+        return $this->userRoles;
+    }
+
+    public function addUserRole(UserRole $userRole): self {
+        if (!$this->userRoles->contains($userRole)) {
+            $this->userRoles[] = $userRole;
+            $userRole->setRole($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUserRole(UserRole $userRole): self {
+        if ($this->userRoles->removeElement($userRole)) {
+            // set the owning side to null (unless already changed)
+            if ($userRole->getRole() === $this) {
+                $userRole->setRole(null);
+            }
+        }
+
+        return $this;
+    }
 
 }

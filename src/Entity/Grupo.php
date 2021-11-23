@@ -34,6 +34,16 @@ class Grupo
      */
     private $tipoDispositivo;
 
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $nombre;
+
+    public function __toString()
+    {
+        return $this->getNombre();
+    }
+
     public function __construct()
     {
         $this->usuarios = new ArrayCollection();
@@ -98,6 +108,18 @@ class Grupo
         }
 
         $this->tipoDispositivo = $tipoDispositivo;
+
+        return $this;
+    }
+
+    public function getNombre(): ?string
+    {
+        return $this->nombre;
+    }
+
+    public function setNombre(string $nombre): self
+    {
+        $this->nombre = $nombre;
 
         return $this;
     }

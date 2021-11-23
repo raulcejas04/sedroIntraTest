@@ -14,10 +14,12 @@ class PruebagusType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $builder
+         $builder
+            ->add('cuit', TextType::class, ['label' => "CUIT",'required' => true,'attr' => ['class' => "form-control"]])
             ->add('campoString', TextType::class, ['label' => "Campo string",'required' => true,'attr' => ['class' => "form-control"]])
             ->add('campoInteger', IntegerType::class, ['label' => "Campo Integer",'required' => true,'attr' => ['class' => "form-control"]])
             ->add('campoEmail', EmailType::class, ['label' => "Campo E-mail",'required' => true,'attr' => ['class' => "form-control"]])
+            ->add('repetirmail', EmailType::class, ['label' => "Repetir E-mail",'required' => true,'attr' => ['class' => "form-control"]])
         ;
     }    
     

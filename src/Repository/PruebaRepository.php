@@ -18,6 +18,58 @@ class PruebaRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Prueba::class);
     }
+    
+    public function getDataForm(string $formname): array
+    {
+        $retorno = array();
+        $conn = $this->getEntityManager()->getConnection();
+        $sql="SELECT id FROM xcnf_form f WHERE f.form_name='{$formname}'";
+        $stmt = $conn->executeQuery($sql);
+        $dataid =  $stmt->fetchAllAssociative();
+        $id = (isset($dataid[0]['id']))?$dataid[0]['id']:0;
+        if($id>0){
+           $sql="SELECT * FROM xcnf_formfield f WHERE f.form_id={$id}";
+           $stmt = $conn->executeQuery($sql);
+           $data =  $stmt->fetchAllAssociative();
+           
+           $retorno = $this->formatoCampoForm($formname,$data);
+           
+        }
+        //echo count($retorno); die();
+        //echo "<pre>";print_r($data); echo "</pre>";die();
+        return $retorno;
+    }
+
+    public function formatoCampoForm($formname,$data): array
+    {
+        
+        $ret = array();
+        foreach ($data as $ka=>$arr)
+        {
+            $aux = array();
+            //echo "<pre>";print_r($arr); echo "</pre>";die();
+            foreach($arr as $k=>$v)
+            {
+                if($k=='fieldname'){
+                    $fieldname=$formname."_".$v;
+                    
+                }else{
+                    if ( !(($k=='id') || ($k=='form_id')))
+                    {
+                        if ($v!=null){
+                            $aux[$k] = $v;
+                        }
+                    }                    
+                }
+            }
+            $aux['fieldname'] = $fieldname;
+            $aux['fieldname_err'] = "err_".$fieldname;
+            $ret[] = $aux;        
+        }
+
+        return $ret;
+    }
+
 
     // /**
     //  * @return Prueba[] Returns an array of Prueba objects
