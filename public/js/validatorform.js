@@ -14,7 +14,7 @@ function aplicarReglas(js)
 {
     for (var key in js){
         procesarComponente(js[key])
-    }    
+    }
 }
 
 function procesarComponente(obj){
@@ -26,11 +26,9 @@ function procesarComponente(obj){
     }else{
         alert('No existe el campo: '+obj['fieldname'])
     }
-
 }
 
 function validadores(element, obj ){
-
     //--- coloca placeholder ---
     if(obj['val_placeholder']){
         element.placeholder=obj['val_placeholder']
@@ -70,10 +68,9 @@ function validadores(element, obj ){
             alert("Validacion: No existe campo emailrepeat:"+params['email']+" en extraproperties\n- Posiblemente debera anteponer el nombre del formulario: nombreform_"+params['email']+"\n- Verifique ademas el nombre")
         }
     }
-    
+
     ///--------
     // SEGUIR PROGRAMNDO EL RESTO DE LAS VALIDACIONES
-
 }
 
 

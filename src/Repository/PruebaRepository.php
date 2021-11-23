@@ -19,7 +19,7 @@ class PruebaRepository extends ServiceEntityRepository
         parent::__construct($registry, Prueba::class);
     }
     
-public function getDataForm(string $formname): array
+    public function getDataForm(string $formname): array
     {
         $retorno = array();
         $conn = $this->getEntityManager()->getConnection();
