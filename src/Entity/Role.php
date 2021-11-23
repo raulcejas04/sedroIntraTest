@@ -110,6 +110,11 @@ class Role {
      */
     private $userRoles;
 
+    public function __toString()
+    {
+        return $this->getName();
+    }
+
     public function __construct() {
          $this->menus = new ArrayCollection();
          $this->userRoles = new ArrayCollection();

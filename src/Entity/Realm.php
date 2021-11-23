@@ -44,6 +44,11 @@ class Realm
      */
     private $userRealms;
 
+    public function __toString()
+    {
+        return $this->getRealm();
+    }    
+
     public function __construct()
     {
         $this->solicitudes = new ArrayCollection();
