@@ -52,16 +52,17 @@ class PruebaController extends AbstractController
     }    
 
     
-    #[Route('/pruebagus', name: 'pruebagus')]
+   #[Route('/pruebagus', name: 'pruebagus')]
     public function pruebagus(Request $request): Response    
     {
-        $prueba = new Prueba;
-        $form = $this->createForm(PruebagusType::class, $prueba);
+        //$prueba = new Prueba;
+        $form = $this->createForm(PruebagusType::class);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()){
             $entityManager = $this->getDoctrine()->findById();
-            $entityManager->persist($prueba);
+            //$entityManager->persist($prueba);
+            $entityManager->persist();
             $entityManager->flush();
 
             return $this->redirectToRoute('dashboard');
@@ -71,5 +72,16 @@ class PruebaController extends AbstractController
             'form' => $form->createView(),
         ]);
     }
+
+    #[Route('/datavalidator/{id}', name: 'datavalidator', methods: ['GET'])]
+    public function datavalidator(Request $request): Response    
+    {
+        $formname = $request->get('id');
+        $entityManager = $this->getDoctrine()->getManager();
+        $dd = $entityManager->getRepository('App:Prueba')->getDataForm($formname);
+        return $this->json($dd);
+
+    }
+
 
 }
