@@ -100,8 +100,19 @@ class Role {
      */
     private $menus;
 
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $keycloakRoleId;
+
+    /**
+     * @ORM\OneToMany(targetEntity=UserRole::class, mappedBy="role")
+     */
+    private $userRoles;
+
     public function __construct() {
          $this->menus = new ArrayCollection();
+         $this->userRoles = new ArrayCollection();
     }
 
     public function getId(): ?int {
@@ -263,6 +274,48 @@ public function setMenu(?Rolemenu $menu): self
     }
 
     $this->menu = $menu;
+
+    return $this;
+}
+
+public function getKeycloakRoleId(): ?string
+{
+    return $this->keycloakRoleId;
+}
+
+public function setKeycloakRoleId(?string $keycloakRoleId): self
+{
+    $this->keycloakRoleId = $keycloakRoleId;
+
+    return $this;
+}
+
+/**
+ * @return Collection|UserRole[]
+ */
+public function getUserRoles(): Collection
+{
+    return $this->userRoles;
+}
+
+public function addUserRole(UserRole $userRole): self
+{
+    if (!$this->userRoles->contains($userRole)) {
+        $this->userRoles[] = $userRole;
+        $userRole->setRole($this);
+    }
+
+    return $this;
+}
+
+public function removeUserRole(UserRole $userRole): self
+{
+    if ($this->userRoles->removeElement($userRole)) {
+        // set the owning side to null (unless already changed)
+        if ($userRole->getRole() === $this) {
+            $userRole->setRole(null);
+        }
+    }
 
     return $this;
 }

@@ -49,11 +49,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private $username;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Realm::class, inversedBy="users")
-     */
-    private $realm;
-
-    /**
      * @ORM\ManyToOne(targetEntity=PersonaFisica::class, inversedBy="users")
      */
     private $personaFisica;
@@ -73,11 +68,23 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     private $usuarios;
 
+    /**
+     * @ORM\OneToMany(targetEntity=UserRealm::class, mappedBy="usuario")
+     */
+    private $userRealms;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Alertas::class, mappedBy="usuario")
+     */
+    private $alertas;
+
     public function __construct()
     {
         $this->solicitudes = new ArrayCollection();
         $this->usuarioDispositivos = new ArrayCollection();
         $this->usuarios = new ArrayCollection();
+        $this->userRealms = new ArrayCollection();
+        $this->alertas = new ArrayCollection();
     }
 
     public function __toString()
@@ -194,18 +201,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getRealm(): ?Realm
-    {
-        return $this->realm;
-    }
-
-    public function setRealm(?Realm $realm): self
-    {
-        $this->realm = $realm;
-
-        return $this;
-    }
-
     public function getPersonaFisica(): ?PersonaFisica
     {
         return $this->personaFisica;
@@ -300,6 +295,66 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if ($this->usuarios->removeElement($usuario)) {
             $usuario->removeUsuario($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|UserRealm[]
+     */
+    public function getUserRealms(): Collection
+    {
+        return $this->userRealms;
+    }
+
+    public function addUserRealm(UserRealm $userRealm): self
+    {
+        if (!$this->userRealms->contains($userRealm)) {
+            $this->userRealms[] = $userRealm;
+            $userRealm->setUsuario($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUserRealm(UserRealm $userRealm): self
+    {
+        if ($this->userRealms->removeElement($userRealm)) {
+            // set the owning side to null (unless already changed)
+            if ($userRealm->getUsuario() === $this) {
+                $userRealm->setUsuario(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Alertas[]
+     */
+    public function getAlertas(): Collection
+    {
+        return $this->alertas;
+    }
+
+    public function addAlerta(Alertas $alerta): self
+    {
+        if (!$this->alertas->contains($alerta)) {
+            $this->alertas[] = $alerta;
+            $alerta->setUsuario($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAlerta(Alertas $alerta): self
+    {
+        if ($this->alertas->removeElement($alerta)) {
+            // set the owning side to null (unless already changed)
+            if ($alerta->getUsuario() === $this) {
+                $alerta->setUsuario(null);
+            }
         }
 
         return $this;

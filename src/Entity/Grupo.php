@@ -25,7 +25,12 @@ class Grupo
     private $usuarios;
 
     /**
-     * @ORM\ManyToOne(targetEntity=TipoDispositivo::class, inversedBy="grupos")
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $KeycloakGroupId;
+
+    /**
+     * @ORM\OneToOne(targetEntity=TipoDispositivo::class, mappedBy="grupo", cascade={"persist", "remove"})
      */
     private $tipoDispositivo;
 
@@ -63,6 +68,18 @@ class Grupo
         return $this;
     }
 
+    public function getKeycloakGroupId(): ?string
+    {
+        return $this->KeycloakGroupId;
+    }
+
+    public function setKeycloakGroupId(?string $KeycloakGroupId): self
+    {
+        $this->KeycloakGroupId = $KeycloakGroupId;
+
+        return $this;
+    }
+
     public function getTipoDispositivo(): ?TipoDispositivo
     {
         return $this->tipoDispositivo;
@@ -70,6 +87,16 @@ class Grupo
 
     public function setTipoDispositivo(?TipoDispositivo $tipoDispositivo): self
     {
+        // unset the owning side of the relation if necessary
+        if ($tipoDispositivo === null && $this->tipoDispositivo !== null) {
+            $this->tipoDispositivo->setGrupo(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($tipoDispositivo !== null && $tipoDispositivo->getGrupo() !== $this) {
+            $tipoDispositivo->setGrupo($this);
+        }
+
         $this->tipoDispositivo = $tipoDispositivo;
 
         return $this;
