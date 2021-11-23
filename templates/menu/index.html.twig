@@ -25,7 +25,7 @@
 
                         <div class="nav-item {% if items[props_n0['id']] is defined %}dropdown{% endif %}">
                             <a href="{{ lnk }}" class="text-white nav-link {% if items[props_n0['id']] is defined %}dropdown-toggle{% endif %}" {% if items[props_n0['id']] is defined %} data-bs-toggle="dropdown" {% endif %}  >{{ props_n0.nombre }}</a>
-                            <div class="dropdown-menu">
+                            <div class="dropdown-menu bgsedronar">
 
                             {% if items[props_n0['id']] is defined %}
                                 {% for id_n1, props_n1 in items[props_n0['id']] %}
@@ -34,7 +34,7 @@
                                     {% if props_n1.link is defined and props_n1.link!= "" %}                                    
                                     {% set link = props_n1.link %}
                                     {% endif %}
-                                    <a href="{{ app.request.baseUrl ~ '/' ~ link }}" class="dropdown-item"> {% if props_n1['icon']!='' %}<span class="{{props_n1.icon}}"></span>{% endif %} {{props_n1.nombre}}</a>
+                                    <a href="{{ app.request.baseUrl ~ '/' ~ link }}" class="dropdown-item text-white"> {% if props_n1['icon']!='' %}<span class="{{props_n1.icon}}"></span>{% endif %} {{props_n1.nombre}}</a>
                                 
                                 {% endfor %}
                             {% endif %}
@@ -53,15 +53,15 @@
                 <div class="nav-item dropdown">
                 {% if is_granted('IS_AUTHENTICATED_FULLY') %}
                     <a href="#" class="text-white nav-link dropdown-toggle" data-bs-toggle="dropdown"><i class="fs-4 bi bi-person-circle"></i> {{ app.user }} Diego Castaño</a>
-                    <div class="dropdown-menu">
-                        <a href="{{ path('change_password') }}" class="dropdown-item">Cambio de clave</a>
+                    <div class="dropdown-menu bgsedronar">
+                        <a href="{{ path('change_password') }}" class="text-white dropdown-item">Cambio de clave</a>
                         <div class="dropdown-divider"></div>
-                        <a href="{{ path('oauth_logout') }}" class="dropdown-item">Desconectarse</a>
+                        <a href="{{ path('oauth_logout') }}" class="dropdown-item text-white">Desconectarse</a>
                     </div>
                 {% else %}
                     <a href="#" class="text-white nav-link dropdown-toggle" data-bs-toggle="dropdown">Login</a>
-                    <div class="dropdown-menu">
-                        <a href="{{ path('dashboard') }}" class="dropdown-item">Ingresar</a>
+                    <div class="dropdown-menu bgsedronar">
+                        <a href="{{ path('dashboard') }}" class="text-white dropdown-item">Ingresar</a>
                     </div>
                 {% endif %}
                 </div>

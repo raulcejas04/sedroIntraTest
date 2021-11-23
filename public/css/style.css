@@ -1686,3 +1686,7 @@ footer > div > div > div.col-md-4.contacto > ul > li {
 a:link, a:visited, a:active {
   text-decoration:none !important;
 }
+
+.dropdown-item:focus, .dropdown-item:hover {
+  background-color: #0072bb!important;
+}
