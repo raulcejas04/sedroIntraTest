@@ -15,7 +15,7 @@
 <body>
     {{ render( app.request.baseUrl ~ '/menu' ) }}
     {{ render( app.request.baseUrl ~ '/sidebarcontrol' ) }}
-    
+  
     <div class="container-fluid">
         <div class="row">
 
@@ -23,7 +23,7 @@
                 {% include 'sidebar.html.twig' with opcionesLateral  %}
             {% endif %}
 
-            <main id="main" class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <main id="main" class="col-md-9 ms-sm-auto {% if opcionesLateral is defined  %} col-lg-10 {% else %} col-lg-12  {% endif %} px-md-4">
             {#<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">#}
             <div class="justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
 
@@ -44,6 +44,17 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
         <script src="https://unpkg.com/validator@latest/validator.min.js"></script>
         <script src="/js/validator.js"></script>
+        <script>
+function openNav() {
+  document.getElementById("mySidenav").style.width = "250px";
+  document.getElementById("main").style.marginLeft = "250px";
+}
+
+function closeNav() {
+  document.getElementById("mySidenav").style.width = "0";
+  document.getElementById("main").style.marginLeft= "0";
+}
+</script>
     {% endblock %}
 
     </body>

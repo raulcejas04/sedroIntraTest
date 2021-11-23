@@ -1,88 +1,72 @@
-<!-- INICIO NAVBAR -->
-<nav class="navbar navbar-expand-lg navbar-light bgsedronar">
-<div class="container-fluid">
-    <a class="navbar-brand" href="#">Sedronar</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-    
-    
-    <div class="collapse navbar-collapse" id="navbarNavDropdown">
-        {% if items[0] is defined %}
-        <ul class="navbar-nav">
-        {% for id_n0, props_n0 in items[0] %}
-            {%  if props_n0.link =='' %}
-               {%  set lnk = "#"  %}
-            {%  else  %}
-                {%  set lnk = app.request.baseUrl ~ '/' ~ props_n0.link  %}
-            {%  endif %}
+<div class="m-6">
+    <nav class="navbar navbar-expand-lg navbar-light bgsedronar">
+        <div class="container-fluid">
+             <a class="navbar-brand" href="#" aria-label="SEDRONAR Presidencia de la Nación"> 
+              <img alt="sedronar" src="../img/logoSedronar.png" height="40px"> 
+          </a> 
+          <a class="navbar-brand"  href="#" aria-label="Jefatura de Gabinete de Ministros Argentina"> 
+              <img alt="Jefatura de Gabinete de Ministros Argentina" src="../img/jefgabinetearg.png" height="50px"> 
+          </a> 
+            <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+                <div class="navbar-nav ">
 
-            <li class="nav-item {% if items[props_n0['id']] is defined %}dropdown{% endif%}"  id="menu_{{id_n0}}">
-                <a class="nav-link {% if items[props_n0['id']] is defined %}dropdown-toggle{% endif%}" href="{{ lnk }}" id="navbarDropdownMenuLink" role="button" {% if items[props_n0['id']] is defined %}data-bs-toggle="dropdown"{% endif%} aria-expanded="false">{{ props_n0.nombre }}</a>
-                <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                    {% if items[props_n0['id']] is defined %}
-                    {% for id_n1, props_n1 in items[props_n0['id']] %}
-                        
-                        {#{% if props_n1['activo'] is defined  and props_n1['activo'] %}#}
-                        {% if props_n1['divider'] == 1 %}  
-                            <li class="divider"></li>
-                        {% endif%}
-                        <li>
-                            {% set link = "#" %}
-                            {% if props_n1.link is defined and props_n1.link!= "" %}                                    
-                              {% set link = props_n1.link %}
+                    {% if items[0] is defined %}
+            
+                        {% for id_n0, props_n0 in items[0] %}
+                            {%  if props_n0.link =='' %}
+                            {%  set lnk = "#"  %}
+                            {%  else  %}
+                                {%  set lnk = app.request.baseUrl ~ '/' ~ props_n0.link  %}
+                            {%  endif %}
+
+
+                        <div class="nav-item {% if items[props_n0['id']] is defined %}dropdown{% endif %}">
+                            <a href="{{ lnk }}" class="text-white nav-link {% if items[props_n0['id']] is defined %}dropdown-toggle{% endif %}" {% if items[props_n0['id']] is defined %} data-bs-toggle="dropdown" {% endif %}  >{{ props_n0.nombre }}</a>
+                            <div class="dropdown-menu">
+
+                            {% if items[props_n0['id']] is defined %}
+                                {% for id_n1, props_n1 in items[props_n0['id']] %}
+                            
+                                    {% set link = "#" %}
+                                    {% if props_n1.link is defined and props_n1.link!= "" %}                                    
+                                    {% set link = props_n1.link %}
+                                    {% endif %}
+                                    <a href="{{ app.request.baseUrl ~ '/' ~ link }}" class="dropdown-item"> {% if props_n1['icon']!='' %}<span class="{{props_n1.icon}}"></span>{% endif %} {{props_n1.nombre}}</a>
+                                
+                                {% endfor %}
                             {% endif %}
-                            <a class="dropdown-item" href="{{ app.request.baseUrl ~ '/' ~ link }}">
-                                {% if props_n1['icon']!='' %}<span class="{{props_n1.icon}}"></span>{% endif %} {{props_n1.nombre}}
-                            </a>
-                        </li>
-                    {% endfor %}
+                            </div>
+                            </div>
+                        {% endfor %}
+            
                     {% endif %}
-                </ul>
-            </li>
-        {% endfor %}
-        </ul>
-        {% endif %}
-
-    </div>
+                </div>
 
 
-    <hr class="d-md-none text-white-50">
-    <ul class="navbar-nav flex-row flex-wrap ms-md-auto justify-content-end">
+<!-- ///////////////// -->
+               
 
-        <!--ALERTAS-->
-        {% if alertcount is defined %}
-            {% if alertcount>0 %}
-            {# TODO: hacer funcionar las notificaciones #}
-            <li class="nav-item"><a class="nav-link active" aria-current="page" href="/alertas"> <span class="badge bg-danger">{{ alertcount }}</span> 
-                <i class="bi bi-bell"></i> </a>
-            </li>
-            {% endif%}
-        {% endif%}
-        <!--FIN:ALERTAS-->
+            <div class="navbar-nav ms-auto">
+                <div class="nav-item dropdown">
+                {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+                    <a href="#" class="text-white nav-link dropdown-toggle" data-bs-toggle="dropdown"><i class="fs-4 bi bi-person-circle"></i> {{ app.user }} Diego Castaño</a>
+                    <div class="dropdown-menu">
+                        <a href="{{ path('change_password') }}" class="dropdown-item">Cambio de clave</a>
+                        <div class="dropdown-divider"></div>
+                        <a href="{{ path('oauth_logout') }}" class="dropdown-item">Desconectarse</a>
+                    </div>
+                {% else %}
+                    <a href="#" class="text-white nav-link dropdown-toggle" data-bs-toggle="dropdown">Login</a>
+                    <div class="dropdown-menu">
+                        <a href="{{ path('dashboard') }}" class="dropdown-item">Ingresar</a>
+                    </div>
+                {% endif %}
+                </div>
+            </div>
 
-        <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarUser" role="button" data-bs-toggle="dropdown" aria-expanded="false">Rol-ADMIN</a>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
-                {# TODO: Hacer que se muestren las opciones de acuerdo al rol del usuario (jugar con la herencia de roles en security.yaml) #}
-                <li><a class="dropdown-item" href="#">Rol-USER</a></li>                
-                <li><a class="dropdown-item" href="#">Rol-SYSADMIN</a></li>
-            </ul>
-        </li>
-        <li class="nav-item dropdown">
-            {% if is_granted('IS_AUTHENTICATED_FULLY') %}
-                <a class="nav-link dropdown-toggle" href="#" id="navbarUser" role="button" data-bs-toggle="dropdown" aria-expanded="false">{{ app.user }}</a>
-                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
-                    <li><a class="dropdown-item" href="{{ path('change_password') }}">Cambio de password</a></li>
-                    <li><a class="dropdown-item" href="{{ path('oauth_logout') }}">Desconectarse</a></li>
-                </ul>
-            {% else %}
-                <a class="nav-link dropdown-toggle" href="#" id="navbarUser" role="button" data-bs-toggle="dropdown" aria-expanded="false">Login</a>
-                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
-                    <li><a class="dropdown-item" href="{{ path('dashboard') }}">Ingresar</a></li>                    
-                </ul>
-            {% endif %}
-        </li>
-    </ul>    
+        </div>
+    </nav>
 </div>
-</nav>

@@ -1,8 +1,25 @@
 <!-- INICIO SIDEBAR -->
-<nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bgsedronar-gris1C sidebar collapse">
+<nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bgsedronar sidebar collapse">
 <div class="position-sticky pt-3">
 
-    <ul class="nav flex-column">
+    <ul class="nav flex-column text-white w-100">
+        <li>
+          <a href="#submenu0" data-bs-toggle="collapse" class="nav-link px-0 align-middle text-white">
+              <i class="fs-4 bi bi-person-circle"></i> Diego
+                    <span class="badge bg-danger" style="margin-left: 30px;">8</span><i class="bi bi-bell" style="color: white; margin-left: 6px;"> 
+              </i>
+          </a>
+          <ul class="collapse nav flex-column ms-1" id="submenu0" data-bs-parent="#menu">
+                
+              <li class="w-100">
+                  <a href="#" class="nav-link px-0 text-white"> Cambio de Clave </a>
+              </li>
+              <li>
+                  <a href="#" class="nav-link px-0 text-white"> Salir </a>
+              </li>
+          </ul>
+        </li>
+
         {% for id, prop in opcionesLateral %}
             {%  if prop.link =='' %}
                {%  set lnk = "#"  %}
@@ -10,7 +27,7 @@
                 {%  set lnk = app.request.baseUrl ~ '/' ~ prop.link  %}
             {%  endif %}
         <li class="nav-item">
-            <a class="nav-link" href="{{lnk}}"><span data-feather="opside_{{prop.id}}"></span>{{prop.name}}</a>
+            <a class="nav-link px-0 align-middle text-white" href="{{lnk}}"><span data-feather="opside_{{prop.id}}"></span>{{prop.name}}</a>
         </li>
         {% endfor %}
     </ul>
