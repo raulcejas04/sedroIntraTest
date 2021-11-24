@@ -29,7 +29,7 @@ class Role {
     /**
      * @var string|null
      *
-     * @ORM\Column(name="code", type="string", length=15, nullable=true, options={"comment"="Codigo de Rol."})
+     * @ORM\Column(name="code", type="string", length=30, nullable=true, options={"comment"="Codigo de Rol."})
      */
     private $code;
 
