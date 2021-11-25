@@ -107,7 +107,7 @@ class Role {
     private $keycloakRoleId;
 
     /**
-     * @ORM\OneToMany(targetEntity=UserRole::class, mappedBy="role")
+     * @ORM\OneToMany(targetEntity=UserRole::class, mappedBy="role",cascade={"persist"})
      */
     private $userRoles;
 

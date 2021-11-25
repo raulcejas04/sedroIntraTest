@@ -71,7 +71,7 @@ class KeycloakAuthenticator extends SocialAuthenticator {
 
         if ($existingUser) {
             if (array_key_exists("roles", $data)) {
-                $existingUser->setRole($data["roles"]);
+                $existingUser->setRoles($data["roles"]);
             }
         } else {
             // if user exist but never connected with keycloak
@@ -92,12 +92,14 @@ class KeycloakAuthenticator extends SocialAuthenticator {
             //$user->setUsername($keycloakUser->getPreferredUsername());
             //TODO: Ver esto! ROLE_ADMIN--- Podría ser preguntando de cual Realm proviene el usuario que nos de el ROLE_*??
             if (array_key_exists("roles", $data)) {
-                $newUser->setRole($data["roles"]);
+                $newUser->setRoles($data["roles"]);
             }
             $newUser->setPassword('');
             $this->em->persist($newUser);
             $this->em->flush();
         }
+
+        $user = $existingUser ? $existingUser : $newUser;
 
         /** GRUPO Y ROLES * */
         // ¿¿¿Es factible generar esto acá????
@@ -117,6 +119,22 @@ class KeycloakAuthenticator extends SocialAuthenticator {
         }
 
         if (array_key_exists("roles", $data)) {
+            //Buscamos todos los roles con este usuario y los borramos
+            //Esto para agregarlos abajo y tener siempre los mismos datos de keycloak y ningun otro repetido y/o agregado erroneamente.
+            $userRoles = $this->em->getRepository(\App\Entity\UserRole::class)->findBy([
+                "Usuario" => $user
+            ]);
+
+            foreach ($userRoles as $userRole) {
+                //TODO: Definir baja lógica o física en este caso especial
+                //Por qué no uso baja lógica?
+                //Cada vez que el usuario loguee, acumularia estos datos con fechaBaja
+                //Creo que en este caso puntual es necesario la baja física
+                //Ya que es algo que no necesitariamos recuperar de la bd a futuro y puede acumularse en gran medida innecesariamente
+                $this->em->remove($userRole);
+                $this->em->flush();
+            }
+
             foreach ($data["roles"] as $role) {
                 //Se remueve el prefijo para acertar la búsqueda, debe ser igual al que está en el mapper del cliente en keycloak
                 $res = $this->keycloakService->getRole(str_replace("ROLE_", "", $role));
@@ -124,20 +142,20 @@ class KeycloakAuthenticator extends SocialAuthenticator {
                 $r = $existingRole ? $existingRole : new \App\Entity\Role();
                 $r->setKeycloakRoleId($res->id);
                 $r->setCode("ROLE_" . $res->name);
-                //TODO: Traer la descripción del role
-                $r->setName('ROLE');
+                //TODO: Traer la descripción del role (puede sacarse de atributos, pero quiero ver si hay una forma directa)
+                $r->setName($res->name);
+
+                $userRole = new \App\Entity\UserRole();
+                $userRole->setRole($r);
+                $userRole->setUsuario($user);
+                $r->addUserRole($userRole);
+
                 $this->em->persist($r);
                 $this->em->flush();
-
-                //TODO: Si el rol existe y el usuario no se encuentra dentro de su atributo userRoles, generar la entidad UserRole y setear los campos correspondientes.
-                //En caso de que el rol ya no esté con el grupo de usuario, removerlo.
-                
-               
-                
             }
         }
         /** FIN GRUPO Y ROLES * */
-        return $existingUser ? $existingUser : $newUser;
+        return $user;
     }
 
     public function onAuthenticationFailure(Request $request, \Symfony\Component\Security\Core\Exception\AuthenticationException $exception) {
