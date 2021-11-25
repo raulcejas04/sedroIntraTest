@@ -111,6 +111,11 @@ class Role {
      */
     private $userRoles;
 
+    /**
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    private $fechaEliminacion;
+
     public function __toString() {
         return $this->getName();
     }
@@ -314,6 +319,18 @@ class Role {
                 $userRole->setRole(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getFechaEliminacion(): ?\DateTimeInterface
+    {
+        return $this->fechaEliminacion;
+    }
+
+    public function setFechaEliminacion(?\DateTimeInterface $fechaEliminacion): self
+    {
+        $this->fechaEliminacion = $fechaEliminacion;
 
         return $this;
     }

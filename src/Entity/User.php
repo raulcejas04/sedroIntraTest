@@ -78,6 +78,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     private $alertas;
 
+    /**
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    private $fechaEliminacion;
+
     public function __construct()
     {
         $this->solicitudes = new ArrayCollection();
@@ -356,6 +361,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $alerta->setUsuario(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getFechaEliminacion(): ?\DateTimeInterface
+    {
+        return $this->fechaEliminacion;
+    }
+
+    public function setFechaEliminacion(?\DateTimeInterface $fechaEliminacion): self
+    {
+        $this->fechaEliminacion = $fechaEliminacion;
 
         return $this;
     }

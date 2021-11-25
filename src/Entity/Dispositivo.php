@@ -54,6 +54,11 @@ class Dispositivo
      */
     private $tipoDispositivo;
 
+    /**
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    private $fechaEliminacion;
+
     public function __construct()
     {
         $this->solicitudes = new ArrayCollection();
@@ -186,6 +191,18 @@ class Dispositivo
     public function setTipoDispositivo(?TipoDispositivo $tipoDispositivo): self
     {
         $this->tipoDispositivo = $tipoDispositivo;
+
+        return $this;
+    }
+
+    public function getFechaEliminacion(): ?\DateTimeInterface
+    {
+        return $this->fechaEliminacion;
+    }
+
+    public function setFechaEliminacion(?\DateTimeInterface $fechaEliminacion): self
+    {
+        $this->fechaEliminacion = $fechaEliminacion;
 
         return $this;
     }

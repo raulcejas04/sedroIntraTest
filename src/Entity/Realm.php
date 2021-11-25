@@ -44,6 +44,11 @@ class Realm
      */
     private $userRealms;
 
+    /**
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    private $fechaEliminacion;
+
     public function __toString()
     {
         return $this->getRealm();
@@ -152,6 +157,18 @@ class Realm
                 $userRealm->setRealm(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getFechaEliminacion(): ?\DateTimeInterface
+    {
+        return $this->fechaEliminacion;
+    }
+
+    public function setFechaEliminacion(?\DateTimeInterface $fechaEliminacion): self
+    {
+        $this->fechaEliminacion = $fechaEliminacion;
 
         return $this;
     }

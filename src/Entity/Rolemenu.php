@@ -28,6 +28,11 @@ class Rolemenu {
      */
     private $role;
 
+    /**
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    private $fechaEliminacion;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -53,6 +58,18 @@ class Rolemenu {
     public function setRole(?Role $role): self
     {
         $this->role = $role;
+
+        return $this;
+    }
+
+    public function getFechaEliminacion(): ?\DateTimeInterface
+    {
+        return $this->fechaEliminacion;
+    }
+
+    public function setFechaEliminacion(?\DateTimeInterface $fechaEliminacion): self
+    {
+        $this->fechaEliminacion = $fechaEliminacion;
 
         return $this;
     }

@@ -29,6 +29,11 @@ class UserRole
      */
     private $Usuario;
 
+    /**
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    private $fechaEliminacion;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -54,6 +59,18 @@ class UserRole
     public function setUsuario(?User $Usuario): self
     {
         $this->Usuario = $Usuario;
+
+        return $this;
+    }
+
+    public function getFechaEliminacion(): ?\DateTimeInterface
+    {
+        return $this->fechaEliminacion;
+    }
+
+    public function setFechaEliminacion(?\DateTimeInterface $fechaEliminacion): self
+    {
+        $this->fechaEliminacion = $fechaEliminacion;
 
         return $this;
     }
