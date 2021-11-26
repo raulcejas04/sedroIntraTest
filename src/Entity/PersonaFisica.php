@@ -89,6 +89,11 @@ class PersonaFisica
      */
     private $representaciones;
 
+    /**
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    private $fechaEliminacion;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
@@ -321,6 +326,18 @@ class PersonaFisica
                 $representacione->setPersonaFisica(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getFechaEliminacion(): ?\DateTimeInterface
+    {
+        return $this->fechaEliminacion;
+    }
+
+    public function setFechaEliminacion(?\DateTimeInterface $fechaEliminacion): self
+    {
+        $this->fechaEliminacion = $fechaEliminacion;
 
         return $this;
     }

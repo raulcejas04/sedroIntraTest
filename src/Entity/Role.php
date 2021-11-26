@@ -29,7 +29,7 @@ class Role {
     /**
      * @var string|null
      *
-     * @ORM\Column(name="code", type="string", length=15, nullable=true, options={"comment"="Codigo de Rol."})
+     * @ORM\Column(name="code", type="string", length=30, nullable=true, options={"comment"="Codigo de Rol."})
      */
     private $code;
 
@@ -107,9 +107,14 @@ class Role {
     private $keycloakRoleId;
 
     /**
-     * @ORM\OneToMany(targetEntity=UserRole::class, mappedBy="role")
+     * @ORM\OneToMany(targetEntity=UserRole::class, mappedBy="role",cascade={"persist"})
      */
     private $userRoles;
+
+    /**
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    private $fechaEliminacion;
 
     public function __toString() {
         return $this->getName();
@@ -314,6 +319,18 @@ class Role {
                 $userRole->setRole(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getFechaEliminacion(): ?\DateTimeInterface
+    {
+        return $this->fechaEliminacion;
+    }
+
+    public function setFechaEliminacion(?\DateTimeInterface $fechaEliminacion): self
+    {
+        $this->fechaEliminacion = $fechaEliminacion;
 
         return $this;
     }
