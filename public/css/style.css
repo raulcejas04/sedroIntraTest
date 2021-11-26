@@ -1690,3 +1690,11 @@ a:link, a:visited, a:active {
 .dropdown-item:focus, .dropdown-item:hover {
   background-color: #0072bb!important;
 }
+
+button:focus:not(:focus-visible) {
+    outline: 0;
+}
+.navbar-light .navbar-toggler {
+    color: rgb(255 255 255 / 55%);
+    border-color: rgba(0,0,0,.1);
+}
