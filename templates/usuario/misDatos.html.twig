@@ -1,0 +1,64 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mis Datos{% endblock %}
+
+{% block body %}
+    <style>
+        .example-wrapper {
+            margin: 0 auto;
+            max-width: 800px;
+            width: 95%;
+            font: 18px/1.5 sans-serif;
+        }
+        .example-wrapper code {
+            background: #F5F5F5;
+            padding: 2px 6px;
+        }
+    </style>
+
+    <div class="example-wrapper">
+        <h6>Mis Datos<h6/>
+            <strong>Usuario:</strong>
+            <p>{{ app.user.username }}</p>
+
+            <strong>Correo:</strong>
+            <p>{{ app.user.email }}</p>
+
+            {% if app.user.personaFisica %}
+                {% set personaFisica = app.user.personaFisica %}
+                <strong>Nombre y Apellido:</strong>
+                <p>{{ personaFisica }}</p>
+
+                <strong>Documento:</strong>
+                <p>{{ personaFisica.tipoDocumento~ ' '~personaFisica.nroDoc }}</p>
+
+                <strong>CUIT/CUIL:</strong>
+                <p>{{ personaFisica.cuitCuil}}</p>
+
+                <strong>Fecha de Nacimiento:</strong>
+                <p>{{ personaFisica.fechaNac|date('d-m-Y')}}</p>
+
+                <strong>Sexo:</strong>
+                <p>{{ personaFisica.sexo.descripcion}}</p>
+
+                <strong>Estado Civil:</strong>
+                <p>{{ personaFisica.estadoCivil}}</p>
+
+                <strong>Nacionalidad:</strong>
+                <p>{{ personaFisica.nacionalidad}}</p>
+            {% endif %}
+
+            <strong>Roles:</strong>
+            {% for rol in app.user.roles %}
+                <br/>
+                {{ rol }}
+            {% endfor %}
+            <br/>
+            <br/>
+            <strong>Grupos:</strong>
+            {% for grupo in app.user.grupos %}
+                <br/>
+                {{ grupo.nombre }}
+            {% endfor %}
+    </div>
+{% endblock %}

@@ -66,7 +66,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface {
     /**
      * @ORM\ManyToMany(targetEntity=Grupo::class, mappedBy="usuarios")
      */
-    private $usuarios;
+    private $grupos;
 
     /**
      * @ORM\OneToMany(targetEntity=UserRealm::class, mappedBy="usuario")
@@ -86,7 +86,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface {
     public function __construct() {
         $this->solicitudes = new ArrayCollection();
         $this->usuarioDispositivos = new ArrayCollection();
-        $this->usuarios = new ArrayCollection();
+        $this->grupos = new ArrayCollection();
         $this->userRealms = new ArrayCollection();
         $this->alertas = new ArrayCollection();
     }
@@ -257,22 +257,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface {
     /**
      * @return Collection|Grupo[]
      */
-    public function getUsuarios(): Collection {
-        return $this->usuarios;
+    public function getGrupos(): Collection {
+        return $this->grupos;
     }
 
-    public function addUsuario(Grupo $usuario): self {
-        if (!$this->usuarios->contains($usuario)) {
-            $this->usuarios[] = $usuario;
-            $usuario->addUsuario($this);
+    public function addGrupo(Grupo $grupo): self {
+        if (!$this->grupos->contains($grupo)) {
+            $this->grupos[] = $grupo;
+            $grupo->addUsuario($this);
         }
 
         return $this;
     }
 
-    public function removeUsuario(Grupo $usuario): self {
-        if ($this->usuarios->removeElement($usuario)) {
-            $usuario->removeUsuario($this);
+    public function removeGrupo(Grupo $grupo): self {
+        if ($this->grupos->removeElement($grupo)) {
+            $grupo->removeUsuario($this);
         }
 
         return $this;
