@@ -94,11 +94,17 @@ class PersonaFisica
      */
     private $fechaEliminacion;
 
+    /**
+     * @ORM\ManyToMany(targetEntity=Admision::class, mappedBy="personaFisica")
+     */
+    private $admisiones;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
         $this->solicitudes = new ArrayCollection();
         $this->representaciones = new ArrayCollection();
+        $this->admisiones = new ArrayCollection();
     }
 
     public function __toString()
@@ -338,6 +344,33 @@ class PersonaFisica
     public function setFechaEliminacion(?\DateTimeInterface $fechaEliminacion): self
     {
         $this->fechaEliminacion = $fechaEliminacion;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Admision[]
+     */
+    public function getAdmisiones(): Collection
+    {
+        return $this->admisiones;
+    }
+
+    public function addAdmisione(Admision $admisione): self
+    {
+        if (!$this->admisiones->contains($admisione)) {
+            $this->admisiones[] = $admisione;
+            $admisione->addPersonaFisica($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAdmisione(Admision $admisione): self
+    {
+        if ($this->admisiones->removeElement($admisione)) {
+            $admisione->removePersonaFisica($this);
+        }
 
         return $this;
     }

@@ -59,10 +59,16 @@ class Dispositivo
      */
     private $fechaEliminacion;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Admision::class, mappedBy="dispositivo")
+     */
+    private $admisiones;
+
     public function __construct()
     {
         $this->solicitudes = new ArrayCollection();
         $this->usuarioDispositivos = new ArrayCollection();
+        $this->admisiones = new ArrayCollection();
     }
 
     public function __toString()
@@ -203,6 +209,36 @@ class Dispositivo
     public function setFechaEliminacion(?\DateTimeInterface $fechaEliminacion): self
     {
         $this->fechaEliminacion = $fechaEliminacion;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Admision[]
+     */
+    public function getAdmisiones(): Collection
+    {
+        return $this->admisiones;
+    }
+
+    public function addAdmisione(Admision $admisione): self
+    {
+        if (!$this->admisiones->contains($admisione)) {
+            $this->admisiones[] = $admisione;
+            $admisione->setDispositivo($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAdmisione(Admision $admisione): self
+    {
+        if ($this->admisiones->removeElement($admisione)) {
+            // set the owning side to null (unless already changed)
+            if ($admisione->getDispositivo() === $this) {
+                $admisione->setDispositivo(null);
+            }
+        }
 
         return $this;
     }
