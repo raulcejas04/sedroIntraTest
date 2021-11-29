@@ -102,15 +102,18 @@ class KeycloakAuthenticator extends SocialAuthenticator {
         $user = $existingUser ? $existingUser : $newUser;
 
         /** GRUPO Y ROLES * */
-        // ¿¿¿Es factible generar esto acá????
-        //Leemos los grupos y agregamos a la db en caso de que no exista. Si existe actualiza la información.
         if (array_key_exists("groups", $data)) {
+            foreach ($user->getGrupos() as $grupoUsuario) {
+                $this->em->remove($grupoUsuario);
+                $this->em->flush();
+            }
             foreach ($data["groups"] as $group) {
                 $res = $this->keycloakService->getGroup($group);
                 $existingGroup = $this->em->getRepository(\App\Entity\Grupo::class)->findOneBy(["KeycloakGroupId" => $res->id]);
                 $g = $existingGroup ? $existingGroup : new \App\Entity\Grupo();
                 $g->setKeycloakGroupId($res->id);
                 $g->setNombre($res->name);
+                $g->addUsuario($user);
                 $this->em->persist($g);
                 $this->em->flush();
 
@@ -119,18 +122,10 @@ class KeycloakAuthenticator extends SocialAuthenticator {
         }
 
         if (array_key_exists("roles", $data)) {
-            //Buscamos todos los roles con este usuario y los borramos
-            //Esto para agregarlos abajo y tener siempre los mismos datos de keycloak y ningun otro repetido y/o agregado erroneamente.
             $userRoles = $this->em->getRepository(\App\Entity\UserRole::class)->findBy([
                 "Usuario" => $user
             ]);
-
             foreach ($userRoles as $userRole) {
-                //TODO: Definir baja lógica o física en este caso especial
-                //Por qué no uso baja lógica?
-                //Cada vez que el usuario loguee, acumularia estos datos con fechaBaja
-                //Creo que en este caso puntual es necesario la baja física
-                //Ya que es algo que no necesitariamos recuperar de la bd a futuro y puede acumularse en gran medida innecesariamente
                 $this->em->remove($userRole);
                 $this->em->flush();
             }

@@ -19,14 +19,14 @@ class NuevaSolicitudType extends AbstractType
                 'label' => "CUIT Persona Jurídica",
                 'required' => true,
                 'attr' => [
-                    'class' => "form-control"
+                    'class' => "val-cuit"
                 ]
             ])
             ->add('cuil', TextType::class, [
                 'label' => "CUIL Persona Física",
                 'required' => true,
                 'attr' => [
-                    'class' => "form-control"
+                    'class' => "val-cuit"
                 ]
             ])
             ->add('nicname', TextType::class, [

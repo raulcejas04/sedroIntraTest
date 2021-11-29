@@ -10,8 +10,8 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity(repositoryClass=GrupoRepository::class)
  */
-class Grupo
-{
+class Grupo {
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -20,7 +20,7 @@ class Grupo
     private $id;
 
     /**
-     * @ORM\ManyToMany(targetEntity=User::class, inversedBy="usuarios")
+     * @ORM\ManyToMany(targetEntity=User::class, inversedBy="grupos")
      */
     private $usuarios;
 
@@ -44,64 +44,58 @@ class Grupo
      */
     private $fechaEliminacion;
 
-    public function __toString()
-    {
+    public function __toString() {
         return $this->getNombre();
     }
 
-    public function __construct()
-    {
+    public function __construct() {
         $this->usuarios = new ArrayCollection();
     }
 
-    public function getId(): ?int
-    {
+    public function getId(): ?int {
         return $this->id;
     }
 
     /**
      * @return Collection|User[]
      */
-    public function getUsuarios(): Collection
-    {
+    public function getUsuarios(): Collection {
         return $this->usuarios;
     }
 
-    public function addUsuario(User $usuario): self
-    {
+    public function addUsuario(User $usuario): self {
         if (!$this->usuarios->contains($usuario)) {
             $this->usuarios[] = $usuario;
+            $usuario->addGrupo($this);
         }
 
         return $this;
     }
 
-    public function removeUsuario(User $usuario): self
-    {
-        $this->usuarios->removeElement($usuario);
+    public function removeUsuario(User $usuario): self {
+        if ($this->usuarios->removeElement($usuario)) {
+            $usuario->removeGrupo($this);
+        }
+
 
         return $this;
     }
 
-    public function getKeycloakGroupId(): ?string
-    {
+    public function getKeycloakGroupId(): ?string {
         return $this->KeycloakGroupId;
     }
 
-    public function setKeycloakGroupId(?string $KeycloakGroupId): self
-    {
+    public function setKeycloakGroupId(?string $KeycloakGroupId): self {
         $this->KeycloakGroupId = $KeycloakGroupId;
 
         return $this;
     }
 
-    public function getTipoDispositivo(): ?TipoDispositivo
-    {
+    public function getTipoDispositivo(): ?TipoDispositivo {
         return $this->tipoDispositivo;
     }
 
-    public function setTipoDispositivo(?TipoDispositivo $tipoDispositivo): self
-    {
+    public function setTipoDispositivo(?TipoDispositivo $tipoDispositivo): self {
         // unset the owning side of the relation if necessary
         if ($tipoDispositivo === null && $this->tipoDispositivo !== null) {
             $this->tipoDispositivo->setGrupo(null);
@@ -117,25 +111,21 @@ class Grupo
         return $this;
     }
 
-    public function getNombre(): ?string
-    {
+    public function getNombre(): ?string {
         return $this->nombre;
     }
 
-    public function setNombre(string $nombre): self
-    {
+    public function setNombre(string $nombre): self {
         $this->nombre = $nombre;
 
         return $this;
     }
 
-    public function getFechaEliminacion(): ?\DateTimeInterface
-    {
+    public function getFechaEliminacion(): ?\DateTimeInterface {
         return $this->fechaEliminacion;
     }
 
-    public function setFechaEliminacion(?\DateTimeInterface $fechaEliminacion): self
-    {
+    public function setFechaEliminacion(?\DateTimeInterface $fechaEliminacion): self {
         $this->fechaEliminacion = $fechaEliminacion;
 
         return $this;
