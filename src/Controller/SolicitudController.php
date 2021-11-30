@@ -308,7 +308,7 @@ class SolicitudController extends AbstractController
         $entityManager = $this->getDoctrine()->getManager();
 
         //Buscamos un usuario en keycloak de la extranet
-        $usuario = $this->forward('App\Controller\KeycloakFullApiController::getUserByUsername', [
+        $usuario = $this->forward('App\Controller\KeycloakFullApiController::getUserByUsernameAndRealm', [
             'username'  => $solicitud->getCuil(),
             'realm' => $this->getParameter('keycloak_extranet_realm')
                                             

@@ -573,6 +573,10 @@ class KeycloakFullApiController extends AbstractController {
         return new JsonResponse($data);
     }
 
+    /**
+     * Create a gruoup in the realm
+     * POST /admin/realms/{realm}/groups/
+     */
     public function createKeycloakGroupInRealm($realm, $name) {
         $token = $this->getTokenAdmin();
 
@@ -587,11 +591,12 @@ class KeycloakFullApiController extends AbstractController {
                 'Authorization' => "Bearer " . $token->access_token],
             'debug' => false,
             'json' => [
-                'name' => $name
+                'name' => $name,
+                
             ]
         ];
 
-        $res = $this->client->put($uri, $params);
+        $res = $this->client->post($uri, $params);
 
         $data = json_decode($res->getStatusCode());
         return new JsonResponse($data);

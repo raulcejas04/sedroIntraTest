@@ -1,0 +1,61 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Menuitem index{% endblock %}
+
+{% block body %}
+    <h1>Menuitem index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Rolecompany</th>
+                <th>Name</th>
+                <th>Nametree</th>
+                <th>Icon</th>
+                <th>Link</th>
+                <th>Active</th>
+                <th>Orderlist1</th>
+                <th>Orderlist</th>
+                <th>TypeId</th>
+                <th>Availablesel</th>
+                <th>Module</th>
+                <th>Action</th>
+                <th>Divider</th>
+                <th>FechaEliminacion</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for menuitem in menuitems %}
+            <tr>
+                <td>{{ menuitem.id }}</td>
+                <td>{{ menuitem.rolecompany }}</td>
+                <td>{{ menuitem.name }}</td>
+                <td>{{ menuitem.nametree }}</td>
+                <td>{{ menuitem.icon }}</td>
+                <td>{{ menuitem.link }}</td>
+                <td>{{ menuitem.active }}</td>
+                <td>{{ menuitem.orderlist1 }}</td>
+                <td>{{ menuitem.orderlist }}</td>
+                <td>{{ menuitem.typeId }}</td>
+                <td>{{ menuitem.availablesel }}</td>
+                <td>{{ menuitem.module }}</td>
+                <td>{{ menuitem.action }}</td>
+                <td>{{ menuitem.divider }}</td>
+                <td>{{ menuitem.fechaEliminacion ? menuitem.fechaEliminacion|date('Y-m-d H:i:s') : '' }}</td>
+                <td>
+                    <a href="{{ path('menuitem_show', {'id': menuitem.id}) }}">show</a>
+                    <a href="{{ path('menuitem_edit', {'id': menuitem.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="16">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('menuitem_new') }}">Create new</a>
+{% endblock %}
