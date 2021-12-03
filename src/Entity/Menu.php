@@ -95,11 +95,6 @@ class Menu {
         $this->items = new ArrayCollection();
     }
 
-    public function __toString()
-    {
-        return $this->name;
-    }
-
     public function setId(int $id) {
         $this->id = $id;
     }
