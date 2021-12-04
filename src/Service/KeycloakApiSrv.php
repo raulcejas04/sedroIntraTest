@@ -3,11 +3,10 @@
 namespace App\Service;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
-use GuzzleHttp;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use GuzzleHttp;
 
 /**
  * Sumario controller.
