@@ -139,10 +139,10 @@ class __TwigTemplate_e4854a351a77eec00a90c706e4f132701415eaaaee032440d8a54769aef
     <br>
     <br>
     
-<script src=\"/js/validatorform.js\"></script>
+<!--<script src=\"/js/validatorform.js\"></script>
 <script>
   document.onload = validarForm('nueva_solicitud')
-</script> 
+</script> -->
 
 ";
         
@@ -202,10 +202,10 @@ class __TwigTemplate_e4854a351a77eec00a90c706e4f132701415eaaaee032440d8a54769aef
     <br>
     <br>
     
-<script src=\"/js/validatorform.js\"></script>
+<!--<script src=\"/js/validatorform.js\"></script>
 <script>
   document.onload = validarForm('nueva_solicitud')
-</script> 
+</script> -->
 
 {% endblock %}
 ", "solicitud/index.html.twig", "/var/www/html/intra/templates/solicitud/index.html.twig");

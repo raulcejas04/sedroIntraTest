@@ -7,6 +7,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use GuzzleHttp;
 
 /**
@@ -29,7 +30,7 @@ class KeycloakFullApiController extends AbstractController {
      */
     public function getRolesComposite($usuario_id) {
         $token = $this->getTokenAdmin();
-        $base_uri_keycloak = $this->getParameter('keycloak-server-url');
+         $base_uri_keycloak = $this->getParameter('keycloak-server-url');
         $uri = $base_uri_keycloak . '/admin/realms/{realm}/users/{id}/role-mappings/clients/{client_uuid}';
 
         $realm = $this->getParameter('keycloak-realm');
@@ -79,9 +80,8 @@ class KeycloakFullApiController extends AbstractController {
             ]
         ];
 
-        $res = $this->client->post($uri, $params);
+	$res = $this->client->post($uri, $params);
         $data = json_decode($res->getBody());
-        //dd($data);
         $response = new Response($data);
         return $response;
     }
@@ -196,6 +196,8 @@ class KeycloakFullApiController extends AbstractController {
      * POST /realms/master/protocol/openid-connect/token
      */
     public function getTokenAdmin() {
+
+
         $base_uri_keycloak = $this->getParameter('keycloak-server-url');
         $uri = $base_uri_keycloak . '/realms/master/protocol/openid-connect/token';
         $parametros = [
@@ -204,10 +206,10 @@ class KeycloakFullApiController extends AbstractController {
                 'password' => $this->getParameter('keycloak_admin_password'),
                 'grant_type' => $this->getParameter('keycloak_admin_grant_type'),
                 'client_id' => $this->getParameter('keycloak_admin_client_id'),
-                'client_secret' => $this->getParameter('Keycloak_admin_client_secret'),
+		'client_secret' => $this->getParameter('Keycloak_admin_client_secret'),
             ]
         ];
-        //dd($parametros);
+
         $res = $this->client->post($uri, $parametros);
         $data = json_decode($res->getBody());
         return $data;

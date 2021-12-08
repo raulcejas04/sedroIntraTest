@@ -519,6 +519,7 @@
     <service id="App\Controller\SolicitudController" class="App\Controller\SolicitudController" public="true" autowire="true" autoconfigure="true">
       <tag name="controller.service_arguments"/>
       <tag name="container.service_subscriber"/>
+      <argument type="service" id="App\Controller\KeycloakFullApiController"/>
       <call method="setContainer">
         <argument type="service" id=".service_locator.W9y3dzm.App\Controller\SolicitudController"/>
       </call>
