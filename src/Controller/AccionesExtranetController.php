@@ -106,17 +106,7 @@ class AccionesExtranetController extends AbstractController
         return $this->redirectToRoute('usuarios_extranet');
     }
 
-    /**
-     * @Route("/dashboard/pruebas-extranet", name="pruebas_extranet")
-     */
-    public function pruebasEnExtranet()
-    {
-        $response = $this->render(
-            'acciones_extranet/pruebasEnExtranet.html.twig',
-            []
-        );
-        return $response;
-    }
+    
 
     /**
      * @Route("/dashboard/pruebas-extranet/crear-grupo", name="pruebas_extranet_grupo")

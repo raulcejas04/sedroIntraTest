@@ -1,0 +1,157 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+  Pruebas en extranet
+{% endblock %}
+
+{% block body %}
+  <div class="example-wrapper">
+    <h2>
+      Super administradores
+    </h2>
+
+    <div class="row">
+      <h3>
+        Keycloak
+      </h3>
+
+      <div class="col-sm-4">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">
+              Realms
+            </h5>
+            <p class="card-text">
+              Distintos Realms en cada ambiente
+            </p>
+            <a href="{{ path('realm_index') }}" class="btn btn-primary">
+              Realm
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-4">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">
+              Grupos
+            </h5>
+            <p class="card-text">
+              Grupos de Keycloak
+            </p>
+            <a href="{{ path('grupo_index') }}" class="btn btn-primary">
+              Grupos
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-4">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">
+              Personas en grupos
+            </h5>
+            <p class="card-text">
+              Personas que conforman los grupos
+            </p>
+            <a href="#" class="btn btn-primary">
+              Grupos
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-4">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">
+              Roles
+            </h5>
+            <p class="card-text">
+              Roles existentes en cada grupo de Keycloak
+            </p>
+            <a href="{{ path('role_index') }}" class="btn btn-primary">
+              Roles
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <hr />
+
+    <div class="row">
+      <h3>
+        Tipos de...
+      </h3>
+      <div class="col-sm-4">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">
+              Tipos de documentos
+            </h5>
+            <p class="card-text">
+              Distintos tipos de documentos de identificación de personas
+              válidos en la República Argentina que pueden ser usados en la
+              aplicación.
+            </p>
+            <a href="{{ path('tipo_documento_index') }}"
+              class="btn btn-primary">
+              Tipos Documentos
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-4">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">
+              Cuil Cuit
+            </h5>
+            <p class="card-text">
+              Simplemente un campo para validar el CUIL o CUIT de una persona.
+            </p>
+            <a href="{{ path('tipo_cuilcuit_index') }}" class="btn btn-primary">
+              Cuil Cuit
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-4">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">
+              Tipos de dispositivos
+            </h5>
+            <p class="card-text">
+              Clasificación de dispositivos según sus características con los
+              que Sedronar matiene convenios.
+            </p>
+            <a href="{{ path('tipo_dispositivo_index') }}"
+              class="btn btn-primary">
+              Tipos de dispositivos
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-4">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">
+              Sexo
+            </h5>
+            <p class="card-text">
+              Tipos de sexo que figuran (o podrán figurar) en los DNI de las
+              personas.
+            </p>
+            <a href="{{ path('sexo_index') }}"
+              class="btn btn-primary">
+              Sexo
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

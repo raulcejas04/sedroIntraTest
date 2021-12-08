@@ -1,0 +1,35 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Realm{% endblock %}
+
+{% block body %}
+    <h1>Realm</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ realm.id }}</td>
+            </tr>
+            <tr>
+                <th>Realm</th>
+                <td>{{ realm.realm }}</td>
+            </tr>
+            
+            <tr>
+                <th>KeycloakRealmId</th>
+                <td>{{ realm.keycloakRealmId }}</td>
+            </tr>
+            <tr>
+                <th>FechaEliminacion</th>
+                <td>{{ realm.fechaEliminacion ? realm.fechaEliminacion|date('Y-m-d H:i:s') : '' }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('realm_index') }}">back to list</a>
+
+    <a href="{{ path('realm_edit', {'id': realm.id}) }}">edit</a>
+
+    {{ include('realm/_delete_form.html.twig') }}
+{% endblock %}

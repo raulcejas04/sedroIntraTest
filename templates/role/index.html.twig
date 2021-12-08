@@ -1,0 +1,59 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Role index{% endblock %}
+
+{% block body %}
+    <h1>Role index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>CompanyId</th>
+                <th>Code</th>
+                <th>Name</th>
+                <th>Active</th>
+                <th>Createdby</th>
+                <th>Createdat</th>
+                <th>Updatedby</th>
+                <th>Updatedat</th>
+                <th>Deletedby</th>
+                <th>Deletedat</th>
+                <th>Orderlist</th>
+                <th>KeycloakRoleId</th>
+                <th>FechaEliminacion</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for role in roles %}
+            <tr>
+                <td>{{ role.id }}</td>
+                <td>{{ role.companyId }}</td>
+                <td>{{ role.code }}</td>
+                <td>{{ role.name }}</td>
+                <td>{{ role.active }}</td>
+                <td>{{ role.createdby }}</td>
+                <td>{{ role.createdat ? role.createdat|date('Y-m-d H:i:s') : '' }}</td>
+                <td>{{ role.updatedby }}</td>
+                <td>{{ role.updatedat ? role.updatedat|date('Y-m-d H:i:s') : '' }}</td>
+                <td>{{ role.deletedby }}</td>
+                <td>{{ role.deletedat ? role.deletedat|date('Y-m-d H:i:s') : '' }}</td>
+                <td>{{ role.orderlist }}</td>
+                <td>{{ role.keycloakRoleId }}</td>
+                <td>{{ role.fechaEliminacion ? role.fechaEliminacion|date('Y-m-d H:i:s') : '' }}</td>
+                <td>
+                    <a href="{{ path('role_show', {'id': role.id}) }}">show</a>
+                    <a href="{{ path('role_edit', {'id': role.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="15">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('role_new') }}">Create new</a>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New TipoCuitCuil{% endblock %}
+
+{% block body %}
+    <h1>Create new TipoCuitCuil</h1>
+
+    {{ include('tipos/_form.html.twig') }}
+
+    <a href="{{ path('tipos_index') }}">back to list</a>
+{% endblock %}

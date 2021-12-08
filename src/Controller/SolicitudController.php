@@ -42,7 +42,6 @@ class SolicitudController extends AbstractController
                 return $this->redirectToRoute('dashboard');
             }
             
-            //TODO: Este no es el hash solicitado por la documentación: (openssl_encrypt, cifrado 'AES-256-CBC')
             $hash = md5(uniqid(rand(), true));
             $solicitud->setHash($hash);
             
@@ -225,9 +224,10 @@ class SolicitudController extends AbstractController
 
         $password = substr(md5(uniqid(rand(1,100))), 1, 6);
         //Crea usuario en keycloak y en la tabla usuarios
-        $this->crearUsuario($solicitud, $password);
+        $a = $this->crearUsuario($solicitud, $password);
 
-        //Envía un email    
+        $a = null;
+        //Envia mail con los datos de acceso
         $url = $this->getParameter('extranet_url');
         $email = (new TemplatedEmail())            
             ->from($this->getParameter('direccion_email_salida'))
@@ -307,42 +307,14 @@ class SolicitudController extends AbstractController
     private function verificarSolicitud($solicitud){
         $entityManager = $this->getDoctrine()->getManager();
 
-        //Buscamos un usuario en keycloak de la extranet
-        $usuario = $this->forward('App\Controller\KeycloakFullApiController::getUserByUsernameAndRealm', [
-            'username'  => $solicitud->getCuil(),
-            'realm' => $this->getParameter('keycloak_extranet_realm')
-                                            
-        ]);
-
-        if ($usuario) {
-            $a = true;
-        } else {
-            $a = false;
-        }
-        
-
-        //TODO: Verificar el CUIT y/o el CUIL que sean correctos y válidos (Preguntar a Gustavo del algoritmo de verificación)
-        $verificarMailExistente = $entityManager->getRepository('App\Entity\Solicitud')->findOneByMail($solicitud->getMail());
-        $verificarCuilExistente = $entityManager->getRepository('App\Entity\Solicitud')->findOneByCuil($solicitud->getCuil());
-        $verificarCuitExistenet = $entityManager->getRepository('App\Entity\Solicitud')->findOneByCuit($solicitud->getCuit());
-
-        if ($verificarCuilExistente){
-            $this->addFlash('danger', 'Existe una solicitud con ese CUIL');
-        }
-
-        if ($verificarCuitExistenet){
-            $this->addFlash('danger', 'Existe una solicitud con ese CUIL');
-        }
-
-        if ($verificarMailExistente) {
-            $this->addFlash('danger', 'Existe una solicitud con esa dirección de Email');
-        }
-
-        if ($verificarMailExistente || $verificarCuilExistente || $verificarCuitExistenet){
+        $solicitudActiva = $entityManager->getRepository('App\Entity\Solicitud')->findSolicitudActiva($solicitud->getMail(), $solicitud->getNicname());
+        if ($solicitudActiva){
+            $this->addFlash('danger', 'Existe una solicitud activa con esos datos. (La persona con CUIT ' . $solicitud->getCuil() . ' aún no envió los datos solicitados)');
             return true;
         } else {
             return false;
         }
+        //TODO: verificar más escenarios
     }
 
     private function validaUsuarioExistente($username){

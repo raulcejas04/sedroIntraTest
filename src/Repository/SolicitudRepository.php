@@ -36,15 +36,28 @@ class SolicitudRepository extends ServiceEntityRepository
     }
     */
 
-    /*
-    public function findOneBySomeField($value): ?Solicitud
+    
+    public function findSolicitudActiva($mail, $nicname)
     {
         return $this->createQueryBuilder('s')
-            ->andWhere('s.exampleField = :val')
-            ->setParameter('val', $value)
+            ->where('s.mail = :mail')
+            ->andWhere('s.nicname = :nicname')
+            ->andWhere('s.fechaAlta IS NULL')
+            ->andWhere('s.correccion IS NULL')
+            ->andWhere('s.usada IS NULL')
+            ->setParameter('mail', $mail)
+            ->setParameter('nicname', $nicname)
             ->getQuery()
-            ->getOneOrNullResult()
+            ->getResult();
         ;
+
+        return $this->createQueryBuilder('pf')            
+            ->leftJoin('pf.representaciones', 'r')
+            ->leftJoin('r.personaJuridica', 'pj')
+            ->leftJoin('pj.dispositivos', 'd')
+            ->leftJoin('pj.solicitudes', 's')
+            ->getQuery()
+            ->getResult();
     }
-    */
+    
 }

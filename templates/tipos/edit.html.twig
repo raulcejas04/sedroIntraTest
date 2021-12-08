@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit TipoCuitCuil{% endblock %}
+
+{% block body %}
+    <h1>Edit TipoCuitCuil</h1>
+
+    {{ include('tipos/_form.html.twig', {'button_label': 'Update'}) }}
+
+    <a href="{{ path('tipos_index') }}">back to list</a>
+
+    {{ include('tipos/_delete_form.html.twig') }}
+{% endblock %}

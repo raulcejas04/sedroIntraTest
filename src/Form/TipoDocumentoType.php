@@ -2,28 +2,24 @@
 
 namespace App\Form;
 
-use App\Entity\Grupo;
+use App\Entity\TipoDocumento;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class GrupoType extends AbstractType
+class TipoDocumentoType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            //->add('KeycloakGroupId')
-            ->add('nombre')
-            ->add('realm')
-            //->add('usuarios')
-            //->add('tipoDispositivo')
+            ->add('tipoDocumento')
         ;
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => Grupo::class,
+            'data_class' => TipoDocumento::class,
         ]);
     }
 }

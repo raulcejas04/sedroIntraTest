@@ -30,7 +30,7 @@ class NuevaSolicitudType extends AbstractType
                 ]
             ])
             ->add('nicname', TextType::class, [
-                'label' => "NicName (cambiarlo)",
+                'label' => "Nombre corto de dispositivo",
                 'required' => true,
                 'attr' => [
                     'class' => "form-control"
