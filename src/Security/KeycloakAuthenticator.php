@@ -3,9 +3,11 @@
 namespace App\Security;
 
 use App\Entity\User;
+use App\Entity\UserGrupo;
 use KnpU\OAuth2ClientBundle\Security\Authenticator\SocialAuthenticator;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,32 +17,39 @@ use Symfony\Component\HttpFoundation\Session\Session;
 /**
  * Class KeycloakAuthenticator
  */
-class KeycloakAuthenticator extends SocialAuthenticator {
+class KeycloakAuthenticator extends SocialAuthenticator
+{
 
     private $clientRegistry;
     private $em;
     private $router;
     private $keycloakService;
+    private $parameterBag;
 
-    public function __construct(ClientRegistry $clientRegistry, EntityManagerInterface $em, RouterInterface $router, \App\Service\KeycloakApiSrv $service) {
+    public function __construct(ClientRegistry $clientRegistry, EntityManagerInterface $em, RouterInterface $router, \App\Service\KeycloakApiSrv $service, ParameterBagInterface $pb)
+    {
         $this->clientRegistry = $clientRegistry;
         $this->em = $em;
         $this->router = $router;
         $this->keycloakService = $service;
+        $this->parameterBag = $pb;
     }
 
-    public function start(Request $request, \Symfony\Component\Security\Core\Exception\AuthenticationException $authException = null) {
+    public function start(Request $request, \Symfony\Component\Security\Core\Exception\AuthenticationException $authException = null)
+    {
         return new RedirectResponse(
-                '/oauth/login', // might be the site, where users choose their oauth provider
-                Response::HTTP_TEMPORARY_REDIRECT
+            '/oauth/login', // might be the site, where users choose their oauth provider
+            Response::HTTP_TEMPORARY_REDIRECT
         );
     }
 
-    public function supports(Request $request) {
+    public function supports(Request $request)
+    {
         return $request->attributes->get('_route') === 'oauth_check';
     }
 
-    public function getCredentials(Request $request) {
+    public function getCredentials(Request $request)
+    {
         $credentials = $this->fetchAccessToken($this->getKeycloakClient());
         $refreshToken = $credentials->getRefreshToken();
         $token = $credentials->getToken();
@@ -51,7 +60,8 @@ class KeycloakAuthenticator extends SocialAuthenticator {
         return $credentials;
     }
 
-    public function getUser($credentials, \Symfony\Component\Security\Core\User\UserProviderInterface $userProvider) {
+    public function getUser($credentials, \Symfony\Component\Security\Core\User\UserProviderInterface $userProvider)
+    {
         //$client = $this->clientRegistry->getClient('keycloak');
         //$client = $this->getKeycloakClient();
 
@@ -65,9 +75,9 @@ class KeycloakAuthenticator extends SocialAuthenticator {
         //dd($keycloakUser->toArray()['preferred_username']);
         //existing user ?
         $existingUser = $this
-                ->em
-                ->getRepository(User::class)
-                ->findOneBy(['KeycloakId' => $keycloakUser->getId()]);
+            ->em
+            ->getRepository(User::class)
+            ->findOneBy(['KeycloakId' => $keycloakUser->getId()]);
 
         if ($existingUser) {
             if (array_key_exists("roles", $data)) {
@@ -78,7 +88,7 @@ class KeycloakAuthenticator extends SocialAuthenticator {
             $email = $keycloakUser->getEmail();
             /** @var User $userInDatabase */
             $userInDatabase = $this->em->getRepository(User::class)
-                    ->findOneBy(['email' => $email]);
+                ->findOneBy(['email' => $email]);
             if ($userInDatabase) {
                 $userInDatabase->setKeycloakId($keycloakUser->getId());
                 $this->em->persist($userInDatabase);
@@ -103,17 +113,26 @@ class KeycloakAuthenticator extends SocialAuthenticator {
 
         /** GRUPO Y ROLES * */
         if (array_key_exists("groups", $data)) {
-            foreach ($user->getGrupos() as $grupoUsuario) {
+            $userGroups = $this->em->getRepository(\App\Entity\UserGrupo::class)->findBy([
+                "usuario" => $user
+            ]);
+
+            foreach ($userGroups as $grupoUsuario) {
                 $this->em->remove($grupoUsuario);
                 $this->em->flush();
             }
             foreach ($data["groups"] as $group) {
-                $res = $this->keycloakService->getGroup($group);
+                $res = $this->keycloakService->getGroup($group, $this->parameterBag->get('keycloak_realm'));
                 $existingGroup = $this->em->getRepository(\App\Entity\Grupo::class)->findOneBy(["KeycloakGroupId" => $res->id]);
                 $g = $existingGroup ? $existingGroup : new \App\Entity\Grupo();
                 $g->setKeycloakGroupId($res->id);
-                $g->setNombre($res->name);
-                $g->addUsuario($user);
+                $g->setNombre($res->name);  
+                
+                $userGroup = new UserGrupo();
+                $userGroup->setUsuario($user); 
+                $userGroup->setGrupo($g);
+                $g->addGroupUser($userGroup);
+
                 $this->em->persist($g);
                 $this->em->flush();
 
@@ -132,7 +151,7 @@ class KeycloakAuthenticator extends SocialAuthenticator {
 
             foreach ($data["roles"] as $role) {
                 //Se remueve el prefijo para acertar la búsqueda, debe ser igual al que está en el mapper del cliente en keycloak
-                $res = $this->keycloakService->getRole(str_replace("ROLE_", "", $role));
+                $res = $this->keycloakService->getRole(str_replace("ROLE_", "", $role),$this->parameterBag->get('keycloak_realm'));
                 $existingRole = $this->em->getRepository(\App\Entity\Role::class)->findOneBy(["keycloakRoleId" => $res->id]);
                 $r = $existingRole ? $existingRole : new \App\Entity\Role();
                 $r->setKeycloakRoleId($res->id);
@@ -153,13 +172,15 @@ class KeycloakAuthenticator extends SocialAuthenticator {
         return $user;
     }
 
-    public function onAuthenticationFailure(Request $request, \Symfony\Component\Security\Core\Exception\AuthenticationException $exception) {
+    public function onAuthenticationFailure(Request $request, \Symfony\Component\Security\Core\Exception\AuthenticationException $exception)
+    {
         $message = strtr($exception->getMessageKey(), $exception->getMessageData());
 
         return new Response($message, Response::HTTP_FORBIDDEN);
     }
 
-    public function onAuthenticationSuccess(Request $request, \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token, string $providerKey) {
+    public function onAuthenticationSuccess(Request $request, \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token, string $providerKey)
+    {
         //dd($token);
         // change "app_homepage" to some route in your app
         $targetUrl = $this->router->generate('dashboard');
@@ -170,8 +191,8 @@ class KeycloakAuthenticator extends SocialAuthenticator {
     /**
      * @return \KnpU\OAuth2ClientBundle\Client\Provider\KeycloakClient
      */
-    private function getKeycloakClient() {
+    private function getKeycloakClient()
+    {
         return $this->clientRegistry->getClient('keycloak');
     }
-
 }

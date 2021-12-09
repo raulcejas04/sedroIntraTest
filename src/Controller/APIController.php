@@ -6,6 +6,7 @@ use App\Service\KeycloakApiSrv;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -53,4 +54,75 @@ class APIController extends AbstractController
 
         return new JsonResponse(["status" => "success", "message" => "Usuario creado correctamente."]);
     }
+
+    #[Route('/add/group/user', name: 'api_add_group_user', methods: ['POST'])]
+    public function addGroupToUser(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $username = $data["username"];
+        $groups = $data["groups"];
+
+        if (empty($username) || empty($groups)) {
+            throw new NotFoundHttpException("Expecting mandatory parameters!");
+        }
+
+        $userResponse = $this->keycloakService->getUserByUsernameAndRealm($username, $this->getParameter('keycloak_extranet_realm'));
+        $user = json_decode($userResponse->getContent());
+
+        foreach ($groups as $_group) {
+            $group = $this->keycloakService->getGroup($_group,$this->getParameter('keycloak_extranet_realm'));
+            $putGroupResponse = $this->keycloakService->addUserToGroup(
+                $this->getParameter('keycloak_extranet_realm'),
+                $user->id,
+                $group->id
+            );
+        }
+
+        if ($putGroupResponse->getStatusCode() == 500) {
+            return new JsonResponse(["status" => "error", "message" => "Ha ocurrido un error y la operación no pudo completarse."]);
+        }
+
+        return new JsonResponse(["status" => "success", "message" => "Grupo asignado correctamente."]);
+    }
+
+    #[Route('/get/group', name: 'api_get_group')]
+    public function getGroup(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $group = $data["group"];
+        $realm = $data["realm"];
+
+        if (empty($group) || empty($realm)) {
+            throw new NotFoundHttpException("Expecting mandatory parameters!");
+        }
+
+        $res = $this->keycloakService->getGroup($group,$realm);
+
+       /*  if ($res->getStatusCode() == 500) {
+            return new JsonResponse(["status" => "error", "message" => "Ha ocurrido un error y la operación no pudo completarse."]);
+        } */
+
+        return new JsonResponse((array)$res,Response::HTTP_OK);
+    }
+
+    #[Route('/get/role', name: 'api_get_role')]
+    public function getRole(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $role = $data["role"];
+        $realm = $data["realm"];
+
+        if (empty($role) || empty($realm)) {
+            throw new NotFoundHttpException("Expecting mandatory parameters!");
+        }
+
+        $res = $this->keycloakService->getRole($role,$realm);
+
+     /*    if ($res->getStatusCode() == 500) {
+            return new JsonResponse(["status" => "error", "message" => "Ha ocurrido un error y la operación no pudo completarse."]);
+        } */
+
+        return new JsonResponse((array)$res,Response::HTTP_OK);
+    }
+
 }
