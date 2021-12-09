@@ -26,9 +26,9 @@ use Symfony\Component\HttpClient\HttpClient;
 
 class SolicitudController extends AbstractController
 {
-     public function __construct(KeycloakFullApiController $keycloak){
-	$this->keycloak = $keycloak;
-     }
+    public function __construct(KeycloakFullApiController $keycloak){
+    	$this->keycloak = $keycloak;
+    }
 
 
     #[Route('/dashboard/nueva-solicitud', name: 'nueva-solicitud')]
@@ -46,6 +46,11 @@ class SolicitudController extends AbstractController
             if ($this->verificarSolicitud($solicitud) == true){
                 return $this->redirectToRoute('dashboard');
             }
+
+            //verifica persona física preexistente
+            //TODO: Seguir por acá 9/12/21
+            $personaFisica = $entityManager->getRepository(PersonaFisica::class)->findOneBy(['cuil' => $solicitud->getPersonaFisica()->getCuitCuil()]);
+            $personaJuridica = $entityManager->getRepository(PersonaJuridica::class)->findOneBy(['cuit' => $solicitud->getPersonaJuridica()->getCuit()]);   
             
             $hash = md5(uniqid(rand(), true));
             $solicitud->setHash($hash);
@@ -69,7 +74,7 @@ class SolicitudController extends AbstractController
 
             $mailer->send($email);
 
-            $this->addFlash('success', 'Invitación creada con éxito!');
+            $this->addFlash('success', 'Invitación creada con éxito. Se ha enviado un email a ' . $solicitud->getMail() . ' con instrucciones para completar el registro.');
             return $this->redirectToRoute('dashboard');
         }
 
@@ -217,89 +222,87 @@ class SolicitudController extends AbstractController
     /**
      * @Route("dashboard/solicitud/{hash}/aceptar-solicitud", name="aceptarSolicitud")
      */
-    public function aceptarSolicitud($hash, MailerInterface $mailer): Response
+    public function aceptarSolicitud($hash): Response
     {
         $entityManager = $this->getDoctrine()->getManager();
         $solicitud = $entityManager->getRepository('App\Entity\Solicitud')->findOneByHash($hash);
         
         $solicitud->setFechaAlta(new \DateTime('now'));
         
-        $entityManager->persist($solicitud);
-        $entityManager->flush();
-
         $password = substr(md5(uniqid(rand(1,100))), 1, 6);
         //Crea usuario en keycloak y en la tabla usuarios
         $a = $this->crearUsuario($solicitud, $password);
 
         $a = null;
-        //Envia mail con los datos de acceso
-        $url = $this->getParameter('extranet_url');
-        $email = (new TemplatedEmail())            
-            ->from($this->getParameter('direccion_email_salida'))
-            ->to($solicitud->getMail())
-            ->subject('Solicitud aprobada: Datos de acceso')            
-            ->htmlTemplate('emails/invitacionPasoTres.html.twig')
-            ->context([
-                'nicname' => $solicitud->getNicname(),
-                'user' => $solicitud->getPersonaFisica()->getCuitCuil(),
-                'password' => $password,
-                'url' => $url
-            ])
-            ;
+        
 
-        $mailer->send($email);
+        $entityManager->persist($solicitud);
+        $entityManager->flush();
         
         $this->addFlash('success', 'Usuario creado con éxito! Se envió un email a ' . $solicitud->getMail() . ' con los datos de acceso');
-        dd();            
+        //dd();            
         return $this->redirectToRoute('dashboard');
     }
 
 
-    private function crearUsuario($solicitud, $password ) {
+    private function crearUsuario($solicitud, $password, MailerInterface $mailer) {
+        $entityManager = $this->getDoctrine()->getManager();        
         
-        /*$data = $this->forward('App\Controller\KeycloakFullApiController::postUsuario', [
-            'username'  => $solicitud->getPersonaFisica()->getCuitCuil(),
-            'email' => $solicitud->getMail(),
-            'firstname'  => $solicitud->getPersonaFisica()->getNombres(),
-            'lastname' => $solicitud->getPersonaFisica()->getApellido(),
-            'password' => $password,
-            'temporary' => 'true',
-            'realm' => $this->getParameter('keycloak_extranet_realm')
-        ]); */
-        
-        
-	$data=$this->keycloak->postUsuario(
-            $solicitud->getPersonaFisica()->getCuitCuil(),
-            $solicitud->getMail(),
-            $solicitud->getPersonaFisica()->getNombres(),
-            $solicitud->getPersonaFisica()->getApellido(),
-            $password,
-            'true',
-            $this->getParameter('keycloak_extranet_realm'));
-        
-        if ($data->getStatusCode() == 500 ) {
-            $this->addFlash('danger', 'Hubo un error, la operación no pudo completarse');
-                    
-            return $this->redirectToRoute('dashboard');
+        $usuarioKeycloak = $this->verificaUsuarioPreexistente($solicitud->getPersonaFisica()->getCuitCuil());
+        if ($usuarioKeycloak) {
+            $usuario = $entityManager->getRepository('App\Entity\User')->encontrarPorKeycloakId($usuarioKeycloak->id);
+            $solicitud->setUsuario($usuario[0]);
+            $entityManager->persist($solicitud);
+        } else {
+            $data=$this->keycloak->postUsuario(
+                $solicitud->getPersonaFisica()->getCuitCuil(),
+                $solicitud->getMail(),
+                $solicitud->getPersonaFisica()->getNombres(),
+                $solicitud->getPersonaFisica()->getApellido(),
+                $password,
+                'true',
+                $this->getParameter('keycloak_extranet_realm')
+            );
+            
+            if ($data->getStatusCode() == 500 ) {
+                $this->addFlash('danger', 'Hubo un error, la operación no pudo completarse');
+                        
+                return $this->redirectToRoute('dashboard');
+            }
+
+            $usuarioKeycloak = $this->keycloak->getUserByUsernameAndRealm($solicitud->getPersonaFisica()->getCuitCuil(), $this->getParameter('keycloak_extranet_realm'));
+
+            $usuario = new User;
+            $usuario->setPersonaFisica($solicitud->getPersonaFisica());
+            $usuario->setUsername($solicitud->getPersonaFisica()->getCuitCuil());
+            //TODO: crear registros REALM en la tabla (ver esta línea de acá abajo)
+            //$usuario->setRealm($this->getParameter('keycloak_extranet_realm'));
+            $usuario->setEmail($solicitud->getMail());
+            //TODO: Ver el tema de los roles en algún futuro
+            $usuario->setRoles(['ROLE_USER']);
+            //Si el password no se setea en blanco, por default toma nulo. Si es nulo va a tirar error al loguear en el extra.
+            $usuario->setPassword('');
+            //TODO: ver el keycloakId
+            $usuario->setKeycloakId($usuarioKeycloak->id);
+
+            $entityManager->persist($usuario);
+            //Envia mail con los datos de acceso
+            $url = $this->getParameter('extranet_url');
+            $email = (new TemplatedEmail())            
+                ->from($this->getParameter('direccion_email_salida'))
+                ->to($solicitud->getMail())
+                ->subject('Solicitud aprobada: Datos de acceso')            
+                ->htmlTemplate('emails/invitacionPasoTres.html.twig')
+                ->context([
+                    'nicname' => $solicitud->getNicname(),
+                    'user' => $solicitud->getPersonaFisica()->getCuitCuil(),
+                    'password' => $password,
+                    'url' => $url
+                ])
+            ;
+
+            $mailer->send($email);
         }
-
-        //TODO: verificar si ya existe el usuario
-        $entityManager = $this->getDoctrine()->getManager();
-
-        $usuario = new User;
-        $usuario->setPersonaFisica($solicitud->getPersonaFisica());
-        $usuario->setUsername($solicitud->getPersonaFisica()->getCuitCuil());
-        //TODO: crear registros REALM en la tabla (ver esta línea de acá abajo)
-        //$usuario->setRealm($this->getParameter('keycloak_extranet_realm'));
-        $usuario->setEmail($solicitud->getMail());
-        //TODO: Ver el tema de los roles en algún futuro
-        $usuario->setRoles(['ROLE_USER']);
-        //Si el password no se setea en blanco, por default toma nulo. Si es nulo va a tirar error al loguear en el extra.
-        $usuario->setPassword('');
-        //TODO: ver el keycloakId
-        //$usuario->setKeycloakId(hacer algo con $data);
-
-        $entityManager->persist($usuario);
         $entityManager->flush();
 
         return;
@@ -332,11 +335,12 @@ class SolicitudController extends AbstractController
         //TODO: verificar más escenarios
     }
 
-    private function validaUsuarioExistente($username){
-        $res = $this->forward('App\Controller\KeycloakFullApiController::getUserByUsernameAndRealm', [
-            'username'  => $username,
-            'realm' => $this->getParameter('keycloak_extranet_realm')
-        ]);
+    private function verificaUsuarioPreexistente($username){
+        $res = $this->keycloak->getUserByUsernameAndRealm(
+            $username,
+            $this->getParameter('keycloak_extranet_realm')
+        );
+        
         return json_decode($res->getContent());
     }
 
