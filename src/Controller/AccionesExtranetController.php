@@ -7,12 +7,17 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
+use App\Controller\KeycloakFullApiController;
 
 /**
  * @Route("/acciones-extranet")
  */
 class AccionesExtranetController extends AbstractController
 {
+    public function __construct(KeycloakFullApiController $keycloak){
+    	$this->keycloak = $keycloak;
+    }
+
     #[Route('/lista', name: 'usuarios_extranet')]
     public function listaUsuariosExtranet(): Response
     {
@@ -34,14 +39,8 @@ class AccionesExtranetController extends AbstractController
      */
     public function disableUser($id): Response
     {
-        $this->forward(
-            'App\Controller\KeycloakFullApiController::disableUser',
-            [
-                'id' => $id,
-                'realm' => $this->getParameter('keycloak_extranet_realm'),
-            ]
-        );
-
+        $this->keycloak->disableUser($id, $this->getParameter('keycloak_extranet_realm'));
+            
         return $this->redirectToRoute('usuarios_extranet');
     }
 
@@ -50,13 +49,7 @@ class AccionesExtranetController extends AbstractController
      */
     public function reactivateUser($id): Response
     {
-        $this->forward(
-            'App\Controller\KeycloakFullApiController::reactivateUser',
-            [
-                'id' => $id,
-                'realm' => $this->getParameter('keycloak_extranet_realm'),
-            ]
-        );
+        $this->keycloak->reactivateUser($id, $this->getParameter('keycloak_extranet_realm'));
 
         return $this->redirectToRoute('usuarios_extranet');
     }
@@ -67,14 +60,7 @@ class AccionesExtranetController extends AbstractController
     public function blanquearPassword($id, MailerInterface $mailer): Response
     {
         $password = substr(md5(uniqid(rand(1, 100))), 1, 6);
-        $data = $this->forward(
-            'App\Controller\KeycloakFullApiController::resetPasswordUser',
-            [
-                'id' => $id,
-                'realm' => $this->getParameter('keycloak_extranet_realm'),
-                'password' => $password,
-            ]
-        );
+        $data = $this->keycloak->resetPasswordUser($id, $this->getParameter('keycloak_extranet_realm'), $password);
 
         $data = json_decode($data->getContent(), true);
 
@@ -114,13 +100,7 @@ class AccionesExtranetController extends AbstractController
     public function pruebasEnExtranetCrearGrupo()
     {
         $nombre = 'Prueba';
-        $grupo = $this->forward(
-            'App\Controller\KeycloakFullApiController::createKeycloakGroupInRealm',
-            [
-                'realm' => $this->getParameter('keycloak_extranet_realm'),
-                'name' => $nombre,
-            ]
-        );
+        $grupo = $this->keycloak->createKeycloakGroupInRealm ($this->getParameter('keycloak_extranet_realm'), $nombre);
 
         switch ($grupo->getStatusCode()) {
             case 200:
@@ -157,13 +137,8 @@ class AccionesExtranetController extends AbstractController
 
     private function getAllExtranetUsers()
     {
-        $usuariosExtranet = $this->forward(
-            'App\Controller\KeycloakFullApiController::getUsers',
-            [
-                'realm' => $this->getParameter('keycloak_extranet_realm'),
-            ]
-        );
-
+        $usuariosExtranet = $this->keycloak->getUsers($this->getParameter('keycloak_extranet_realm'));
+            
         $usuarios = json_decode($usuariosExtranet->getContent(), true);
         return $usuarios;
     }

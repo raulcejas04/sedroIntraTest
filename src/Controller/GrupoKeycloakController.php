@@ -10,10 +10,15 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Entity\Grupo;
+use App\Controller\KeycloakFullApiController;
 
 #[Route('/grupo/keycloak')]
 class GrupoKeycloakController extends AbstractController
 {
+    public function __construct(KeycloakFullApiController $keycloak){
+    	$this->keycloak = $keycloak;
+    }
+
     #[Route('/', name: 'grupo_keycloak_index', methods: ['GET'])]
     public function index(GrupoKeycloakRepository $grupoKeycloakRepository): Response
     {
@@ -31,10 +36,7 @@ class GrupoKeycloakController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $newKeycloakGroup = $this->forward('App\Controller\KeycloakFullApiController::createKeycloakGroupInRealm', [
-                'realm' => $this->getParameter('keycloak_realm'),
-                'name' => $grupoKeycloak->getNombre(),
-            ]);
+            $newKeycloakGroup = $this->keycloak->createKeycloakGroupInRealm($this->getParameter('keycloak_realm'),$grupoKeycloak->getNombre());
             
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($grupoKeycloak);

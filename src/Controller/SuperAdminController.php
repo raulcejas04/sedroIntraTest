@@ -10,6 +10,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use App\Controller\KeycloakFullApiController;
 use App\Entity\TipoDispositivo;
 use App\Entity\TipoDocumento;
 use App\Form\TipoDispositivoType;
@@ -32,6 +33,10 @@ use App\Repository\RoleRepository;
 #[Route('/dashboard/super-admines')]
 class SuperAdminController extends AbstractController
 {
+
+    public function __construct(KeycloakFullApiController $keycloak){
+    	$this->keycloak = $keycloak;
+    }
 
     /**
      * @Route("/", name="ListaSuperAdmin")
@@ -76,10 +81,8 @@ class SuperAdminController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             /*
-            $a = $this->forward('App\Controller\KeycloakFullApiController::createKeycloakRealm', [
-                'name' => $realm->getRealm(),
-            ]);
-*/
+            $a = $this->keycloak->createKeycloakRealm($realm->getRealm());
+            */
 
             $entityManager->persist($realm);
             $entityManager->flush();
@@ -149,14 +152,8 @@ class SuperAdminController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->forward('App\Controller\KeycloakFullApiController::createKeycloakGroupInRealm', [
-                'realm' => $grupo->getRealm()->getRealm(),
-                'name' => $grupo->getNombre(),
-            ]);
-            $this->forward('App\Controller\KeycloakFullApiController::viewKeycloakGroupInRealm', [
-                'realm' => $this->getParameter('keycloak_realm'),
-                'name' => $grupo->getNombre(),
-            ]);
+            $this->keycloak->createKeycloakGroupInRealm($grupo->getRealm()->getRealm(), $grupo->getNombre());
+            $this->keycloak->viewKeycloakGroupInRealm($this->getParameter('keycloak_realm'), $grupo->getNombre());
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($grupo);
             $entityManager->flush();

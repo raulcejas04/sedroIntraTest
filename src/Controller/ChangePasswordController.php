@@ -12,6 +12,10 @@ use Symfony\Component\Validator\Constraints\All;
 
 class ChangePasswordController extends AbstractController
 {
+    public function __construct(KeycloakFullApiController $keycloak){
+    	$this->keycloak = $keycloak;
+    }
+
     #[Route('/dashboard/change/password', name: 'change_password')]
     public function index(Request $request)
     {
@@ -24,16 +28,8 @@ class ChangePasswordController extends AbstractController
             $dataForm = $request->request->all();
             $password = $dataForm['change_password']['password']['first'];
             
-            $this->forward('App\Controller\KeycloakFullApiController::resetPasswordUser', [
-                'id' => $id,
-                'realm' => $this->getParameter('keycloak_extranet_realm'),
-                'password' => $password
-            ]);
-            $exito = $this->forward('App\Controller\KeycloakFullApiController::changeUserPassword', [
-                'id' => $id, 
-                'realm' => $realm, 
-                'password' => $password
-            ]);
+            $this->keycloak->resetPasswordUser($id, $this->getParameter('keycloak_realm'), $password);
+            $exito = $this->keycloak->changeUserPassword($id, $realm, $password);
             if ($exito->getStatusCode() == 500) {
                 $this->addFlash('warning', 'No fue posible actualizar la contraseña');                
             } else {

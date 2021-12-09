@@ -36,6 +36,15 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $this->_em->flush();
     }
 
+    public function encontrarPorKeycloakId(string $id)
+    {
+        return $this->createQueryBuilder('u')            
+            ->where('u.KeycloakId = :id')
+            ->setParameter('id', $id)
+            ->getQuery()
+            ->getResult();    
+    }
+
     // /**
     //  * @return User[] Returns an array of User objects
     //  */
