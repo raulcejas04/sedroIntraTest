@@ -309,7 +309,7 @@ class SuperAdminController extends AbstractController
             $entityManager->persist($tipoCuitCuil);
             $entityManager->flush();
 
-            return $this->redirectToRoute('tipos_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('tipo_cuilcuit_index', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->renderForm('tipos/new.html.twig', [
@@ -335,7 +335,7 @@ class SuperAdminController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
 
-            return $this->redirectToRoute('tipos_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('tipo_cuilcuit_index', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->renderForm('tipos/edit.html.twig', [
@@ -352,7 +352,7 @@ class SuperAdminController extends AbstractController
             $entityManager->flush();
         }
 
-        return $this->redirectToRoute('tipos_index', [], Response::HTTP_SEE_OTHER);
+        return $this->redirectToRoute('tipo_cuilcuit_index', [], Response::HTTP_SEE_OTHER);
     }
 
     /*****************************************************************************************

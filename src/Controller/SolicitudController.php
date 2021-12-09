@@ -11,7 +11,7 @@ use App\Entity\Solicitud;
 use App\Form\NuevaSolicitudType;
 use App\Form\RepresentacionType;
 use App\Service\KeycloakApiSrv;
-use App\Controller\KeyCloakFullApiController;
+use App\Controller\KeycloakFullApiController;
 use App\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -26,6 +26,11 @@ use Symfony\Component\HttpClient\HttpClient;
 
 class SolicitudController extends AbstractController
 {
+     public function __construct(KeycloakFullApiController $keycloak){
+	$this->keycloak = $keycloak;
+     }
+
+
     #[Route('/dashboard/nueva-solicitud', name: 'nueva-solicitud')]
     public function nuevaSolicitud(Request $request, MailerInterface $mailer): Response
     {
@@ -245,14 +250,14 @@ class SolicitudController extends AbstractController
         $mailer->send($email);
         
         $this->addFlash('success', 'Usuario creado con éxito! Se envió un email a ' . $solicitud->getMail() . ' con los datos de acceso');
-                    
+        dd();            
         return $this->redirectToRoute('dashboard');
     }
 
 
-    private function crearUsuario($solicitud, $password) {
+    private function crearUsuario($solicitud, $password ) {
         
-        $data = $this->forward('App\Controller\KeycloakFullApiController::postUsuario', [
+        /*$data = $this->forward('App\Controller\KeycloakFullApiController::postUsuario', [
             'username'  => $solicitud->getPersonaFisica()->getCuitCuil(),
             'email' => $solicitud->getMail(),
             'firstname'  => $solicitud->getPersonaFisica()->getNombres(),
@@ -260,7 +265,17 @@ class SolicitudController extends AbstractController
             'password' => $password,
             'temporary' => 'true',
             'realm' => $this->getParameter('keycloak_extranet_realm')
-        ]); 
+        ]); */
+        
+        
+	$data=$this->keycloak->postUsuario(
+            $solicitud->getPersonaFisica()->getCuitCuil(),
+            $solicitud->getMail(),
+            $solicitud->getPersonaFisica()->getNombres(),
+            $solicitud->getPersonaFisica()->getApellido(),
+            $password,
+            'true',
+            $this->getParameter('keycloak_extranet_realm'));
         
         if ($data->getStatusCode() == 500 ) {
             $this->addFlash('danger', 'Hubo un error, la operación no pudo completarse');

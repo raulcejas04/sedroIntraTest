@@ -59,14 +59,14 @@ function validadores(element, obj, element_err){
             if (!validator.isNumeric(event.key) || element.textLength >= 13) event.preventDefault()
         });
 
-        element.addEventListener('focusout', event => {
-            element.setCustomValidity("");
+        input.addEventListener('focusout', event => {
+            input.setCustomValidity("");
             if(!isValidCUITCUIL(element.value)) {
-                element.setCustomValidity(obj['is_cuit_error']);
-                element_err.innerHTML = obj['is_cuit_error'];
-                element_err.style.color = 'red'; // TODO es provisorio, habría que sacarlo y hacerlo desde CSS
+                input.setCustomValidity("Cuit/Cuil inválido");
+                ("#err_"+input).innerHTML = "Cuit/Cuil inválido";
+                ("#err_"+input).style.color = 'red'; // TODO es provisorio, habría que sacarlo y hacerlo desde CSS
             } else {
-                element_err.innerHTML = '';
+                ("#err_"+input).innerHTML = '';
             }
         });
     }

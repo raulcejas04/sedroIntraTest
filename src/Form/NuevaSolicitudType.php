@@ -39,7 +39,7 @@ class NuevaSolicitudType extends AbstractType
             ->add('mail', RepeatedType::class, [
                 'type' => EmailType::class,
                 'invalid_message' => 'Los emails deben ser iguales',
-                'options' => ['attr' => ['class' => 'form-control']],
+                'options' => ['attr' => ['class' => 'form-control val-email']],
                 'required' => true,
                 'first_options'  => ['label' => 'E-mail'],
                 'second_options' => ['label' => 'Repita E-mail'],
