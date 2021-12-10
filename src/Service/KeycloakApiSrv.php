@@ -290,8 +290,24 @@ class KeycloakApiSrv extends AbstractController {
         ];
         //echo $uri."<br>";
         $res = $this->client->get($uri, $params);
-        $data = json_decode($res->getBody());
-        return new JsonResponse($data[0]);
+        return json_decode($res->getBody());
+    }
+
+    public function getUserByEmailAndRealm($email, $realm) {
+        $token = $this->getTokenAdmin();
+
+        $auth_url = $this->parameterBag->get('keycloak-server-url');
+        $uri = $auth_url . "/admin/realms/{realm}/users";
+        //$realm=$this->getParameter('keycloak-realm');
+
+        $uri = str_replace("{realm}", $realm, $uri);
+        $uri = $uri . "?email=" . $email;
+
+        $params = ['headers' => ['Authorization' => "Bearer " . $token->access_token]
+        ];
+        //echo $uri."<br>";
+        $res = $this->client->get($uri, $params);
+        return json_decode($res->getBody());
     }
 
     public function getUserByIdAndRealm($id, $realm) {

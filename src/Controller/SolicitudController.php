@@ -26,7 +26,9 @@ use Symfony\Component\HttpClient\HttpClient;
 
 class SolicitudController extends AbstractController
 {
-    public function __construct(KeycloakFullApiController $keycloak){
+    private $keycloak;
+    
+    public function __construct(KeycloakApiSrv $keycloak){
     	$this->keycloak = $keycloak;
     }
 
@@ -261,6 +263,11 @@ class SolicitudController extends AbstractController
             $solicitud->setUsuario($usuario[0]);
             $entityManager->persist($solicitud);
         } else {
+
+/*             if(empty($this->keycloak->getUserByUsernameAndRealm($solicitud->getPersonaFisica()->getCuitCuil(),$this->getParameter('keycloak_realm')))){
+
+            } */
+
             $data=$this->keycloak->postUsuario(
                 $solicitud->getPersonaFisica()->getCuitCuil(),
                 $solicitud->getMail(),
