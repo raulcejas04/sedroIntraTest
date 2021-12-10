@@ -25,6 +25,11 @@ class Realm
     private $realm;
 
     /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $idRealmKeycloak;
+
+    /**
      * @ORM\OneToMany(targetEntity=Solicitud::class, mappedBy="realm")
      */
     private $solicitudes;

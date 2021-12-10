@@ -19,7 +19,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Mailer\MailerInterface;
 
-
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\HttpClient\CurlHttpClient;
 use Symfony\Component\HttpClient\NativeHttpClient;
@@ -43,15 +42,22 @@ class SolicitudController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager = $this->getDoctrine()->getManager();
             
-            //Verifica si ya existe una solicitud con el Cuit, Cuil o Mail
+            //Verifica si ya existe una solicitud activa
             if ($this->verificarSolicitud($solicitud) == true){
                 return $this->redirectToRoute('dashboard');
             }
 
-            //verifica persona física preexistente            
-            $personaFisica = $entityManager->getRepository(PersonaFisica::class)->findOneBy(['cuil' => $solicitud->getPersonaFisica()->getCuitCuil()]);
+            //verifica persona física y/o jurídica preexistente            
+            $personaFisica = $entityManager->getRepository(PersonaFisica::class)->findOneBy(['cuitCuil' => $solicitud->getCuil()]);
+            $personaJuridica = $entityManager->getRepository(PersonaJuridica::class)->findOneBy(['cuit' => $solicitud->getCuit()]);
+            
+            if ($personaFisica){
+                $solicitud->setPersonaFisica($personaFisica);
+            }
 
-            $personaJuridica = $entityManager->getRepository(PersonaJuridica::class)->findOneBy(['cuit' => $solicitud->getPersonaJuridica()->getCuit()]);   
+            if($personaJuridica){
+                $solicitud->setPersonaJuridica($personaJuridica);
+            }
             
             $hash = md5(uniqid(rand(), true));
             $solicitud->setHash($hash);
