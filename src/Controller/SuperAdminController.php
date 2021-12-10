@@ -29,6 +29,12 @@ use App\Repository\RealmRepository;
 use App\Entity\Role;
 use App\Form\RoleType;
 use App\Repository\RoleRepository;
+use App\Entity\Nacionalidad;
+use App\Form\NacionalidadType;
+use App\Repository\NacionalidadRepository;
+use App\Entity\EstadoCivil;
+use App\Form\EstadoCivilType;
+use App\Repository\EstadoCivilRepository;
 
 #[Route('/dashboard/super-admines')]
 class SuperAdminController extends AbstractController
@@ -559,6 +565,144 @@ class SuperAdminController extends AbstractController
         }
 
         return $this->redirectToRoute('sexo_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    /*****************************************************************************************
+     * NACIONALIDAD
+     *****************************************************************************************/
+    #[Route('/tipos/nacionalidad/', name: 'nacionalidad_index', methods: ['GET'])]
+    public function indexNacionalidad(NacionalidadRepository $nacionalidadRepository): Response
+    {
+        return $this->render('nacionalidad/index.html.twig', [
+            'nacionalidads' => $nacionalidadRepository->findAll(),
+        ]);
+    }
+
+    #[Route('/tipos/nacionalidad/new', name: 'nacionalidad_new', methods: ['GET','POST'])]
+    public function newNacionalidad(Request $request): Response
+    {
+        $nacionalidad = new Nacionalidad();
+        $form = $this->createForm(NacionalidadType::class, $nacionalidad);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->persist($nacionalidad);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('nacionalidad_index', [], Response::HTTP_SEE_OTHER);
+        }
+
+        return $this->renderForm('nacionalidad/new.html.twig', [
+            'nacionalidad' => $nacionalidad,
+            'form' => $form,
+        ]);
+    }
+
+    #[Route('/tipos/nacionalidad/{id}', name: 'nacionalidad_show', methods: ['GET'])]
+    public function showNacionalidad(Nacionalidad $nacionalidad): Response
+    {
+        return $this->render('nacionalidad/show.html.twig', [
+            'nacionalidad' => $nacionalidad,
+        ]);
+    }
+
+    #[Route('/tipos/nacionalidad/{id}/edit', name: 'nacionalidad_edit', methods: ['GET','POST'])]
+    public function editNacionalidad(Request $request, Nacionalidad $nacionalidad): Response
+    {
+        $form = $this->createForm(NacionalidadType::class, $nacionalidad);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->getDoctrine()->getManager()->flush();
+
+            return $this->redirectToRoute('nacionalidad_index', [], Response::HTTP_SEE_OTHER);
+        }
+
+        return $this->renderForm('nacionalidad/edit.html.twig', [
+            'nacionalidad' => $nacionalidad,
+            'form' => $form,
+        ]);
+    }
+
+    #[Route('/tipos/nacionalidad/{id}', name: 'nacionalidad_delete', methods: ['POST'])]
+    public function deleteNacionalidad(Request $request, Nacionalidad $nacionalidad): Response
+    {
+        if ($this->isCsrfTokenValid('delete'.$nacionalidad->getId(), $request->request->get('_token'))) {
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->remove($nacionalidad);
+            $entityManager->flush();
+        }
+
+        return $this->redirectToRoute('nacionalidad_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    /*****************************************************************************************
+     * Estado CIVIL
+     *****************************************************************************************/
+    #[Route('/tipos/estado-civil/', name: 'estado_civil_index', methods: ['GET'])]
+    public function indexEstadoCivil(EstadoCivilRepository $estadoCivilRepository): Response
+    {
+        return $this->render('estado_civil/index.html.twig', [
+            'estado_civils' => $estadoCivilRepository->findAll(),
+        ]);
+    }
+
+    #[Route('/tipos/estado-civil/new', name: 'estado_civil_new', methods: ['GET', 'POST'])]
+    public function newEstadoCivil(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $estadoCivil = new EstadoCivil();
+        $form = $this->createForm(EstadoCivilType::class, $estadoCivil);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->persist($estadoCivil);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('estado_civil_index', [], Response::HTTP_SEE_OTHER);
+        }
+
+        return $this->renderForm('estado_civil/new.html.twig', [
+            'estado_civil' => $estadoCivil,
+            'form' => $form,
+        ]);
+    }
+
+    #[Route('/tipos/estado-civil/{id}', name: 'estado_civil_show', methods: ['GET'])]
+    public function showEstadoCivil(EstadoCivil $estadoCivil): Response
+    {
+        return $this->render('estado_civil/show.html.twig', [
+            'estado_civil' => $estadoCivil,
+        ]);
+    }
+
+    #[Route('/{id}/edit', name: 'estado_civil_edit', methods: ['GET', 'POST'])]
+    public function editEstadoCivil(Request $request, EstadoCivil $estadoCivil, EntityManagerInterface $entityManager): Response
+    {
+        $form = $this->createForm(EstadoCivilType::class, $estadoCivil);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->flush();
+
+            return $this->redirectToRoute('estado_civil_index', [], Response::HTTP_SEE_OTHER);
+        }
+
+        return $this->renderForm('estado_civil/edit.html.twig', [
+            'estado_civil' => $estadoCivil,
+            'form' => $form,
+        ]);
+    }
+
+    #[Route('/tipos/estado-civil/{id}', name: 'estado_civil_delete', methods: ['POST'])]
+    public function deleteEstadoCivil(Request $request, EstadoCivil $estadoCivil, EntityManagerInterface $entityManager): Response
+    {
+        if ($this->isCsrfTokenValid('delete'.$estadoCivil->getId(), $request->request->get('_token'))) {
+            $entityManager->remove($estadoCivil);
+            $entityManager->flush();
+        }
+
+        return $this->redirectToRoute('estado_civil_index', [], Response::HTTP_SEE_OTHER);
     }
 
 }

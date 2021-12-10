@@ -15,6 +15,8 @@
         Keycloak
       </h3>
 
+      <div class="row m-3">
+
       <div class="col-sm-4">
         <div class="card">
           <div class="card-body">
@@ -62,6 +64,10 @@
           </div>
         </div>
       </div>
+      </div>
+
+
+      <div class="row row m-3">
 
       <div class="col-sm-4">
         <div class="card">
@@ -78,6 +84,40 @@
           </div>
         </div>
       </div>
+      <div class="col-sm-4">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">
+              Administradores
+            </h5>
+            <p class="card-text">
+              Agrega un nuevo administrador de Intranet
+            </p>
+            <a href="#" class="btn btn-primary">
+              Nuevo administrador
+            </a>
+          </div>
+        </div>
+      </div>
+    
+
+    <div class="col-sm-4">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">
+              Super Administradores
+            </h5>
+            <p class="card-text">
+              Agrega un nuevo Super Administrador
+            </p>
+            <a href="#" class="btn btn-primary">
+              Nuevo Super Administrador
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    
     </div>
     <hr />
 
@@ -85,6 +125,7 @@
       <h3>
         Tipos de...
       </h3>
+      <div class="row m-3">
       <div class="col-sm-4">
         <div class="card">
           <div class="card-body">
@@ -135,6 +176,8 @@
           </div>
         </div>
       </div>
+      </div>
+      <div class="row m-3">
       <div class="col-sm-4">
         <div class="card">
           <div class="card-body">
@@ -152,6 +195,43 @@
           </div>
         </div>
       </div>
+
+      <div class="col-sm-4">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">
+              Nacionalidad
+            </h5>
+            <p class="card-text">
+              Países del mundo.
+            </p>
+            <a href="{{ path('nacionalidad_index') }}"
+              class="btn btn-primary">
+              Nacionalidad
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-4">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">
+              Estado Civil
+            </h5>
+            <p class="card-text">
+              Estados Civiles posibles que puede tener una persona física.
+            </p>
+            <a href="{{ path('estado_civil_index') }}"
+              class="btn btn-primary">
+              Estado Civil
+            </a>
+          </div>
+        </div>
+      </div>
+
+
+
+    </div>
     </div>
   </div>
 {% endblock %}

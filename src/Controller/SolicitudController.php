@@ -19,6 +19,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Mailer\MailerInterface;
 
+
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\HttpClient\CurlHttpClient;
 use Symfony\Component\HttpClient\NativeHttpClient;
@@ -47,9 +48,9 @@ class SolicitudController extends AbstractController
                 return $this->redirectToRoute('dashboard');
             }
 
-            //verifica persona física preexistente
-            //TODO: Seguir por acá 9/12/21
+            //verifica persona física preexistente            
             $personaFisica = $entityManager->getRepository(PersonaFisica::class)->findOneBy(['cuil' => $solicitud->getPersonaFisica()->getCuitCuil()]);
+
             $personaJuridica = $entityManager->getRepository(PersonaJuridica::class)->findOneBy(['cuit' => $solicitud->getPersonaJuridica()->getCuit()]);   
             
             $hash = md5(uniqid(rand(), true));
