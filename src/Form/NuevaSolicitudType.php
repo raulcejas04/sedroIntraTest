@@ -9,6 +9,8 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use App\Entity\TipoDispositivo;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 
 class NuevaSolicitudType extends AbstractType
 {
@@ -31,6 +33,15 @@ class NuevaSolicitudType extends AbstractType
             ])
             ->add('nicname', TextType::class, [
                 'label' => "Nombre corto de dispositivo",
+                'required' => true,
+                'attr' => [
+                    'class' => "form-control"
+                ]
+            ])
+            ->add('tipoDispositivo', EntityType::class, [
+                'class' => TipoDispositivo::class,
+                'mapped' => false,
+                'label' => "Tipo de dispositivo",
                 'required' => true,
                 'attr' => [
                     'class' => "form-control"
