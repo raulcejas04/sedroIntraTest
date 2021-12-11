@@ -279,6 +279,36 @@ class SuperAdminController extends AbstractController
         return $this->redirectToRoute('role_index', [], Response::HTTP_SEE_OTHER);
     }
 
+    /*****************************************************************************************
+     * Super Administradores
+     *****************************************************************************************/
+    #[Route('/nuevo-super-admin/', name: 'nuevo_super_admin')]
+    public function nuevoSuperAdmin(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $user = new User();
+        $form = $this->createForm(UserType::class, $user);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+               $entityManager->persist($user);
+               $entityManager->flush();
+
+            return $this->redirectToRoute('nuevo_super_admin', [], Response::HTTP_SEE_OTHER);
+            }
+        return $this->renderForm('role/new.html.twig', [
+            'role' => $role,
+            'form' => $form,
+           ]);
+    }
+
+    #[Route('/listar-super-administradores/', name: 'listar_super_administradores')]
+    public function listarSuperAdmin(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $a = $this->keycloak->viewKeycloakGroupInRealm($this->getParameter('keycloak_realm'), 'Super Administradores');
+        $groupId = $a->getId();
+        $superAdmines = $this->keycloak->getGroupMembers($groupId);
+        
+    }
+
     
 
 

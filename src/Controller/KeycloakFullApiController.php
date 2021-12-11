@@ -687,8 +687,7 @@ class KeycloakFullApiController extends AbstractController
         $token = $this->getTokenAdmin();
 
         $base_uri_keycloak = $this->getParameter('keycloak-server-url');
-        $uri =
-            $base_uri_keycloak . '/admin/realms/{realm}/groups?search=' . $name;
+        $uri = $base_uri_keycloak . '/admin/realms/{realm}/groups?search=' . $name;
 
         $uri = str_replace('{realm}', $realm, $uri);
 
@@ -766,7 +765,7 @@ class KeycloakFullApiController extends AbstractController
     }
 
     /**
-     * /admin/realms/heroes/groups/{id}/members 
+     * /admin/realms/{realm}/groups/{id}/members 
      */ 
     public function getGroupMembers($groupId)
     {
@@ -795,4 +794,5 @@ class KeycloakFullApiController extends AbstractController
         $data = json_decode($res->getStatusCode());
         return new JsonResponse($data);
     }
+
 }
