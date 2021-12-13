@@ -74,42 +74,17 @@ class KeycloakAuthenticator extends SocialAuthenticator
         //dd($keycloakUser);
         //dd($keycloakUser->toArray()['preferred_username']);
         //existing user ?
-        $existingUser = $this
+        $user = $this
             ->em
             ->getRepository(User::class)
             ->findOneBy(['KeycloakId' => $keycloakUser->getId()]);
-
-        if ($existingUser) {
+        if ($user) {
             if (array_key_exists("roles", $data)) {
-                $existingUser->setRoles($data["roles"]);
+                $user->setRoles($data["roles"]);
             }
         } else {
-            // if user exist but never connected with keycloak
-            $email = $keycloakUser->getEmail();
-            /** @var User $userInDatabase */
-            $userInDatabase = $this->em->getRepository(User::class)
-                ->findOneBy(['email' => $email]);
-            if ($userInDatabase) {
-                $userInDatabase->setKeycloakId($keycloakUser->getId());
-                $this->em->persist($userInDatabase);
-                $this->em->flush();
-                return $userInDatabase;
-            }
-            //user not exist in database
-            $newUser = new User();
-            $newUser->setKeycloakId($keycloakUser->getId());
-            $newUser->setEmail($keycloakUser->getEmail());
-            //$user->setUsername($keycloakUser->getPreferredUsername());
-            //TODO: Ver esto! ROLE_ADMIN--- Podría ser preguntando de cual Realm proviene el usuario que nos de el ROLE_*??
-            if (array_key_exists("roles", $data)) {
-                $newUser->setRoles($data["roles"]);
-            }
-            $newUser->setPassword('');
-            $this->em->persist($newUser);
-            $this->em->flush();
+            return null;
         }
-
-        $user = $existingUser ? $existingUser : $newUser;
 
         /** GRUPO Y ROLES * */
         if (array_key_exists("groups", $data)) {
@@ -174,9 +149,9 @@ class KeycloakAuthenticator extends SocialAuthenticator
 
     public function onAuthenticationFailure(Request $request, \Symfony\Component\Security\Core\Exception\AuthenticationException $exception)
     {
-        $message = strtr($exception->getMessageKey(), $exception->getMessageData());
-
-        return new Response($message, Response::HTTP_FORBIDDEN);
+        return new RedirectResponse(
+            $this->router->generate('account_failure')
+        );
     }
 
     public function onAuthenticationSuccess(Request $request, \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token, string $providerKey)
