@@ -32,10 +32,8 @@
                     {% for solicitud in solicitudes %}
                         <tr>
                             <td class="text-center  align-middle">
-                            {% if solicitud.usada %}
                                 <a href="{{ path('verSolicitud', {'hash': solicitud.hash}) }}">
                                     <i class="align-middle" data-feather="eye"></i> ver</a>
-                                    {% endif %}
                             </td>
 
                             <td class="text-left">
@@ -93,11 +91,7 @@
                                 {% if solicitud.correccion %}
                                     <span class="badge rounded-pill bg-warning">Rechazado</span>
                                 {% endif %}
-
-                                {% if solicitud.fechaAlta == null and solicitud.correccion == null %}
-                                    <span class="badge rounded-pill bg-danger">NECESITA ATENCIÓN!</span>
-                                {% endif %}
-
+                                
                                 {% if solicitud.fechaUso == null %}
                                     <span class="badge rounded-pill bg-info">Esperando datos</span>
                                 {% endif %}
