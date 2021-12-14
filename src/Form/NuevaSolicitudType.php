@@ -9,6 +9,8 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 use App\Entity\TipoDispositivo;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 
@@ -54,7 +56,11 @@ class NuevaSolicitudType extends AbstractType
                 'required' => true,
                 'first_options'  => ['label' => 'E-mail'],
                 'second_options' => ['label' => 'Repita E-mail'],
-            ]);
+            ])
+            ->addEventListener(
+                FormEvents::POST_SUBMIT,
+                [$this, 'onPostSubmit']
+            );
         ;
     }
 
@@ -63,5 +69,15 @@ class NuevaSolicitudType extends AbstractType
         $resolver->setDefaults([
             'data_class' => Solicitud::class,
         ]);
+    }
+    
+    public function onPostSubmit(FormEvent $event): void
+    {
+        $sol = $event->getData();
+        $form = $event->getForm();
+	$sol->setCuit(str_replace('-','',$sol->getCuit()));
+	$sol->setCuil(str_replace('-','',$sol->getCuil()));
+	
+	$event->setData($sol);
     }
 }

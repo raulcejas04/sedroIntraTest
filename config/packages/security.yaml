@@ -44,11 +44,21 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
+        - { path: ^/oauth/login, roles: IS_AUTHENTICATED_ANONYMOUSLY } //el login entra como anonimo porque sino se queda en loop        
         - { path: ^/account/failure, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/dashboard, roles: ROLE_USER }
+        - { path: ^/, roles: ROLE_USER }
+        #- { path: ^/dashboard, roles: ROLE_USER }
         - { path: ^/api/add/user, roles: IS_AUTHENTICATED_ANONYMOUSLY,ips: [127.0.0.1],port: 9005 }
         - { path: ^/api/add/group/user, roles: IS_AUTHENTICATED_ANONYMOUSLY,ips: [127.0.0.1],port: 9005 }
         - { path: ^/api/get/group, roles: IS_AUTHENTICATED_ANONYMOUSLY,ips: [127.0.0.1],port: 9005 }
         - { path: ^/api/get/role, roles: IS_AUTHENTICATED_ANONYMOUSLY,ips: [127.0.0.1],port: 9005 }
+        # - { path: ^/admin, roles: ROLE_ADMIN }
+        # - { path: ^/profile, roles: ROLE_USER }
+        
+        #- { path: ^/dashboard, roles: ROLE_USER }
+        #- { path: ^/api/add/user, roles: IS_AUTHENTICATED_ANONYMOUSLY,ips: [127.0.0.1],port: 9005 }
+        #- { path: ^/api/add/group/user, roles: IS_AUTHENTICATED_ANONYMOUSLY,ips: [127.0.0.1],port: 9005 }
+        #- { path: ^/api/get/group, roles: IS_AUTHENTICATED_ANONYMOUSLY,ips: [127.0.0.1],port: 9005 }
+        #- { path: ^/api/get/role, roles: IS_AUTHENTICATED_ANONYMOUSLY,ips: [127.0.0.1],port: 9005 }
         # - { path: ^/admin, roles: ROLE_ADMIN }
         # - { path: ^/profile, roles: ROLE_USER }

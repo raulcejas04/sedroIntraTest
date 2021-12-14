@@ -9,6 +9,8 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 
 class PersonaFisicaCollectionType extends AbstractType
 {
@@ -74,7 +76,7 @@ class PersonaFisicaCollectionType extends AbstractType
                 'label' => "Número CUIT/CUIL",                
                 'required' => true,
                 'attr' => [
-                    'class' => 'form-control',
+                    'class' => 'form-control val-cuit',
                     'readonly' => true,
                 ]
             ])
@@ -93,6 +95,10 @@ class PersonaFisicaCollectionType extends AbstractType
                     'class' => 'form-control'
                 ]
             ])
+            ->addEventListener(
+                FormEvents::POST_SUBMIT,
+                [$this, 'onPostSubmit']
+            )
             
         ;
     }
@@ -102,5 +108,14 @@ class PersonaFisicaCollectionType extends AbstractType
         $resolver->setDefaults([
             'data_class' => PersonaFisica::class,
         ]);
+    }
+    
+    public function onPostSubmit(FormEvent $event): void
+    {
+        $per = $event->getData();
+        $form = $event->getForm();
+	$per->setcuitCuil(str_replace('-','',$sol->getcuitCuil()));
+	
+	$event->setData($per);
     }
 }

@@ -23,13 +23,15 @@ use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\HttpClient\CurlHttpClient;
 use Symfony\Component\HttpClient\NativeHttpClient;
 use Symfony\Component\HttpClient\HttpClient;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class SolicitudController extends AbstractController
 {
     private $keycloak;
     
-    public function __construct(KeycloakApiSrv $keycloak){
+    public function __construct(KeycloakApiSrv $keycloak, UrlGeneratorInterface $router){
     	$this->keycloak = $keycloak;
+        $this->router = $router;
     }
 
 
@@ -153,9 +155,8 @@ class SolicitudController extends AbstractController
                     
             $nuevoUsuarioKeycloak = $this->crearUsuarioKeycloak($solicitud, $password);
             $nuevoUsuarioDb = $this->crearUsuarioDb($solicitud, $nuevoUsuarioKeycloak[0]);
-            
-            //envío de email
-            $url = $this->getParameter('extranet_url');
+
+            //Envia mail con los datos de acceso
             $email = (new TemplatedEmail())            
                 ->from($this->getParameter('direccion_email_salida'))
                 ->to($solicitud->getMail())
@@ -165,7 +166,7 @@ class SolicitudController extends AbstractController
                     'nicname' => $solicitud->getNicname(),
                     'user' => $solicitud->getPersonaFisica()->getCuitCuil(),
                     'password' => $password,
-                    'url' => $url
+                    'url' => $this->getParameter('extranet_url').'/dashboard'
                 ])
             ;
             $solicitud->setUsuario($nuevoUsuarioDb);
