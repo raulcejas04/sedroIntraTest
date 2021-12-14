@@ -1,0 +1,1 @@
+CREATE INDEX zonas_idxnivpad ON public.zonas USING btree (nivel, padre);

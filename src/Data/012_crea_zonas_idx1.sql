@@ -1,0 +1,1 @@
+CREATE INDEX zonas_idxidsim ON public.zonas USING btree (idsim);

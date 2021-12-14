@@ -1,0 +1,1 @@
+CREATE INDEX zonas_idzonades1 ON public.zonas USING btree (descrip);
