@@ -246,8 +246,8 @@ class KeycloakApiSrv extends AbstractController {
 
         $res = $this->client->get($uri, $params);
         $data = json_decode($res->getBody());
-
-        return new JsonResponse($data);
+        return $data;
+        //return new JsonResponse($data);
     }
 
     /**
@@ -652,6 +652,40 @@ class KeycloakApiSrv extends AbstractController {
 
         $data = json_decode($res->getStatusCode());
         return new JsonResponse($data);
+    }
+
+
+     /**
+     * GET /admin/realms
+     */
+    public function getRealms() {
+        $token = $this->getTokenAdmin();
+        $auth_url = $this->parameterBag->get('keycloak-server-url');
+        $uri = $auth_url . "/admin/realms";
+        $params = ['headers' => ['Authorization' => "Bearer " . $token->access_token]];
+
+        $res = $this->client->get($uri, $params);
+        $data = json_decode($res->getBody());
+
+        return $data;
+    }
+
+     /**
+     * GET /admin/realms/{realm}/groups 
+     */
+    public function getGroups($realm ,$briefRepresentation = false) {
+        $token = $this->getTokenAdmin();
+        $auth_url = $this->parameterBag->get('keycloak-server-url');
+        $uri = $auth_url . "/admin/realms/{realm}/groups";
+      //  $realm = $this->parameterBag->get('keycloak_realm');
+        //briefRepresentation sirve para mostrar los atributos y demás valores del grupo
+        $uri = str_replace("{realm}", $realm, $uri) . "?briefRepresentation=" . ($briefRepresentation ? "true" : "false");
+        $params = ['headers' => ['Authorization' => "Bearer " . $token->access_token]];
+
+        $res = $this->client->get($uri, $params);
+        $grupos = json_decode($res->getBody());
+
+        return $grupos;
     }
 
 }

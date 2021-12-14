@@ -6,14 +6,6 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Doctrine\ORM\EntityManagerInterface;
-use App\Entity\Menu;
-use App\Entity\Menuitem;
-use App\Entity\Role;
-use App\Entity\Rolemenu;
-use App\Entity\Nacionalidad;
-use App\Entity\EstadoCivil;
-use App\Entity\Sexo;
-
 class DatosDeInicioCommand extends Command {
 
     // the name of the command (the part after "bin/console")
