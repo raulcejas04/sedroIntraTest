@@ -166,7 +166,7 @@ class SolicitudController extends AbstractController
                     'nicname' => $solicitud->getNicname(),
                     'user' => $solicitud->getPersonaFisica()->getCuitCuil(),
                     'password' => $password,
-                    'url' => $this->getParameter('extranet_url').'/dashboard'
+                    'url' => $this->router->generate('dashboard', [], urlGeneratorInterface::ABSOLUTE_URL)
                 ])
             ;
             $solicitud->setUsuario($nuevoUsuarioDb);
