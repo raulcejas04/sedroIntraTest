@@ -46,7 +46,7 @@ class Realm
     private $fechaEliminacion;
 
     /**
-     * @ORM\OneToMany(targetEntity=Grupo::class, mappedBy="realm")
+     * @ORM\OneToMany(targetEntity=Grupo::class, mappedBy="realm",cascade={"persist"})
      */
     private $grupos;
 
