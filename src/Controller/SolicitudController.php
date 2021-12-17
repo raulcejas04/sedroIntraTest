@@ -13,6 +13,7 @@ use App\Form\RepresentacionType;
 use App\Service\KeycloakApiSrv;
 use App\Controller\KeycloakFullApiController;
 use App\Entity\User;
+use App\Form\ReenviarEmailType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
@@ -23,6 +24,7 @@ use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\HttpClient\CurlHttpClient;
 use Symfony\Component\HttpClient\NativeHttpClient;
 use Symfony\Component\HttpClient\HttpClient;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class SolicitudController extends AbstractController
@@ -115,7 +117,6 @@ class SolicitudController extends AbstractController
     {
         $entityManager = $this->getDoctrine()->getManager();
         $solicitud = $entityManager->getRepository('App\Entity\Solicitud')->findOneByHash($hash);
-
         $response = $this->renderView('solicitud\verSolicitud.html.twig', [
             'solicitud' => $solicitud
         ]);
@@ -181,31 +182,55 @@ class SolicitudController extends AbstractController
     }
 
     #[Route('/dashboard/solicitud/{hash}/reenviar-email', name: 'solicitud_reenviarEmail')]
-    public function reenviarCorreo($hash,MailerInterface $mailer): Response
+    public function reenviarCorreo(Request $request, $hash, MailerInterface $mailer): Response
     {
         $entityManager = $this->getDoctrine()->getManager();
         $solicitud = $entityManager->getRepository('App\Entity\Solicitud')->findOneByHash($hash);
 
-        if ($solicitud->getFechaUso()) {
-            $this->addFlash('danger', 'Error, los datos de la solicitud ya han sido completados.');
-            return $this->redirectToRoute('dashboard');
+        if(!$solicitud) {
+            return new JsonResponse([
+                "status" => "error",
+                "message" => "La solicitud no se encuentra o no existe."
+            ]);
         }
 
-        $url = $this->getParameter('extranet_url') . '/solicitud/' . $solicitud->getHash() . '/completar-datos';
-        $email = (new TemplatedEmail())
-            ->from($this->getParameter('direccion_email_salida'))
-            ->to($solicitud->getMail())
-            ->subject('Invitación para dar de alta usuario y dispositivo nuevo')
-            ->htmlTemplate('emails/invitacionPasoUno.html.twig')
-            ->context([
-                'nicname' => $solicitud->getNicname(),
-                'url' => $url
+        if ($solicitud->getFechaUso()) {
+            return new JsonResponse([
+                "status" => "error",
+                "message" => "Los datos de la solicitud ya han sido completados."
             ]);
+        }
 
-        $mailer->send($email);
+        $form = $this->createForm(ReenviarEmailType::class, $solicitud);
+        $form->handleRequest($request);
 
-        $this->addFlash('success', 'Email reenviado con éxito. Se ha enviado un email a ' . $solicitud->getMail() . ' con instrucciones para completar el registro.');
-        return $this->redirectToRoute('dashboard');
+        if ($form->isSubmitted() && $form->isValid()) {
+            $url = $this->getParameter('extranet_url') . '/solicitud/' . $solicitud->getHash() . '/completar-datos';
+            $email = (new TemplatedEmail())
+                ->from($this->getParameter('direccion_email_salida'))
+                ->to($solicitud->getMail())
+                ->subject('Invitación para dar de alta usuario y dispositivo nuevo')
+                ->htmlTemplate('emails/invitacionPasoUno.html.twig')
+                ->context([
+                    'nicname' => $solicitud->getNicname(),
+                    'url' => $url
+                ]);
+
+            $mailer->send($email);
+
+            return new JsonResponse([
+                "status" => "success",
+                "message" => "Email reenviado con éxito. Se ha enviado un email a " . $solicitud->getMail() . " con instrucciones para completar el registro."
+            ]);
+        }
+
+        return new JsonResponse([
+            "status"=>"render",
+            "html" => $this->renderView('modales/reenviarEmailModal.html.twig',[
+                'solicitud'=> $solicitud,
+                'formReenviarCorreo'=>$form->createView()
+            ])
+        ]);
     }
 
     public function verificar($solicitud, $password, $mailer)
