@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use GuzzleHttp;
+use PhpParser\Node\Stmt\TryCatch;
 
 /**
  * Sumario controller.
@@ -437,7 +438,7 @@ class KeycloakFullApiController extends AbstractController
 
         $auth_url = $this->getParameter('keycloak-server-url');
         $uri = $auth_url . '/admin/realms/{realm}/groups';
-        $realm = $this->getParameter('keycloak-realm');
+        $realm = 'Intranet';
         $uri = str_replace('{realm}', $realm, $uri);
 
         $params = [
@@ -709,7 +710,6 @@ class KeycloakFullApiController extends AbstractController
     public function viewKeycloakGroupInRealm($realm, $name)
     {
         $token = $this->getTokenAdmin();
-
         $base_uri_keycloak = $this->getParameter('keycloak-server-url');
         $uri = $base_uri_keycloak . '/admin/realms/{realm}/groups?search=' . $name;
 
@@ -720,13 +720,18 @@ class KeycloakFullApiController extends AbstractController
                 'Content-Type' => 'application/json',
                 'Authorization' => 'Bearer ' . $token->access_token,
             ],
-            'debug' => false,
-            'json' => [
-                'name' => $name,
-            ],
+            'debug' => false,    
         ];
 
-        $res = $this->client->post($uri, $params);
+        try {
+            $res = $this->client->get($uri, $params);
+        } catch (\Exception $e) {
+
+            return new JsonResponse([
+                'content' => 'adad'
+            ]);
+            
+        }        
 
         $data = json_decode($res->getStatusCode());
         return new JsonResponse($data);
@@ -761,6 +766,8 @@ class KeycloakFullApiController extends AbstractController
         $data = json_decode($res->getStatusCode());
         return new JsonResponse($data);
     }
+
+    
 
     public function addUserToGroup($realm, $userId, $groupId)
     {
@@ -814,6 +821,38 @@ class KeycloakFullApiController extends AbstractController
             'debug' => true,
         ];
         $res = $this->client->put($uri, $params);
+
+        $data = json_decode($res->getStatusCode());
+        return new JsonResponse($data);
+    }
+
+    /**
+     * /admin/realms/{realm}
+     */ 
+    public function getRealmByName($realm)
+    {
+        $token = $this->getTokenAdmin();
+
+        $base_uri_keycloak = $this->getParameter('keycloak-server-url');
+        $uri =
+            $base_uri_keycloak .
+            '/admin/realms/{realm}';
+        $uri = str_replace('{realm}', $realm, $uri);                
+        $params = [
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'Authorization' => 'Bearer ' . $token->access_token,
+            ],
+            'debug' => true,
+        ];
+        try {
+            $res = $this->client->get($uri, $params);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'content' => 404
+            ]);
+        }
+        
 
         $data = json_decode($res->getStatusCode());
         return new JsonResponse($data);

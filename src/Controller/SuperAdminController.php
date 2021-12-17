@@ -69,7 +69,34 @@ class SuperAdminController extends AbstractController
 
     /******************************************************************************************
      * REALMS
-     ******************************************************************************************/ 
+     ******************************************************************************************/
+
+    #[Route('/realm-test', name: 'realm_index_test', methods: ['GET'])]
+    public function indexRealmTest(RealmRepository $realmRepository): Response
+    {
+        $grupoCK = $this->keycloak->getGroup('Administradores');
+        //$groups = $this->ks->getGroups('Intranet');
+        //dd($grupoCK);
+        $content = (json_decode($grupoCK->getContent()));
+        if ($content == 200 || $content == "200") {
+            $grupoCK = true;
+        } else {
+            $grupoCK = false;
+        }
+
+        
+        $realm = $this->keycloak->getRealmByName('asdasdddasdasd');
+        $content = (json_decode($realm->getContent()))->content;
+        if ($content == 200 || $content == "200") {
+            $a = true;
+        } else {
+            $a = false;
+        }
+        return $this->renderView('realm/index.html.twig', [
+            'realms' => $realm
+        ]);
+    }
+
     #[Route('/realm/', name: 'realm_index', methods: ['GET'])]
     public function indexRealm(RealmRepository $realmRepository): Response
     {
@@ -289,8 +316,8 @@ class SuperAdminController extends AbstractController
         $form = $this->createForm(UserType::class, $user);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-               $entityManager->persist($user);
-               $entityManager->flush();
+                $entityManager->persist($user);
+                $entityManager->flush();
 
             return $this->redirectToRoute('nuevo_super_admin', [], Response::HTTP_SEE_OTHER);
             }
