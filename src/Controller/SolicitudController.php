@@ -116,9 +116,18 @@ class SolicitudController extends AbstractController
     public function verSolicitud($hash): Response
     {
         $entityManager = $this->getDoctrine()->getManager();
-        $solicitud = $entityManager->getRepository('App\Entity\Solicitud')->findOneByHash($hash);
+        $solicitud = $entityManager->getRepository('App\Entity\Solicitud')->findOneBy([
+            "hash"=>$hash,
+            "fechaEliminacion"=>null
+        ]);
+
+        if(!$solicitud){
+            $this->addFlash('danger','La solicitud no existe.');
+            return $this->redirectToRoute('solicitudes');
+        }
+
         $response = $this->renderView('solicitud\verSolicitud.html.twig', [
-            'solicitud' => $solicitud
+            'solicitud' => $solicitud,
         ]);
         return new Response($response);
     }
@@ -187,17 +196,19 @@ class SolicitudController extends AbstractController
         $entityManager = $this->getDoctrine()->getManager();
         $solicitud = $entityManager->getRepository('App\Entity\Solicitud')->findOneByHash($hash);
 
-        if(!$solicitud) {
+        if (!$solicitud) {
+            $this->addFlash('danger','La solicitud no se encuentra o no existe');           
             return new JsonResponse([
                 "status" => "error",
-                "message" => "La solicitud no se encuentra o no existe."
+                "html" => $this->renderView('modales/flashAlertsModal.html.twig')
             ]);
         }
 
         if ($solicitud->getFechaUso()) {
+            $this->addFlash('danger','Los datos de la solicitud ya han sido completados.');           
             return new JsonResponse([
                 "status" => "error",
-                "message" => "Los datos de la solicitud ya han sido completados."
+                "html" => $this->renderView('modales/flashAlertsModal.html.twig')
             ]);
         }
 
@@ -225,7 +236,7 @@ class SolicitudController extends AbstractController
         }
 
         return new JsonResponse([
-            "status"=>"render",
+            "status"=>"success",
             "html" => $this->renderView('modales/reenviarEmailModal.html.twig',[
                 'solicitud'=> $solicitud,
                 'formReenviarCorreo'=>$form->createView()
