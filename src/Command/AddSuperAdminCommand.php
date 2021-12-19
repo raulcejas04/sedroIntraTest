@@ -7,6 +7,8 @@ use App\Service\KeycloakApiSrv;
 use App\Controller\KeycloakFullApiController;
 use App\Entity\Realm;
 use App\Entity\Grupo;
+use App\Entity\RoleGrupo;
+use App\Entity\Role;
 use App\Entity\PersonaFisica;
 use App\Entity\User;
 use App\Entity\UserGrupo;
@@ -48,51 +50,43 @@ class AddSuperAdminCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $output->writeln([
-            'Creando datos de inicio',
-            '=======================',
-            '',
-        ]);
-        sleep(2);
-        $output->writeln([
-            //TODO: Meter Realms, grupos y roles tanto en la DB como en KC. Luego los datos de inicio 
-            //      como nacionalidad, tipoDocumento, TipoCuitCuil, Sexo, etc.            
-            'no está programado',
-            '==================',
-            '',
-        ]);
-        sleep(1);
+        
+        //Datos de inicio. MUY IMPORTANTES!!!
+        $realm = 'Intranet';
+        $grupo = 'SuperAdministradores';
+        $roleCode = 'ROLE_SUPER_ADMIN';
+        $roleName = 'SuperAdministrador';
 
-        //paso 1, verificar que no exista el realm en Keycloak ni en la DB
-        $escenarioRealm = $this->verificarRealm('Intranet');
-        if ($escenarioRealm['realmDB'] == true && $escenarioRealm['realmCK'] == true) {
+        //paso 1, Verificar el realm en KC y en la DB
+        $escenarioRealm = $this->verificarRealm($realm);
+        if ($escenarioRealm['realmDB'] == true && $escenarioRealm['realmKC'] == true) {
             $output->writeln([                
                 'Existe el reaml en la DB y en KC... continuando',
                 '',
             ]);
-            $realmDb = $this->em->getRepository(Realm::class)->findOneBy(['nombre' => 'Intranet']);
-            $reamlCK = $this->kc->getRealmByName('Intranet');
+            $realmDb = $this->em->getRepository(Realm::class)->findOneBy(['nombre' => $realm]);
+            $reamlCK = $this->kc->getRealmByName($realm);
         }
 
-        if ($escenarioRealm['realmDB'] == true && $escenarioRealm['realmCK'] == false) {
+        if ($escenarioRealm['realmDB'] == true && $escenarioRealm['realmKC'] == false) {
             $output->writeln([                
                 'Existe el reaml en la DB y no en KC... creando realm en KC',
                 '',
             ]);
-            $realmDb = $this->em->getRepository(Realm::class)->findOneBy(['nombre' => 'Intranet']);
+            $realmDb = $this->em->getRepository(Realm::class)->findOneBy(['nombre' => $realm]);
             $reamlCK = $this->crearRealmKC();
         }
 
-        if ($escenarioRealm['realmDB'] == false && $escenarioRealm['realmCK'] == true) {
+        if ($escenarioRealm['realmDB'] == false && $escenarioRealm['realmKC'] == true) {
             $output->writeln([                
                 'Existe el reaml en KC y no en la DB... creando realm en la DB',
                 '',
             ]);
             $reamlDb = $this->crearRealmDB();
-            $reamlCK = $this->kc->getRealmByName('Intranet');
+            $reamlCK = $this->kc->getRealmByName($realm);
         }
 
-        if ($escenarioRealm['realmDB'] == false && $escenarioRealm['realmCK'] == false){
+        if ($escenarioRealm['realmDB'] == false && $escenarioRealm['realmKC'] == false){
             $output->writeln([                
                 'No existe el reaml en la DB ni en KC... creando realm en la DB y en KC',
                 '',
@@ -102,8 +96,75 @@ class AddSuperAdminCommand extends Command
         }
 
         
-        //paso 2, verificar que no exista el grupo en Keycloak ni en la DB
-        $escenarioGrupo = $this->verificarGrupo('Administradores');
+        //paso 2, verificar el grupo en Keycloak y en la DB
+        $escenarioGrupo = $this->verificarGrupo($realm, $grupo);
+        if ($escenarioGrupo['grupoDB'] == true && $escenarioGrupo['grupoKC'] == true) {
+            $output->writeln([                
+                'Existe el grupo en la DB y en KC... continuando',
+                '',
+            ]);
+            $grupoDB = $this->em->getRepository(Grupo::class)->findOneBy(['nombre' => $grupo]);
+            $grupoKC = $this->kc->getGroupByName($realm, $grupo);
+        }
+
+        if ($escenarioGrupo['grupoDB'] == true && $escenarioGrupo['grupoKC'] == false) {
+            $output->writeln([                
+                'Existe el grupo en la DB y no en KC... creando grupo en KC',
+                '',
+            ]);
+            $grupoKC = $this->crearGrupoKC($realm, $grupo);
+            $grupoDB = $this->em->getRepository(Grupo::class)->findOneBy(['nombre' => $grupo]);
+            
+        }
+
+        if ($escenarioGrupo['grupoDB'] == false && $escenarioGrupo['grupoKC'] == true) {
+            $output->writeln([                
+                'Existe el grupo en KC y no en la DB... creando grupo en la DB',
+                '',
+            ]);
+            $grupoKC = $this->kc->getGroupByName($realm, $grupo, true);
+            $grupoDB = $this->crearGrupoDB($realm, $grupo, $grupoKC);            
+        }
+
+        //paso 3, verificar el Rol ROLE_SUPER_ADMIN en Keycloak y en la DB
+        $escenarioRol = $this->verificarRol($realm, $grupo, $roleCode, $roleName);
+        if ($escenarioRol['roleKC'] == true && $escenarioRol['roleDB'] == true) {
+            $output->writeln([                
+                'Existe el rol en la DB y en KC... continuando',
+                '',
+            ]);
+            $roleKC = $this->kc->getRoleByName($realm, $roleCode);
+            $roleDB = $this->em->getRepository(Rol::class)->findOneBy(['nombre' => $roleCode]);
+        }
+
+        if ($escenarioRol['roleKC'] == true && $escenarioRol['roleDB'] == false) {
+            $output->writeln([                
+                'Existe el rol en KC y no en la DB... creando rol en la DB',
+                '',
+            ]);
+            $roleKC = $this->kc->getRoleByName($realm, $roleCode);
+            $roleDB = $this->crearRoleDB($realm, $roleCode, $roleName, $roleKC);
+        }
+
+        if ($escenarioRol['roleKC'] == false && $escenarioRol['roleDB'] == true) {
+            $output->writeln([                
+                'Existe el rol en la DB y no en KC... creando rol en KC',
+                '',
+            ]);
+            $roleKC = $this->crearRoleKC($realm, $roleCode, $roleName);
+            $roleDB = $this->em->getRepository(Rol::class)->findOneBy(['nombre' => $roleCode]);
+        }
+
+        if ($escenarioRol['roleKC'] == false && $escenarioRol['roleDB'] == false) {
+            $output->writeln([                
+                'No existe el rol en la DB ni en KC... creando rol en la DB y KC',
+                '',
+            ]);
+            $roleKC = $this->crearRoleKC($realmCK, $GrupoCK, $roleCode, $roleName);
+
+            $roleDB = $this->crearRoleDB($realmDB, $grupoDB, $roleName, $roleCode, $roleKC);
+        }
+
         /*
         $grupo = new Grupo();
         $grupo->setNombre('SuperAdministradores');
@@ -149,24 +210,23 @@ class AddSuperAdminCommand extends Command
 
     private function verificarRealm($realm) {
         $realmDB = $this->em->getRepository(Realm::class)->findOneBy(["realm"=>$realm]);
-        $realmCK = $this->ks->getRealmByName($realm);
+        $realmKC = $this->ks->getRealmByName($realm);
         if (!$realmDB){
             $realmDb = false;
         } else {
             $realmDb = true;
         }
 
-        $realmCK = $this->ks->getRealmByName('Intranet');  
-        $content = (json_decode($realmCK->getContent()));
+        $content = (json_decode($realmKC->getContent()));
         if ($content == 200 || $content == "200") {
-            $realmCK = true;
+            $realmKC = true;
         } else {
-            $realmCK = false;
+            $realmKC = false;
         }
 
         $escenarioRealm = [
             "realmDB" => $realmDB,
-            "realmCK" => $realmCK,
+            "realmKC" => $realmKC,
         ];
 
         return $escenarioRealm;
@@ -181,13 +241,14 @@ class AddSuperAdminCommand extends Command
 
     private function crearRealmKC() {
         $this->kc->createKeycloakRealm('Intranet');
-        $realmCK = $this->ks->getRealmByName('Intranet');
-        return $realmCK;
+        $realmKC = $this->ks->getRealmByName('Intranet');
+        return $realmKC;
     }
 
-    private function verificarGrupo($grupo){
+    private function verificarGrupo($realm, $grupo){
         $grupoDB = $this->em->getRepository(Grupo::class)->findOneBy(["nombre"=>$grupo]);
-        $grupoCK = $this->ks->viewKeycloakGroupInRealm('Intranet', $grupo);
+        $grupoKC = $this->ks->getRealmGroups($grupo, $realm, $briefRepresentation = false);
+
         if (!$grupoDB){
             $grupoDB = false;
         } else {
@@ -197,15 +258,71 @@ class AddSuperAdminCommand extends Command
             "grupoDB" => $grupoDB,
         ];
 
-        $content = (json_decode($grupoCK->getContent()));
-        if ($grupoCK == 200 || $grupoCK == "200") {
-            $grupoCK = true;
+        if ($grupoKC) {
+            $grupoKC = true;
         } else {
-            $grupoCK = false;
+            $grupoKC = false;
+        }
+
+        $content = (json_decode($grupoKC->getContent()));
+        if ($grupoKC == 200 || $grupoKC == "200") {
+            $grupoKC = true;
+        } else {
+            $grupoKC = false;
         }
         $escenarioGrupo = [
-            "grupoCK" => $grupoCK,
+            "grupoKC" => $grupoKC,
         ];
         return $escenarioGrupo;
+    }
+
+    private function crearGrupoKC($realm, $grupo){
+        $this->kc->createGroup($realm, $grupo);
+        $grupoKC = $this->ks->getRealmGroups($grupo, $realm, $briefRepresentation = true);
+        return $grupoKC;
+    }
+
+    private function crearGrupoDB($realm, $grupo, $grupoKC){
+        $grupoDB = new Grupo();
+        $grupoDB->setNombre($grupo);
+        $grupoDB->setRealm($realm);
+        $grupoDB->setKeycloakGroupId($grupoKC->id);
+        $this->em->persist($grupoDB);
+        return $grupoDB;
+    }
+
+    private function verificarRol($realm, $grupo, $roleCode, $roleName){
+        //ver si existe el rol en la DB y en KC. 
+        //De existir ver si hay incosistencias, (de haberlas repararlas). 
+        //Finalmente ver si el rol está asignados al grupo (de no estarlo asignarlo)
+        $roleKC = $this->ks->getRoleInRealmbyName($realm, $roleName);        
+        $roleDB = $this->em->getRepository(Role::class)->findOneBy(["roleCode"=>$roleCode]);
+
+        if ($roleDB == false) {
+            $roleDB = false;
+        } else {
+            $roleDB = true;
+        }
+        $escenarioRol = [
+            "roleKC" => $roleKC,
+            "roleDB" => $roleDB,
+        ];
+        return $escenarioRol;
+    }
+
+    private function crearRoleKC($realm, $grupo, $roleName, $roleCode) {
+        $this->kc->createRole($realm, $grupo, $roleName, $roleCode);
+        $roleKC = $this->ks->getGroupRoles($grupo, $realm);
+        return $roleKC;
+    }
+
+    private function crearRoleDB($realm, $grupo, $roleName, $roleCode, $roleKC) {
+        $roleDB = new Role();
+        $roleDB->setName($roleName);
+        $roleDB->setCode($roleCode);
+        $roleDB->setGrupo($grupo);
+        $roleDB->setKeycloakRoleId($roleKC->id);
+        $this->em->persist($roleDB);
+        return $roleDB;
     }
 }

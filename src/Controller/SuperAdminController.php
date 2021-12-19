@@ -35,13 +35,15 @@ use App\Repository\NacionalidadRepository;
 use App\Entity\EstadoCivil;
 use App\Form\EstadoCivilType;
 use App\Repository\EstadoCivilRepository;
+use App\Service\KeycloakApiSrv;
 
 #[Route('/dashboard/super-admines')]
 class SuperAdminController extends AbstractController
 {
 
-    public function __construct(KeycloakFullApiController $keycloak){
+    public function __construct(KeycloakFullApiController $keycloak, KeycloakApiSrv $keycloakApiSrv){
     	$this->keycloak = $keycloak;
+        $this->ks = $keycloakApiSrv;
     }
 
     /**
@@ -74,14 +76,12 @@ class SuperAdminController extends AbstractController
     #[Route('/realm-test', name: 'realm_index_test', methods: ['GET'])]
     public function indexRealmTest(RealmRepository $realmRepository): Response
     {
-        $grupoCK = $this->keycloak->getGroup('Administradores');
-        //$groups = $this->ks->getGroups('Intranet');
-        //dd($grupoCK);
-        $content = (json_decode($grupoCK->getContent()));
-        if ($content == 200 || $content == "200") {
-            $grupoCK = true;
+        $roleKC = $this->ks->getRoleInRealmbyName('Intranet', 'SuperAdministrador');
+        
+        if ($roleKC == false) {
+            $roleKC = false;
         } else {
-            $grupoCK = false;
+            $roleKC = true;
         }
 
         

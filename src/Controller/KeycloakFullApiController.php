@@ -432,18 +432,40 @@ class KeycloakFullApiController extends AbstractController
     /**
      * GET /admin/realms/{realm}/groups
      */
-    public function getGroup($name)
+    public function getGroup($realm, $name)
     {
         $token = $this->getTokenAdmin();
 
         $auth_url = $this->getParameter('keycloak-server-url');
         $uri = $auth_url . '/admin/realms/{realm}/groups';
-        $realm = 'Intranet';
         $uri = str_replace('{realm}', $realm, $uri);
 
         $params = [
             'headers' => ['Authorization' => 'Bearer ' . $token->access_token],
         ];
+
+        $res = $this->client->get($uri, $params);
+        $grupos = json_decode($res->getBody());
+        foreach ($grupos as $grupo) {
+            if ($grupo->name == $name) {
+                break;
+            }
+        }
+
+        return $grupo;
+    }
+
+        /**
+     * GET /admin/realms/{realm}/groups 
+     */
+    public function getRealmGroups($name, $realm, $briefRepresentation = false) {
+        $token = $this->getTokenAdmin();
+        $auth_url = $this->parameterBag->get('keycloak-server-url');
+        $uri = $auth_url . "/admin/realms/{realm}/groups";
+        //$realm = $this->parameterBag->get('keycloak_realm');
+        //briefRepresentation sirve para mostrar los atributos y demás valores del grupo
+        $uri = str_replace("{realm}", $realm, $uri) . "?briefRepresentation=" . ($briefRepresentation ? "true" : "false");
+        $params = ['headers' => ['Authorization' => "Bearer " . $token->access_token]];
 
         $res = $this->client->get($uri, $params);
         $grupos = json_decode($res->getBody());

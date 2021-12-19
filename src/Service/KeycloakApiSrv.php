@@ -373,11 +373,11 @@ class KeycloakApiSrv extends AbstractController {
     /**
      * GET /admin/realms/{realm}/groups 
      */
-    public function getGroup($name,$realm ,$briefRepresentation = false) {
+    public function getGroup($name, $realm, $briefRepresentation = false) {
         $token = $this->getTokenAdmin();
         $auth_url = $this->parameterBag->get('keycloak-server-url');
         $uri = $auth_url . "/admin/realms/{realm}/groups";
-      //  $realm = $this->parameterBag->get('keycloak_realm');
+        //$realm = $this->parameterBag->get('keycloak_realm');
         //briefRepresentation sirve para mostrar los atributos y demás valores del grupo
         $uri = str_replace("{realm}", $realm, $uri) . "?briefRepresentation=" . ($briefRepresentation ? "true" : "false");
         $params = ['headers' => ['Authorization' => "Bearer " . $token->access_token]];
@@ -688,4 +688,55 @@ class KeycloakApiSrv extends AbstractController {
         return $grupos;
     }
 
+    public function getRoleInRealmbyName($realm, $roleName) {
+        $token = $this->getTokenAdmin();
+        $auth_url = $this->parameterBag->get('keycloak-server-url');
+        $uri = $auth_url . "/admin/realms/{realm}/roles/{role-name}";
+        $uri = str_replace("{realm}", $realm, $uri);
+        $uri = str_replace("{role-name}", $roleName, $uri);
+        $params = ['headers' => ['Authorization' => "Bearer " . $token->access_token]];
+
+        try {
+            $res = $this->client->get($uri, $params);
+            $role = json_decode($res->getBody());
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
+
+        return $role;
+    }
+
+    public function createRoleInRealm($realm, $roleName, $roleCode){
+        $token = $this->getTokenAdmin();
+        $auth_url = $this->parameterBag->get('keycloak-server-url');
+        $uri = $auth_url . "/admin/realms/{realm}/roles";                                         
+        $uri = str_replace("{realm}", $realm, $uri);
+        
+        $params = [
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'Authorization' => 'Bearer ' . $token->access_token,
+            ],
+            'debug' => true,
+            'json' => [
+                'name' => $roleName,
+                'description' => 'Super Administrador del sistema',
+                'attributes' => $roleCode,
+                'enabled' => true,
+                'credentials' => [
+                    0 => [
+                        'type' => 'password',
+                        'value' => $password,
+                        'temporary' => $temporary,
+                    ],
+                ],
+            ],
+        ];
+
+        $res = $this->client->put($uri, $params);
+
+        $data = json_decode($res->getStatusCode());
+        return new JsonResponse($data);
+    }
 }
