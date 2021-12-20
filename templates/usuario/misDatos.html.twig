@@ -56,9 +56,9 @@
             <br/>
             <br/>
             <strong>Grupos:</strong>
-            {% for grupo in app.user.grupos %}
+            {% for userGrupo in app.user.userGroups %}
                 <br/>
-                {{ grupo.nombre }}
+                {{ userGrupo.grupo }}
             {% endfor %}
     </div>
 {% endblock %}

@@ -14,6 +14,7 @@ use App\Service\KeycloakApiSrv;
 use App\Controller\KeycloakFullApiController;
 use App\Entity\User;
 use App\Form\ReenviarEmailType;
+use Proxies\__CG__\App\Entity\Menu;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
@@ -102,7 +103,9 @@ class SolicitudController extends AbstractController
     public function solicitudes(): Response
     {
         $entityManager = $this->getDoctrine()->getManager();
-        $solicitudes = $entityManager->getRepository('App\Entity\Solicitud')->findAll();
+        $solicitudes = $entityManager->getRepository('App\Entity\Solicitud')->findBy([
+            "fechaEliminacion" => null
+        ]);
 
         $response = $this->renderView('solicitud\solicitudes.html.twig', [
             'solicitudes' => $solicitudes
@@ -117,12 +120,12 @@ class SolicitudController extends AbstractController
     {
         $entityManager = $this->getDoctrine()->getManager();
         $solicitud = $entityManager->getRepository('App\Entity\Solicitud')->findOneBy([
-            "hash"=>$hash,
-            "fechaEliminacion"=>null
+            "hash" => $hash,
+            "fechaEliminacion" => null
         ]);
 
-        if(!$solicitud){
-            $this->addFlash('danger','La solicitud no existe.');
+        if (!$solicitud) {
+            $this->addFlash('danger', 'La solicitud no existe.');
             return $this->redirectToRoute('solicitudes');
         }
 
@@ -197,7 +200,7 @@ class SolicitudController extends AbstractController
         $solicitud = $entityManager->getRepository('App\Entity\Solicitud')->findOneByHash($hash);
 
         if (!$solicitud) {
-            $this->addFlash('danger','La solicitud no se encuentra o no existe');           
+            $this->addFlash('danger', 'La solicitud no se encuentra o no existe');
             return new JsonResponse([
                 "status" => "error",
                 "html" => $this->renderView('modales/flashAlertsModal.html.twig')
@@ -205,7 +208,7 @@ class SolicitudController extends AbstractController
         }
 
         if ($solicitud->getFechaUso()) {
-            $this->addFlash('danger','Los datos de la solicitud ya han sido completados.');           
+            $this->addFlash('danger', 'Los datos de la solicitud ya han sido completados.');
             return new JsonResponse([
                 "status" => "error",
                 "html" => $this->renderView('modales/flashAlertsModal.html.twig')
@@ -236,10 +239,10 @@ class SolicitudController extends AbstractController
         }
 
         return new JsonResponse([
-            "status"=>"success",
-            "html" => $this->renderView('modales/reenviarEmailModal.html.twig',[
-                'solicitud'=> $solicitud,
-                'formReenviarCorreo'=>$form->createView()
+            "status" => "success",
+            "html" => $this->renderView('modales/reenviarEmailModal.html.twig', [
+                'solicitud' => $solicitud,
+                'formReenviarCorreo' => $form->createView()
             ])
         ]);
     }
