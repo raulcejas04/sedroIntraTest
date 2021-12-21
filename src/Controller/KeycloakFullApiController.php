@@ -460,7 +460,7 @@ class KeycloakFullApiController extends AbstractController
      */
     public function getRealmGroups($name, $realm, $briefRepresentation = false) {
         $token = $this->getTokenAdmin();
-        $auth_url = $this->parameterBag->get('keycloak-server-url');
+        $auth_url = $this->getParameter('keycloak-server-url');
         $uri = $auth_url . "/admin/realms/{realm}/groups";
         //$realm = $this->parameterBag->get('keycloak_realm');
         //briefRepresentation sirve para mostrar los atributos y demás valores del grupo

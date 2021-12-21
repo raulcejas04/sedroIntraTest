@@ -55,7 +55,7 @@ class Grupo {
     private $rolesGrupo;
 
     public function __toString() {
-        return $this->getNombre();
+        return $this->getNombre() . " - " . $this->getRealm()->getRealm();
     }
 
     public function __construct() {

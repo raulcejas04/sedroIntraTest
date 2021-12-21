@@ -28,12 +28,12 @@ use Doctrine\ORM\EntityManagerInterface;
 class AddSuperAdminCommand extends Command
 {
     private $em;
-    private $ks;
+    private $kc;
 
-    public function __construct(EntityManagerInterface $em, KeycloakFullApiController $ks) {
+    public function __construct(EntityManagerInterface $em, KeycloakFullApiController $kc) {
         parent::__construct();
         $this->em = $em;
-        $this->ks = $ks;
+        $this->kc = $kc;
     }
     protected function configure(): void
     {
@@ -57,14 +57,16 @@ class AddSuperAdminCommand extends Command
         $roleCode = 'ROLE_SUPER_ADMIN';
         $roleName = 'SuperAdministrador';
 
-        //paso 1, Verificar el realm en KC y en la DB
+        //***************************************************************************
+        //********** paso 1, Verificar el realm en KC y en la DB **********************************
+        //***************************************************************************
         $escenarioRealm = $this->verificarRealm($realm);
         if ($escenarioRealm['realmDB'] == true && $escenarioRealm['realmKC'] == true) {
             $output->writeln([                
                 'Existe el reaml en la DB y en KC... continuando',
                 '',
             ]);
-            $realmDb = $this->em->getRepository(Realm::class)->findOneBy(['nombre' => $realm]);
+            $realmDb = $this->em->getRepository(Realm::class)->findOneBy(['realm' => $realm]);
             $reamlCK = $this->kc->getRealmByName($realm);
         }
 
@@ -73,7 +75,7 @@ class AddSuperAdminCommand extends Command
                 'Existe el reaml en la DB y no en KC... creando realm en KC',
                 '',
             ]);
-            $realmDb = $this->em->getRepository(Realm::class)->findOneBy(['nombre' => $realm]);
+            $realmDb = $this->em->getRepository(Realm::class)->findOneBy(['realm' => $realm]);
             $reamlCK = $this->crearRealmKC();
         }
 
@@ -96,7 +98,9 @@ class AddSuperAdminCommand extends Command
         }
 
         
-        //paso 2, verificar el grupo en Keycloak y en la DB
+        //***************************************************************************
+        //****** paso 2, verificar el grupo en Keycloak y en la DB ********************************
+        //***************************************************************************
         $escenarioGrupo = $this->verificarGrupo($realm, $grupo);
         if ($escenarioGrupo['grupoDB'] == true && $escenarioGrupo['grupoKC'] == true) {
             $output->writeln([                
@@ -126,7 +130,9 @@ class AddSuperAdminCommand extends Command
             $grupoDB = $this->crearGrupoDB($realm, $grupo, $grupoKC);            
         }
 
-        //paso 3, verificar el Rol ROLE_SUPER_ADMIN en Keycloak y en la DB
+        //***************************************************************************
+        // paso 3, verificar el Rol ROLE_SUPER_ADMIN en Keycloak y en la DB ***********************
+        //***************************************************************************
         $escenarioRol = $this->verificarRol($realm, $grupo, $roleCode, $roleName);
         if ($escenarioRol['roleKC'] == true && $escenarioRol['roleDB'] == true) {
             $output->writeln([                
@@ -143,7 +149,7 @@ class AddSuperAdminCommand extends Command
                 '',
             ]);
             $roleKC = $this->kc->getRoleByName($realm, $roleCode);
-            $roleDB = $this->crearRoleDB($realm, $roleCode, $roleName, $roleKC);
+            $roleDB = $this->crearRoleDB($realmDB, $roleCode, $roleName, $roleKC, $roleKC);
         }
 
         if ($escenarioRol['roleKC'] == false && $escenarioRol['roleDB'] == true) {
@@ -210,7 +216,7 @@ class AddSuperAdminCommand extends Command
 
     private function verificarRealm($realm) {
         $realmDB = $this->em->getRepository(Realm::class)->findOneBy(["realm"=>$realm]);
-        $realmKC = $this->ks->getRealmByName($realm);
+        $realmKC = $this->kc->getRealmByName($realm);
         if (!$realmDB){
             $realmDb = false;
         } else {
@@ -241,13 +247,13 @@ class AddSuperAdminCommand extends Command
 
     private function crearRealmKC() {
         $this->kc->createKeycloakRealm('Intranet');
-        $realmKC = $this->ks->getRealmByName('Intranet');
+        $realmKC = $this->kc->getRealmByName('Intranet');
         return $realmKC;
     }
 
     private function verificarGrupo($realm, $grupo){
         $grupoDB = $this->em->getRepository(Grupo::class)->findOneBy(["nombre"=>$grupo]);
-        $grupoKC = $this->ks->getRealmGroups($grupo, $realm, $briefRepresentation = false);
+        $grupoKC = $this->kc->getRealmGroups($grupo, $realm, $briefRepresentation = false);
 
         if (!$grupoDB){
             $grupoDB = false;
@@ -258,13 +264,15 @@ class AddSuperAdminCommand extends Command
             "grupoDB" => $grupoDB,
         ];
 
-        if ($grupoKC) {
+        /*if ($grupoKC) {
             $grupoKC = true;
         } else {
             $grupoKC = false;
         }
+        */
 
-        $content = (json_decode($grupoKC->getContent()));
+        dd($grupoKC);
+        $content = (json_decode($grupoKC->Content));
         if ($grupoKC == 200 || $grupoKC == "200") {
             $grupoKC = true;
         } else {
@@ -278,7 +286,7 @@ class AddSuperAdminCommand extends Command
 
     private function crearGrupoKC($realm, $grupo){
         $this->kc->createGroup($realm, $grupo);
-        $grupoKC = $this->ks->getRealmGroups($grupo, $realm, $briefRepresentation = true);
+        $grupoKC = $this->kc->getRealmGroups($grupo, $realm, $briefRepresentation = true);
         return $grupoKC;
     }
 
@@ -295,7 +303,7 @@ class AddSuperAdminCommand extends Command
         //ver si existe el rol en la DB y en KC. 
         //De existir ver si hay incosistencias, (de haberlas repararlas). 
         //Finalmente ver si el rol está asignados al grupo (de no estarlo asignarlo)
-        $roleKC = $this->ks->getRoleInRealmbyName($realm, $roleName);        
+        $roleKC = $this->kc->getRoleInRealmbyName($realm, $roleName);        
         $roleDB = $this->em->getRepository(Role::class)->findOneBy(["roleCode"=>$roleCode]);
 
         if ($roleDB == false) {
@@ -312,17 +320,18 @@ class AddSuperAdminCommand extends Command
 
     private function crearRoleKC($realm, $grupo, $roleName, $roleCode) {
         $this->kc->createRole($realm, $grupo, $roleName, $roleCode);
-        $roleKC = $this->ks->getGroupRoles($grupo, $realm);
+        $roleKC = $this->kc->getGroupRoles($grupo, $realm);
         return $roleKC;
     }
 
-    private function crearRoleDB($realm, $grupo, $roleName, $roleCode, $roleKC) {
+    private function crearRoleDB($realmDB, $grupo, $roleName, $roleCode, $roleKC) {
         $roleDB = new Role();
+        $roleDB->setRealm($realmDB);
         $roleDB->setName($roleName);
         $roleDB->setCode($roleCode);
-        $roleDB->setGrupo($grupo);
         $roleDB->setKeycloakRoleId($roleKC->id);
         $this->em->persist($roleDB);
         return $roleDB;
     }
+    
 }
