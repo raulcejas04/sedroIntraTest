@@ -36,9 +36,9 @@ class Realm
     private $keycloakRealmId;
 
     /**
-     * @ORM\OneToMany(targetEntity=UserRealm::class, mappedBy="realm",cascade={"persist"})
+     * @ORM\OneToMany(targetEntity=User::class, mappedBy="realm",cascade={"persist"})
      */
-    private $userRealms;
+    private $users;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
@@ -58,7 +58,7 @@ class Realm
     public function __construct()
     {
         $this->solicitudes = new ArrayCollection();
-        $this->userRealms = new ArrayCollection();
+        $this->users = new ArrayCollection();
         $this->grupos = new ArrayCollection();
     }
 
@@ -121,36 +121,6 @@ class Realm
         return $this;
     }
 
-    /**
-     * @return Collection|UserRealm[]
-     */
-    public function getUserRealms(): Collection
-    {
-        return $this->userRealms;
-    }
-
-    public function addUserRealm(UserRealm $userRealm): self
-    {
-        if (!$this->userRealms->contains($userRealm)) {
-            $this->userRealms[] = $userRealm;
-            $userRealm->setRealm($this);
-        }
-
-        return $this;
-    }
-
-    public function removeUserRealm(UserRealm $userRealm): self
-    {
-        if ($this->userRealms->removeElement($userRealm)) {
-            // set the owning side to null (unless already changed)
-            if ($userRealm->getRealm() === $this) {
-                $userRealm->setRealm(null);
-            }
-        }
-
-        return $this;
-    }
-
     public function getFechaEliminacion(): ?\DateTimeInterface
     {
         return $this->fechaEliminacion;
@@ -187,6 +157,36 @@ class Realm
             // set the owning side to null (unless already changed)
             if ($grupo->getRealm() === $this) {
                 $grupo->setRealm(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|User[]
+     */
+    public function getUsers(): Collection
+    {
+        return $this->users;
+    }
+
+    public function addUser(User $user): self
+    {
+        if (!$this->users->contains($user)) {
+            $this->users[] = $user;
+            $user->setRealm($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUser(User $user): self
+    {
+        if ($this->users->removeElement($user)) {
+            // set the owning side to null (unless already changed)
+            if ($user->getRealm() === $this) {
+                $user->setRealm(null);
             }
         }
 
