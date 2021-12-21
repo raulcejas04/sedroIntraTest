@@ -63,15 +63,11 @@ class SincronizarKeycloakCommand extends Command {
             foreach($users as $user){
                 $_user = $this->em->getRepository(User::class)->findOneBy(["KeycloakId"=>$user->id]);
                 if(!$_user){
-                    $output->writeln('<danger>Hay una inconsistencia con el usuario'.$user->username.'.</danger>');
-                }
-                $userRealm = $this->em->getRepository(UserRealm::class)->findOneBy(["usuario"=>$_user,"realm"=>$_realm]);
-                if(!$userRealm && $_user){
-                    $userRealm = new UserRealm();
-                    $userRealm->setRealm($_realm);
-                    $userRealm->setUsuario($_user);
-                    $_realm->addUserRealm($userRealm);
-                }
+                    $output->writeln('Hay una inconsistencia con el usuario '.$user->username.'. Existe en KC pero no en la BD.');
+                }else{
+                    $_user->setRealm($_realm);
+                    $_realm->addUser($_user);
+                }              
             }
             
             $this->em->persist($_realm);

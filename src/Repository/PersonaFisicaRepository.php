@@ -30,6 +30,17 @@ class PersonaFisicaRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function getCuitCuil($data)
+    {
+        return $this->createQueryBuilder('pf')
+            ->andWhere('pf.cuitCuil = :val')
+            ->andWhere('pf.fechaEliminacion IS NULL')
+            ->setParameter('val', $data["cuitCuil"])
+            ->getQuery()
+            ->getOneOrNullResult()
+        ;
+    }
+
     // /**
     //  * @return PersonaFisica[] Returns an array of PersonaFisica objects
     //  */
