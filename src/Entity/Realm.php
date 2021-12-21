@@ -50,6 +50,11 @@ class Realm
      */
     private $grupos;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Role::class, mappedBy="realm")
+     */
+    private $roles;
+
     public function __toString()
     {
         return $this->getRealm();
@@ -60,6 +65,7 @@ class Realm
         $this->solicitudes = new ArrayCollection();
         $this->users = new ArrayCollection();
         $this->grupos = new ArrayCollection();
+        $this->roles = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -187,6 +193,36 @@ class Realm
             // set the owning side to null (unless already changed)
             if ($user->getRealm() === $this) {
                 $user->setRealm(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Role[]
+     */
+    public function getRoles(): Collection
+    {
+        return $this->roles;
+    }
+
+    public function addRole(Role $role): self
+    {
+        if (!$this->roles->contains($role)) {
+            $this->roles[] = $role;
+            $role->setRealm($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRole(Role $role): self
+    {
+        if ($this->roles->removeElement($role)) {
+            // set the owning side to null (unless already changed)
+            if ($role->getRealm() === $this) {
+                $role->setRealm(null);
             }
         }
 

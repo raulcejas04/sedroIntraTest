@@ -121,6 +121,12 @@ class Role {
      */
     private $rolesGrupo;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=Realm::class, inversedBy="roles")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $realm;
+
     public function __toString() {
         return $this->getName();
     }
@@ -367,6 +373,18 @@ class Role {
                 $rolesGrupo->setRole(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getRealm(): ?Realm
+    {
+        return $this->realm;
+    }
+
+    public function setRealm(?Realm $realm): self
+    {
+        $this->realm = $realm;
 
         return $this;
     }
