@@ -37,18 +37,23 @@ class SolicitudRepository extends ServiceEntityRepository
     */
 
     
-    public function findSolicitudActiva($mail, $nicname)
+    public function findSolicitudActiva($mail, $nicname, $cuit, $cuil)
     {
         return $this->createQueryBuilder('s')
-            ->where('s.mail = :mail')
-            ->andWhere('s.nicname = :nicname')
-            ->andWhere('s.fechaAlta IS NULL')
-            ->andWhere('s.correccion IS NULL')
-            ->andWhere('s.usada IS NULL')
-            ->setParameter('mail', $mail)
-            ->setParameter('nicname', $nicname)
-            ->getQuery()
-            ->getResult();
+        ->andWhere('s.mail = :mail')
+        ->andWhere('s.nicname = :nicname')
+        ->andWhere('s.cuit = :cuit')
+        ->andWhere('s.cuil = :cuil')
+        ->andWhere('s.fechaExpiracion IS NULL')
+        ->andWhere('s.fechaAlta IS NULL')
+        ->andWhere('s.correccion IS NULL')
+        ->andWhere('s.usada IS NULL')
+        ->setParameter('mail', $mail)
+        ->setParameter('nicname', $nicname)
+        ->setParameter('cuit', $cuit)
+        ->setParameter('cuil', $cuil)
+        ->getQuery()
+        ->getOneOrNullResult()    
         ;
 
         return $this->createQueryBuilder('pf')            
