@@ -880,4 +880,86 @@ class KeycloakFullApiController extends AbstractController
         return new JsonResponse($data);
     }
 
+    public function getRoleInRealmbyName($realm, $roleName) {
+        $token = $this->getTokenAdmin();
+        $auth_url = $this->getParameter('keycloak-server-url');
+        $uri = $auth_url . "/admin/realms/{realm}/roles/{role-name}";
+        $uri = str_replace("{realm}", $realm, $uri);
+        $uri = str_replace("{role-name}", $roleName, $uri);
+        $params = ['headers' => ['Authorization' => "Bearer " . $token->access_token]];
+
+        try {
+            $res = $this->client->get($uri, $params);
+            $role = json_decode($res->getBody());
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
+
+        return $role;
+    }
+
+    public function createRole($realm, $roleName) {
+        $token = $this->getTokenAdmin();
+        $auth_url = $this->getParameter('keycloak-server-url');
+        $uri = $auth_url . "/admin/realms/{realm}/roles";
+        $uri = str_replace("{realm}", $realm, $uri);
+        $params = [
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'Authorization' => 'Bearer ' . $token->access_token,
+            ],
+            'debug' => true,
+            'json' => [
+                'name' => $roleName,
+                'description' => $roleName,
+                'composite' => false,
+                'clientRole' => false,
+                'containerId' => null,
+                'scopeParamRequired' => false,
+                'scopeDisplayName' => null,
+                'scopeDescription' => null,
+                'scopeValues' => [],
+                'attributes' => [],
+                'roleComposition' => [],
+                'roleDecomposition' => [],
+            ],
+        ];
+
+        try {
+            $res = $this->client->post($uri, $params);
+            $role = json_decode($res->getBody());
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
+
+        return $role;
+    }
+
+    /**
+     * GET /admin/realms/{realm}/groups 
+     */
+    public function getRole($name, $realm, $briefRepresentation = false) {
+        $token = $this->getTokenAdmin();
+        $auth_url = $this->getParameter('keycloak-server-url');
+        $uri = $auth_url . "/admin/realms/{realm}/roles";
+        
+        $uri = str_replace('{realm}', $realm, $uri);        
+        $uri = $uri . "?briefRepresentation=" . ($briefRepresentation ? "true" : "false");
+        //dd($uri);
+        $params = ['headers' => ['Authorization' => "Bearer " . $token->access_token]];
+        
+        $res = $this->client->get($uri, $params);
+        $roles = json_decode($res->getBody());
+        
+        foreach ($roles as $rol) {
+            if ($rol->name == $name) {
+                break;
+            }
+        }
+
+        return $rol;
+    }
+
 }
