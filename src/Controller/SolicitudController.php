@@ -13,6 +13,7 @@ use App\Form\RepresentacionType;
 use App\Service\KeycloakApiSrv;
 use App\Controller\KeycloakFullApiController;
 use App\Entity\User;
+use App\Entity\Realm;
 use App\Form\ReenviarEmailType;
 use Proxies\__CG__\App\Entity\Menu;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -220,7 +221,7 @@ class SolicitudController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $url = $this->getParameter('extranet_url') . '/solicitud/' . $solicitud->getHash() . '/completar-datos';
+            $url = $this->getParameter('extranet_url') . '/public/' . $solicitud->getHash() . '/completar-datos';
             $email = (new TemplatedEmail())
                 ->from($this->getParameter('direccion_email_salida'))
                 ->to($solicitud->getMail())
@@ -352,6 +353,7 @@ class SolicitudController extends AbstractController
     private function crearUsuarioDb($solicitud, $usuarioKeycloak)
     {
         $entityManager = $this->getDoctrine()->getManager();
+        $realm = $entityManager->getRepository(Realm::class)->findOneBy(["realm" => $this->getParameter('keycloak_extranet_realm')]);
 
         $usuario = new User();
         $usuario->setPersonaFisica($solicitud->getPersonaFisica());
