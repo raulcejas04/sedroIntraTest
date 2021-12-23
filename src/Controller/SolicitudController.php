@@ -75,7 +75,8 @@ class SolicitudController extends AbstractController
 
             //TODO: Verificar que el email se haya enviado sin errores
             //TODO: ¿Crear una funcion privada para enviar emails en este controller?
-            $url = $this->getParameter('extranet_url') . '/solicitud/' . $solicitud->getHash() . '/completar-datos';
+            //public para que el firewall lo deje pasar
+            $url = $this->getParameter('extranet_url') . '/public/' . $solicitud->getHash() . '/completar-datos';
             $email = (new TemplatedEmail())
                 ->from($this->getParameter('direccion_email_salida'))
                 ->to($solicitud->getMail())

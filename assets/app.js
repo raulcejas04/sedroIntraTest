@@ -22,3 +22,4 @@ import './bootstrap';
 
 import validator from 'validator';
 global.validator = validator;
+

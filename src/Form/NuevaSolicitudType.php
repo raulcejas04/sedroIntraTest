@@ -26,12 +26,30 @@ class NuevaSolicitudType extends AbstractType
                     'class' => "val-cuit"
                 ]
             ])
+            ->add('razon_social', TextType::class, [
+                'label' => "Razón social",
+                'required' => true,
+                'mapped' => false,
+                'attr' => [
+                    'readonly'=>true
+                ],
+                'disabled' =>"true"
+            ])
             ->add('cuil', TextType::class, [
                 'label' => "CUIL Persona Física",
                 'required' => true,
                 'attr' => [
                     'class' => "val-cuit"
                 ]
+            ])
+            ->add('denominacion', TextType::class, [
+                'label' => "Nombre y apellido",
+                'required' => true,
+                'mapped' => false,
+                'attr' => [
+                    'readonly'=>true
+                ],
+                'disabled' =>"true"
             ])
             ->add('nicname', TextType::class, [
                 'label' => "Nombre corto de dispositivo",

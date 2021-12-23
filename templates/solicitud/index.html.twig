@@ -7,10 +7,23 @@
     <div class="row justify-content-md-center">
         <div class="col-6">
             {{ form_start(form)}}
-            {{ form_row(form.cuit) }}
-            {{ form_row(form.cuil) }}
-            {{ form_row(form.nicname) }}
-            {# {{ form_row(form.tipoDispositivo) }} #}
+            {{ form_row(form.cuit, 
+		            { 'attr': { 'data-get_persona_juridica_x_cuit': path('get_persona_juridica_x_cuit') } }
+            		)
+            }}
+            {{ form_row(form.razon_social) }}
+            {{ form_row(form.cuil,
+      		            { 'attr': { 'data-get_persona_juridica_x_cuit': path('get_persona_fisica_x_cuit') } }
+            		) 
+            }}
+            {{ form_row(form.denominacion) }}
+            {{ form_row(form.nicname,
+      		            { 'attr': { 'data-get_dispositivo': path('get_dispositivo'),
+		  	                'data-get_usuario': path('get_usuario'),
+      		            } }            
+            		) 
+            }}
+            {{ form_row(form.tipoDispositivo) }}
             {{ form_row(form.mail.first) }}
             {{ form_row(form.mail.second) }}
             {{ form_rest(form)}}
@@ -30,10 +43,9 @@
     <br>
     <br>
     <br>
-    
-<!--<script src="/js/validatorform.js"></script>
-<script>
-  document.onload = validarForm('nueva_solicitud')
-</script> -->
 
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>  
+<script type="text/javascript">
+</script>
+{{ encore_entry_script_tags('paso1') }} <!--esta en assets/js-->
 {% endblock %}

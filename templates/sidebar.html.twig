@@ -6,7 +6,7 @@
         <li>
         {% if is_granted('IS_AUTHENTICATED_FULLY') %}
           <a href="#submenu0" data-bs-toggle="collapse" class="nav-link px-0 align-middle text-white">
-              <i class="fs-4 bi bi-person-circle"></i> {{ app.user }}
+              <i class="fs-4 bi bi-person-circle"></i> {{ app.user.username }}
                     <span class="badge bg-danger" style="margin-left: 30px;">8</span><i class="bi bi-bell" style="color: white; margin-left: 6px;"> 
               </i>
           </a>

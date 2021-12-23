@@ -1,4 +1,5 @@
 const Encore = require('@symfony/webpack-encore');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 // Manually configure the runtime environment if not already configured yet by the "encore" command.
 // It's useful when you use tools that rely on webpack.config.js file.
@@ -25,6 +26,7 @@ Encore
     )
     .addEntry('validarFormularios', './assets/validator.js')
     .addEntry('modales', './assets/modales.js')
+    .addEntry('paso1', './assets/js/paso1.js')
     // enables the Symfony UX Stimulus bridge (used in assets/bootstrap.js)
     .enableStimulusBridge('./assets/controllers.json')
 
@@ -73,6 +75,15 @@ Encore
 
     // uncomment if you're having problems with a jQuery plugin
     .autoProvidejQuery()
+    //cambio la sintaxis
+    //https://stackoverflow.com/questions/61937054/npm-run-dev-fails-validationerror-invalid-options-object
+    .addPlugin(new CopyWebpackPlugin(
+      { 
+        patterns: [
+          { from: 'assets/img', to: 'img' }
+        ]
+      }
+    ))
 ;
 
 module.exports = Encore.getWebpackConfig();
