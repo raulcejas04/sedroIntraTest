@@ -468,17 +468,8 @@ class KeycloakFullApiController extends AbstractController
 
         $res = $this->client->get($uri, $params);
         $grupos = json_decode($res->getBody());
-        if ($grupos) {
-            foreach ($grupos as $grupo) {
-                if ($grupo->name == $name) {
-                    $g = $grupo;
-                } else {
-                    $g = null;
-                }
-            }
-        }
 
-        return $g;
+        return $grupos;
     }
 
     /**
@@ -978,21 +969,14 @@ class KeycloakFullApiController extends AbstractController
             'debug' => true,
             'json' => [
                 'name' => $groupName,
-                'path' => $groupName,
-                'realmRoles' => [],
-                'clientRoles' => [],
-                'composite' => false,
-                'containerId' => null,
-                'subGroups' => [],
-                'parentGroupId' => null,
-                'attributes' => [],
+                'realmRoles' => [],                
             ],
         ];
-
         $res = $this->client->post($uri, $params);
+        
         $data = json_decode($res->getBody());
         $response = new Response($data);
-        dd($response);
+        
         return $response;
     }
 
@@ -1009,5 +993,17 @@ class KeycloakFullApiController extends AbstractController
         $data = json_decode($res->getBody());
         return $data;
     }
+
+    public function getRoleByName($realm, $roleName) {
+        $token = $this->getTokenAdmin();
+        $auth_url = $this->getParameter('keycloak-server-url');
+        $uri = $auth_url . "/admin/realms/{realm}/roles/{role-name}";
+        $uri = str_replace('{realm}', $realm, $uri);
+        $uri = str_replace('{role-name}', $roleName, $uri);
+        $params = ['headers' => ['Authorization' => "Bearer " . $token->access_token]];
+        $res = $this->client->put($uri, $params);
+        $data = json_decode($res->getBody());
+        return $data;
+
 
 }
