@@ -95,7 +95,7 @@ class KeycloakFullApiController extends AbstractController
             ],
         ];
 
-	$res = $this->client->post($uri, $params);
+        $res = $this->client->post($uri, $params);
         $data = json_decode($res->getBody());
         $response = new Response($data);
         return $response;
@@ -219,7 +219,8 @@ class KeycloakFullApiController extends AbstractController
     /**
      * POST /realms/master/protocol/openid-connect/token
      */
-    public function getTokenAdmin() {
+    public function getTokenAdmin()
+    {
 
 
         $base_uri_keycloak = $this->getParameter('keycloak-server-url');
@@ -233,7 +234,7 @@ class KeycloakFullApiController extends AbstractController
                     'keycloak_admin_grant_type'
                 ),
                 'client_id' => $this->getParameter('keycloak_admin_client_id'),
-		'client_secret' => $this->getParameter('Keycloak_admin_client_secret'),
+                'client_secret' => $this->getParameter('Keycloak_admin_client_secret'),
             ]
         ];
 
@@ -454,10 +455,11 @@ class KeycloakFullApiController extends AbstractController
         return $grupo;
     }
 
-        /**
+    /**
      * GET /admin/realms/{realm}/groups 
      */
-    public function getRealmGroups($name, $realm, $briefRepresentation = false) {
+    public function getRealmGroups($name, $realm, $briefRepresentation = false)
+    {
         $token = $this->getTokenAdmin();
         $auth_url = $this->getParameter('keycloak-server-url');
         $uri = $auth_url . "/admin/realms/{realm}/groups";
@@ -736,7 +738,7 @@ class KeycloakFullApiController extends AbstractController
                 'Content-Type' => 'application/json',
                 'Authorization' => 'Bearer ' . $token->access_token,
             ],
-            'debug' => false,    
+            'debug' => false,
         ];
 
         try {
@@ -746,8 +748,7 @@ class KeycloakFullApiController extends AbstractController
             return new JsonResponse([
                 'content' => 'adad'
             ]);
-            
-        }        
+        }
 
         $data = json_decode($res->getStatusCode());
         return new JsonResponse($data);
@@ -783,7 +784,7 @@ class KeycloakFullApiController extends AbstractController
         return new JsonResponse($data);
     }
 
-    
+
 
     public function addUserToGroup($realm, $userId, $groupId)
     {
@@ -813,7 +814,7 @@ class KeycloakFullApiController extends AbstractController
 
     /**
      * /admin/realms/{realm}/groups/{id}/members 
-     */ 
+     */
     public function getGroupMembers($groupId)
     {
         $token = $this->getTokenAdmin();
@@ -826,7 +827,7 @@ class KeycloakFullApiController extends AbstractController
         //TODO: Deshardcodear el $groupId (traerlo de la base de datos)
         //TODO: Terminar lo de grupos
         $groupId = 'asd';
-        $uri = str_replace('{realm}', $realm, $uri);        
+        $uri = str_replace('{realm}', $realm, $uri);
         $uri = str_replace('{group_id}', $groupId, $uri);
 
         $params = [
@@ -844,7 +845,7 @@ class KeycloakFullApiController extends AbstractController
 
     /**
      * /admin/realms/{realm}
-     */ 
+     */
     public function getRealmByName($realm)
     {
         $token = $this->getTokenAdmin();
@@ -853,7 +854,7 @@ class KeycloakFullApiController extends AbstractController
         $uri =
             $base_uri_keycloak .
             '/admin/realms/{realm}';
-        $uri = str_replace('{realm}', $realm, $uri);                
+        $uri = str_replace('{realm}', $realm, $uri);
         $params = [
             'headers' => [
                 'Content-Type' => 'application/json',
@@ -868,13 +869,14 @@ class KeycloakFullApiController extends AbstractController
                 'content' => 404
             ]);
         }
-        
+
 
         $data = json_decode($res->getStatusCode());
         return new JsonResponse($data);
     }
 
-    public function getRoleInRealmbyName($realm, $roleName) {
+    public function getRoleInRealmbyName($realm, $roleName)
+    {
         $token = $this->getTokenAdmin();
         $auth_url = $this->getParameter('keycloak-server-url');
         $uri = $auth_url . "/admin/realms/{realm}/roles/{role-name}";
@@ -893,7 +895,8 @@ class KeycloakFullApiController extends AbstractController
         return $role;
     }
 
-    public function createRole($realm, $roleName) {
+    public function createRole($realm, $roleName)
+    {
         $token = $this->getTokenAdmin();
         $auth_url = $this->getParameter('keycloak-server-url');
         $uri = $auth_url . "/admin/realms/{realm}/roles";
@@ -934,19 +937,20 @@ class KeycloakFullApiController extends AbstractController
     /**
      * GET /admin/realms/{realm}/groups 
      */
-    public function getRole($name, $realm, $briefRepresentation = false) {
+    public function getRole($name, $realm, $briefRepresentation = false)
+    {
         $token = $this->getTokenAdmin();
         $auth_url = $this->getParameter('keycloak-server-url');
         $uri = $auth_url . "/admin/realms/{realm}/roles";
-        
-        $uri = str_replace('{realm}', $realm, $uri);        
+
+        $uri = str_replace('{realm}', $realm, $uri);
         $uri = $uri . "?briefRepresentation=" . ($briefRepresentation ? "true" : "false");
         //dd($uri);
         $params = ['headers' => ['Authorization' => "Bearer " . $token->access_token]];
-        
+
         $res = $this->client->get($uri, $params);
         $roles = json_decode($res->getBody());
-        
+
         foreach ($roles as $rol) {
             if ($rol->name == $name) {
                 break;
@@ -956,7 +960,8 @@ class KeycloakFullApiController extends AbstractController
         return $rol;
     }
 
-    public function createGroup($realm, $groupName) {
+    public function createGroup($realm, $groupName)
+    {
         $token = $this->getTokenAdmin();
         $auth_url = $this->getParameter('keycloak-server-url');
         $uri = $auth_url . "/admin/realms/{realm}/groups";
@@ -969,19 +974,20 @@ class KeycloakFullApiController extends AbstractController
             'debug' => true,
             'json' => [
                 'name' => $groupName,
-                'realmRoles' => [],                
+                'realmRoles' => [],
             ],
         ];
         $res = $this->client->post($uri, $params);
-        
+
         $data = json_decode($res->getBody());
         $response = new Response($data);
-        
+
         return $response;
     }
 
 
-    public function addRoleToGroup($realm, $groupId, $roleName) {
+    public function addRoleToGroup($realm, $groupId, $roleName)
+    {
         $token = $this->getTokenAdmin();
         $auth_url = $this->getParameter('keycloak-server-url');
         $uri = $auth_url . "/admin/realms/{realm}/groups/{group-id}/roles/{role-name}";
@@ -994,7 +1000,8 @@ class KeycloakFullApiController extends AbstractController
         return $data;
     }
 
-    public function getRoleByName($realm, $roleName) {
+    public function getRoleByName($realm, $roleName)
+    {
         $token = $this->getTokenAdmin();
         $auth_url = $this->getParameter('keycloak-server-url');
         $uri = $auth_url . "/admin/realms/{realm}/roles/{role-name}";
@@ -1004,6 +1011,5 @@ class KeycloakFullApiController extends AbstractController
         $res = $this->client->put($uri, $params);
         $data = json_decode($res->getBody());
         return $data;
-
-
+    }
 }
