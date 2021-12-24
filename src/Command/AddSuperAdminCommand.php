@@ -66,69 +66,87 @@ class AddSuperAdminCommand extends Command
         $roleCode = 'ROLE_SUPER_ADMIN';
         $roleName = 'SuperAdministrador';
         $realmDB = null;
-        $realmCK = null;
+        $realmKC = null;
         $grupoDB = null;
-        $grupoCK = null;
+        $grupoKC = null;
         $roleDB = null;
-        $roleCK = null;
+        $roleKC = null;
 
         //*********************************************************************
         //********** paso 0, Datos Iniciales **********************************
         //*********************************************************************
-        $estadoCivil1 = new EstadoCivil;
-        $estadoCivil1->setEstadoCivil('Soltero/a');
-        $this->em->persist($estadoCivil1);
+
+        $estadoCivil = $this->em->getRepository(EstadoCivil::class)->findAll();
+        if (!$estadoCivil) {
+            $output->writeln('No hay tipos de estados civiles difinidos en la base de datos');
+            $estadoCivil1 = new EstadoCivil;
+            $estadoCivil1->setEstadoCivil('Soltero/a');
+            $this->em->persist($estadoCivil1);
+
+            $estadoCivil2 = new EstadoCivil;
+            $estadoCivil2->setEstadoCivil('Casado/a');
+            $this->em->persist($estadoCivil2);
+
+            $estadoCivil3 = new EstadoCivil;
+            $estadoCivil3->setEstadoCivil('Divorciado/a');
+            $this->em->persist($estadoCivil3);
+
+            $estadoCivil4 = new EstadoCivil;
+            $estadoCivil4->setEstadoCivil('Viudo/a');
+            $this->em->persist($estadoCivil4);
+        }
         
-        $estadoCivil2 = new EstadoCivil;
-        $estadoCivil2->setEstadoCivil('Casado/a');
-        $this->em->persist($estadoCivil2);
+
+        $sexo = $this->em->getRepository(Sexo::class)->findAll();
+        if (!$sexo) {
+            $output->writeln('No hay sexos definidos en la base de datos');
+            $sexo1 = new Sexo;
+            $sexo1->setSexo('M');
+            $sexo1->setDescripcion('Masculino');
+            $this->em->persist($sexo1);
+
+            $sexo2 = new Sexo;
+            $sexo2->setSexo('F');
+            $sexo2->setDescripcion('Femenino');
+            $this->em->persist($sexo2);
+
+            $sexo3 = new Sexo;
+            $sexo3->setSexo('X');
+            $sexo3->setDescripcion('No binarie');
+            $this->em->persist($sexo3);
+        }
         
-        $estadoCivil3 = new EstadoCivil;
-        $estadoCivil3->setEstadoCivil('Divorciado/a');
-        $this->em->persist($estadoCivil3);
+        $tipoDocumento = $this->em->getRepository(TipoDocumento::class)->findAll();
+        if (!$tipoDocumento) {
+            $output->writeln('No hay tipos de documentos definidos en la base de datos');
+            $tipoDocumento1 = new TipoDocumento;
+            $tipoDocumento1->setTipoDocumento('DNI');
+            $this->em->persist($tipoDocumento1);
 
-        $estadoCivil4 = new EstadoCivil;
-        $estadoCivil4->setEstadoCivil('Viudo/a');
-        $this->em->persist($estadoCivil4);
+            $tipoDocumento2 = new TipoDocumento;
+            $tipoDocumento2->setTipoDocumento('CUIT');
+            $this->em->persist($tipoDocumento2);
 
+            $tipoDocumento3 = new TipoDocumento;
+            $tipoDocumento3->setTipoDocumento('Pasaporte');
+            $this->em->persist($tipoDocumento3);
 
-        $sexo1 = new Sexo;
-        $sexo1->setSexo('M');
-        $sexo1->setDescripcion('Masculino');
-        $this->em->persist($sexo1);
-        
-        $sexo2 = new Sexo;
-        $sexo2->setSexo('F');
-        $sexo2->setDescripcion('Femenino');
-        $this->em->persist($sexo2);
+            $tipoDocumento4 = new TipoDocumento;
+            $tipoDocumento4->setTipoDocumento('Cedula de Identidad');
+            $this->em->persist($tipoDocumento4);
+        }
 
-        $sexo3 = new Sexo;
-        $sexo3->setSexo('X');
-        $sexo3->setDescripcion('No Binarie');
-        $this->em->persist($sexo3);
+        $tipoCuitCuil = $this->em->getRepository(TipoCuitCuil::class)->findAll();
+        if (!$tipoCuitCuil) {
+            $output->writeln('No hay tipos de CUIT/CUIL definidos en la base de datos');
+            $tipoCuitCuil1 = new TipoCuitCuil;
+            $tipoCuitCuil1->setTipoCuitCuil('CUIT');
+            $this->em->persist($tipoCuitCuil1);
 
-        $tipoDoc1 = new TipoDocumento;
-        $tipoDoc1->setTipoDocumento('DNI');
-        $this->em->persist($tipoDoc1);
-
-        $tipoDoc2 = new TipoDocumento;
-        $tipoDoc2->setTipoDocumento('LE');
-        $this->em->persist($tipoDoc2);
-
-        $tipoDoc3 = new TipoDocumento;
-        $tipoDoc3->setTipoDocumento('LC');
-        $this->em->persist($tipoDoc3);
-
-        $tipoDoc4 = new TipoDocumento;
-        $tipoDoc4->setTipoDocumento('Otro');
-        $this->em->persist($tipoDoc4);
-
-        $tipoCuitCuil1 = new TipoCuitCuil;
-        $tipoCuitCuil1->setTipoCuitCuil('CUIT');
-        $this->em->persist($tipoCuitCuil1);
-        $tipoCuitCuil2 = new TipoCuitCuil;
-        $tipoCuitCuil2->setTipoCuitCuil('CUIL');
-        $this->em->persist($tipoCuitCuil2);
+            $tipoCuitCuil2 = new TipoCuitCuil;
+            $tipoCuitCuil2->setTipoCuitCuil('CUIL');
+            $this->em->persist($tipoCuitCuil2);
+        }        
 
         $this->em->flush();
         
@@ -142,7 +160,7 @@ class AddSuperAdminCommand extends Command
                 '',
             ]);
             $realmDB = $this->em->getRepository(Realm::class)->findOneBy(['realm' => $realm]);
-            $realmCK = $this->kc->getRealmByName($realm);
+            $realmKC = $this->kc->getRealmByName($realm);
         }
 
         if ($escenarioRealm['realmDB'] == true && $escenarioRealm['realmKC'] == false) {
@@ -151,7 +169,7 @@ class AddSuperAdminCommand extends Command
                 '',
             ]);
             $realmDB = $this->em->getRepository(Realm::class)->findOneBy(['realm' => $realm]);
-            $realmCK = $this->crearRealmKC();
+            $realmKC = $this->crearRealmKC();
         }
 
         if ($escenarioRealm['realmDB'] == false && $escenarioRealm['realmKC'] == true) {
@@ -160,7 +178,7 @@ class AddSuperAdminCommand extends Command
                 '',
             ]);
             $realmDB = $this->crearRealmDB();
-            $realmCK = $this->kc->getRealmByName($realm);
+            $realmKC = $this->kc->getRealmByName($realm);
         }
 
         if ($escenarioRealm['realmDB'] == false && $escenarioRealm['realmKC'] == false){
@@ -169,7 +187,7 @@ class AddSuperAdminCommand extends Command
                 '',
             ]);
             $realmDB = $this->crearRealmDB();
-            $realmCK = $this->crearRealmKC();
+            $realmKC = $this->crearRealmKC();
         }
 
         
@@ -203,6 +221,15 @@ class AddSuperAdminCommand extends Command
             ]);
             $grupoKC = $this->kc->getGroupByName($realm, $grupo, true);
             $grupoDB = $this->crearGrupoDB($realm, $grupo, $grupoKC);            
+        }
+
+        if ($escenarioGrupo['grupoDB'] == false && $escenarioGrupo['grupoKC'] == false){
+            $output->writeln([                
+                'No existe el grupo en la DB ni en KC... creando grupo en la DB y en KC',
+                '',
+            ]);
+            $grupoKC = $this->crearGrupoKC($realm, $grupo);
+            $grupoDB = $this->crearGrupoDB($realm, $grupo, $grupoKC);
         }
 
         //***************************************************************************
@@ -245,6 +272,8 @@ class AddSuperAdminCommand extends Command
 
             $roleDB = $this->crearRoleDB($realmDB, $grupoDB, $roleName, $roleCode, $roleKC);
         }
+
+        
 
         /*
         $grupo = new Grupo();
@@ -424,8 +453,11 @@ class AddSuperAdminCommand extends Command
     }
 
     private function crearGrupoKC($realm, $grupo){
-        $this->kc->createGroup($realm, $grupo);
+        //dd($realm, $grupo);
+        $a = $this->kc->createGroup($realm, $grupo);
+        dd($a);
         $grupoKC = $this->kc->getRealmGroups($grupo, $realm, $briefRepresentation = true);
+        dd($grupoKC);
         return $grupoKC;
     }
 
@@ -458,8 +490,10 @@ class AddSuperAdminCommand extends Command
     }
 
     private function crearRoleKC($realm, $grupo, $roleName, $roleCode) {
+        //dd($realm, $grupo, $roleName, $roleCode);
         $this->kc->createRole($realm, $grupo, $roleName, $roleCode);
-        $roleKC = $this->kc->getRole($roleName, $realm);        
+        $roleKC = $this->kc->getRole($roleName, $realm);
+        $this->kc->addRoleToGroup($realm, $grupo->id, $roleName);
         return $roleKC;
     }
 
