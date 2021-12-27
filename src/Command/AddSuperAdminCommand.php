@@ -24,6 +24,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Mapping\Id;
 use Symfony\Component\Console\Question\Question;
 
 #[AsCommand(
@@ -71,6 +72,8 @@ class AddSuperAdminCommand extends Command
         $grupoKC = null;
         $roleDB = null;
         $roleKC = null;
+        $roleGrupoKC = null;
+        $roleGrupoDB = null;
 
         //*********************************************************************
         //********** paso 0, Datos Iniciales **********************************
@@ -190,9 +193,50 @@ class AddSuperAdminCommand extends Command
             $realmKC = $this->crearRealmKC();
         }
 
+        //***************************************************************************
+        // paso 2, verificar el Rol ROLE_SUPER_ADMIN en Keycloak y en la DB ***********************
+        //***************************************************************************
+        $escenarioRol = $this->verificarRol($realm, $grupo, $roleCode, $roleName);
+        if ($escenarioRol['roleKC'] == true && $escenarioRol['roleDB'] == true) {
+            $output->writeln([                
+                'Existe el rol en la DB y en KC... continuando',
+                '',
+            ]);
+            $roleKC = $this->kc->getRoleByName($realm, $roleName);
+            $roleDB = $this->em->getRepository(Rol::class)->findOneBy(['nombre' => $roleCode]);
+        }
+
+        if ($escenarioRol['roleKC'] == true && $escenarioRol['roleDB'] == false) {
+            $output->writeln([                
+                'Existe el rol en KC y no en la DB... creando rol en la DB',
+                '',
+            ]);
+            $roleKC = $this->kc->getRole($roleName, $realm);
+            $roleDB = $this->crearRoleDB($realmDB, $grupoDB, $roleName, $roleCode, $roleKC);
+        }
+
+        if ($escenarioRol['roleKC'] == false && $escenarioRol['roleDB'] == true) {
+            $output->writeln([                
+                'Existe el rol en la DB y no en KC... creando rol en KC',
+                '',
+            ]);
+            $roleKC = $this->crearRoleKC($realm, $grupoKC, $roleCode, $roleName);
+            $roleDB = $this->em->getRepository(Rol::class)->findOneBy(['nombre' => $roleCode]);
+        }
+
+        if ($escenarioRol['roleKC'] == false && $escenarioRol['roleDB'] == false) {
+            $output->writeln([                
+                'No existe el rol en la DB ni en KC... creando rol en la DB y KC',
+                '',
+            ]);
+            $roleKC = $this->crearRoleKC($realm, $grupoKC, $roleCode, $roleName);
+
+            $roleDB = $this->crearRoleDB($realmDB, $grupoDB, $roleName, $roleCode, $roleKC);
+        }
+
         
         //***************************************************************************
-        //****** paso 2, verificar el grupo en Keycloak y en la DB ********************************
+        //****** paso 3, verificar el grupo en Keycloak y en la DB ********************************
         //***************************************************************************
         $escenarioGrupo = $this->verificarGrupo($realm, $grupo);
         if ($escenarioGrupo['grupoDB'] == true && $escenarioGrupo['grupoKC'] == true) {
@@ -201,7 +245,7 @@ class AddSuperAdminCommand extends Command
                 '',
             ]);
             $grupoDB = $this->em->getRepository(Grupo::class)->findOneBy(['nombre' => $grupo]);
-            $grupoKC = $this->kc->getGroupByName($realm, $grupo);
+            $grupoKC = $this->getGroupKC($realm, $grupo) ;
         }
 
         if ($escenarioGrupo['grupoDB'] == true && $escenarioGrupo['grupoKC'] == false) {
@@ -219,8 +263,8 @@ class AddSuperAdminCommand extends Command
                 'Existe el grupo en KC y no en la DB... creando grupo en la DB',
                 '',
             ]);
-            $grupoKC = $this->kc->getGroupByName($realm, $grupo, true);
-            $grupoDB = $this->crearGrupoDB($realm, $grupo, $grupoKC);            
+            $grupoKC = $this->getGroupKC($realm, $grupo) ;
+            $grupoDB = $this->crearGrupoDB($realmDB, $grupo, $grupoKC);            
         }
 
         if ($escenarioGrupo['grupoDB'] == false && $escenarioGrupo['grupoKC'] == false){
@@ -229,89 +273,49 @@ class AddSuperAdminCommand extends Command
                 '',
             ]);
             $grupoKC = $this->crearGrupoKC($realm, $grupo);
-            $grupoDB = $this->crearGrupoDB($realm, $grupo, $grupoKC);
+            $grupoDB = $this->crearGrupoDB($realmDB, $grupo, $grupoKC);
         }
 
-        //***************************************************************************
-        // paso 3, verificar el Rol ROLE_SUPER_ADMIN en Keycloak y en la DB ***********************
-        //***************************************************************************
-        $escenarioRol = $this->verificarRol($realm, $grupo, $roleCode, $roleName);
-        if ($escenarioRol['roleKC'] == true && $escenarioRol['roleDB'] == true) {
-            $output->writeln([                
-                'Existe el rol en la DB y en KC... continuando',
-                '',
-            ]);
-            $roleKC = $this->kc->getRoleByName($realm, $roleName);
-            $roleDB = $this->em->getRepository(Rol::class)->findOneBy(['nombre' => $roleCode]);
-        }
-
-        if ($escenarioRol['roleKC'] == true && $escenarioRol['roleDB'] == false) {
-            $output->writeln([                
-                'Existe el rol en KC y no en la DB... creando rol en la DB',
-                '',
-            ]);
-            $roleKC = $this->kc->getRoleByName($realm, $roleName);
-            $roleDB = $this->crearRoleDB($realmDB, $roleCode, $roleName, $roleKC, $roleKC);
-        }
-
-        if ($escenarioRol['roleKC'] == false && $escenarioRol['roleDB'] == true) {
-            $output->writeln([                
-                'Existe el rol en la DB y no en KC... creando rol en KC',
-                '',
-            ]);
-            $roleKC = $this->crearRoleKC($realm, $grupo, $roleCode, $roleName);
-            $roleDB = $this->em->getRepository(Rol::class)->findOneBy(['nombre' => $roleCode]);
-        }
-
-        if ($escenarioRol['roleKC'] == false && $escenarioRol['roleDB'] == false) {
-            $output->writeln([                
-                'No existe el rol en la DB ni en KC... creando rol en la DB y KC',
-                '',
-            ]);
-            $roleKC = $this->crearRoleKC($realm, $grupo, $roleCode, $roleName);
-
-            $roleDB = $this->crearRoleDB($realmDB, $grupoDB, $roleName, $roleCode, $roleKC);
-        }
 
         //*************************************************************************
-        // paso 3, verificar la relación entre Grupo y Role ***********************
+        // paso 4, verificar la relación entre Grupo y Role ***********************
         //*************************************************************************
-        $escenarioGrupoRol = $this->verificarGrupoRole($realm, $grupoKC, $grupoDB, $roleName, $roleCode);
-        if ($escenarioGrupoRol['grupoRolKC'] == true && $escenarioGrupoRol['grupoRolDB'] == true) {
+        $escenarioGrupoRol = $this->verificarGrupoRole($realm, $grupoKC, $grupoDB, $roleCode, $roleName, $roleDB);
+       
+        if ($escenarioGrupoRol['grupoRoleKC'] == true && $escenarioGrupoRol['grupoRoleDB'] == true) {
             $output->writeln([                
                 'Existe la relación entre grupo y rol en la DB y KC... continuando',
                 '',
             ]);
-            $grupoRolKC = $this->kc->getGroupRoleByName($realm, $grupoKC, $roleCode);
-            $grupoRolDB = $this->em->getRepository(GrupoRol::class)->findOneBy(['grupo' => $grupoDB, 'rol' => $roleDB]);
+            $grupoRoleKC = $this->kc->getGroupRoleByName($realm, $grupoKC->id, $roleName);
+            $grupoRoleDB = $this->em->getRepository(GrupoRol::class)->findOneBy(['grupo' => $grupoDB, 'rol' => $roleDB]);
         }
 
-        if ($escenarioGrupoRol['grupoRolKC'] == true && $escenarioGrupoRol['grupoRolDB'] == false) {
+        if ($escenarioGrupoRol['grupoRoleKC'] == true && $escenarioGrupoRol['grupoRoleDB'] == false) {
             $output->writeln([                
                 'Existe la relación entre grupo y rol en la DB y no KC... creando relación en la DB',
                 '',
             ]);
-            $grupoRolKC = $this->kc->getGroupRoleByName($realm, $grupoKC, $roleCode);
-            $grupoRolDB = $this->crearGrupoRolDB($realmDB, $grupoDB, $roleDB, $grupoRolKC);
+            $grupoRoleKC = $this->kc->getGroupRoleByName($realm, $grupoKC->id, $roleName);
+            $grupoRoleDB = $this->crearGrupoRoleDB($grupoDB, $roleDB);
         }
 
-        if ($escenarioGrupoRol['grupoRolKC'] == false && $escenarioGrupoRol['grupoRolDB'] == true) {
+        if ($escenarioGrupoRol['grupoRoleKC'] == false && $escenarioGrupoRol['grupoRoleDB'] == true) {
             $output->writeln([                
                 'Existe la relación entre grupo y rol en KC y no en la DB... creando relación en KC',
                 '',
             ]);
-            $grupoRolKC = $this->crearGrupoRolKC($realm, $grupoKC, $roleCode, $roleName);
-            $grupoRolDB = $this->em->getRepository(GrupoRol::class)->findOneBy(['grupo' => $grupoDB, 'rol' => $roleDB]);
+            $grupoRoleKC = $this->crearGrupoRoleKC($realm, $grupoKC, $roleKC, $roleName, $roleCode);
+            $grupoRoleDB = $this->em->getRepository(GrupoRol::class)->findOneBy(['grupo' => $grupoDB, 'rol' => $roleDB]);
         }
 
-        if ($escenarioGrupoRol['grupoRolKC'] == false && $escenarioGrupoRol['grupoRolDB'] == false) {
+        if ($escenarioGrupoRol['grupoRoleKC'] == false && $escenarioGrupoRol['grupoRoleDB'] == false) {
             $output->writeln([                
                 'No existe la relación entre grupo y rol en la DB ni en KC... creando relación en la DB y KC',
                 '',
             ]);
-            $grupoRolKC = $this->crearGrupoRolKC($realm, $grupoKC, $roleCode, $roleName);
-            $grupoRolDB = $this->crearGrupoRolDB($realmDB, $grupoDB, $roleDB, $grupoRolKC);
-        }
+            $grupoRoleKC = $this->crearGrupoRoleKC($realm, $grupoKC, $roleKC, $roleName, $roleCode);
+            $grupoRoleDB = $this->crearGrupoRoleDB($grupoDB, $roleDB);
 
         /*
         $grupo = new Grupo();
@@ -339,6 +343,14 @@ class AddSuperAdminCommand extends Command
 
 */
 
+        $output->writeln([                
+            '===================================================================================',
+            '',
+        ]);
+        $output->writeln([                
+            '',
+            '',
+        ]);
 
         $io = new SymfonyStyle($input, $output);
         $helper = $this->getHelper('question');
@@ -437,6 +449,7 @@ class AddSuperAdminCommand extends Command
 
         return Command::SUCCESS;
     }
+    }
 
     private function verificarRealm($realm) {
         $realmDB = $this->em->getRepository(Realm::class)->findOneBy(["realm"=>$realm]);
@@ -501,20 +514,55 @@ class AddSuperAdminCommand extends Command
         return $escenarioGrupo;
     }
 
+    private function getGroupKC($realm, $grupo) {
+        $grupoKC = $this->kc->getRealmGroups($grupo, $realm, $briefRepresentation = true);
+        
+
+        foreach ($grupoKC as $gKc) {
+            if ($gKc->name == $grupo) {
+                $group = $gKc;
+                
+                break;
+            } else {
+                $group = null;
+            }
+             
+        }
+
+        if (is_array($group)) {
+            $group = json_decode(json_encode($group));
+            dd($group);
+        }
+
+        return $group;
+    }
+
     private function crearGrupoKC($realm, $grupo){
         $a = $this->kc->createGroup($realm, $grupo);
-        dd($a);
-        $grupoKC = $this->kc->getRealmGroups($grupo, $realm, $briefRepresentation = true);
-        dd($grupoKC);
+        //dd($a);
+        $grupoKC = $this->kc->getRealmGroups($grupo, $realm, $briefRepresentation = false);
+        if (is_array($grupoKC)) {
+            $grupoKC = $grupoKC[0];
+        }
         return $grupoKC;
     }
 
-    private function crearGrupoDB($realm, $grupo, $grupoKC){
+    private function crearGrupoDB($realmDB, $grupo, $grupoKC){
+        
+        if (is_array($grupoKC)) {
+            $grupoKCId = $grupoKC[0];
+            $grupoKCId = $grupoKCId->id;
+        }
+        if (is_object($grupoKC)) {
+            $grupoKCId = $grupoKC->id;
+        }
         $grupoDB = new Grupo();
         $grupoDB->setNombre($grupo);
-        $grupoDB->setRealm($realm);
-        $grupoDB->setKeycloakGroupId($grupoKC->id);
+        $grupoDB->setRealm($realmDB);
+        $grupoDB->setKeycloakGroupId($grupoKCId);
+        
         $this->em->persist($grupoDB);
+       
         return $grupoDB;
     }
 
@@ -537,21 +585,28 @@ class AddSuperAdminCommand extends Command
         return $escenarioRol;
     }
 
-    private function crearRoleKC($realm, $grupo, $roleName, $roleCode) {
-        //dd($realm, $grupo, $roleName, $roleCode);
-        $this->kc->createRole($realm, $grupo, $roleName, $roleCode);
+    private function crearRoleKC($realm, $grupoKC, $roleCode, $roleName) {
+        
+        $this->kc->createRole($realm, $roleName, $roleCode);        
         $roleKC = $this->kc->getRole($roleName, $realm);
-        $this->kc->addRoleToGroup($realm, $grupo->id, $roleName);
+        
         return $roleKC;
     }
 
-    private function crearRoleDB($realmDB, $grupo, $roleName, $roleCode, $roleKC) {
+    private function crearRoleDB($realmDB, $grupoDB, $roleName, $roleCode, $roleKC) {
         $roleDB = new Role();
         $roleDB->setRealm($realmDB);
         $roleDB->setName($roleName);
         $roleDB->setCode($roleCode);
         $roleDB->setKeycloakRoleId($roleKC->id);
+        
+        $roleGrupoDB = new RoleGrupo();
+        $roleGrupoDB->setRole($roleDB);
+        $roleGrupoDB->setGrupo($grupoDB);
+
         $this->em->persist($roleDB);
+        $this->em->persist($roleGrupoDB);
+
         return $roleDB;
     }
 
@@ -559,24 +614,32 @@ class AddSuperAdminCommand extends Command
         $this->kc->postUsuario(
             $personaFisica->getCuitCuil(),
             $email,
-            $personaFisica->getNombre(),
+            $personaFisica->getNombres(),
             $personaFisica->getApellido(),
-            $personaFisica->getDni(),
+            $personaFisica->getNroDoc(),
             true,
             $realm
         );
-        $usuarioKC = $this->kc->getUserByUsernameAndRealm($$personaFisica->getCuilCuit(), $realm);
+        $usuarioKC = $this->kc->getUserByUsernameAndRealm($personaFisica->getCuitCuil(), $realm);
         return $usuarioKC;
     }
 
-    private function verificarGrupoRole($realm, $grupoKC, $grupoDB, $roleCode, $roleName) {
-        $grupoRoleKC = $this->kc->getGroupRole($realm, $grupoKC->id, $roleName);
-        $grupoRoleDB = $this->em->getRepository(GrupoRole::class)->findOneBy(["grupo"=>$grupoDB, "role"=>$roleCode]);
+    private function verificarGrupoRole($realm, $grupoKC, $grupoDB, $roleCode, $roleName, $roleDB) {
+        
+        $grupoRoleKC = $this->kc->getGroupRoleByName($realm, $grupoKC->id, $roleName);        
+        $grupoRoleDB = $this->em->getRepository(RoleGrupo::class)->findOneBy(["grupo"=>$grupoDB, "role"=>$roleDB]);
+        
 
         if ($grupoRoleDB == false) {
             $grupoRoleDB = false;
         } else {
             $grupoRoleDB = true;
+        }
+
+        if ($grupoRoleKC == false) {
+            $grupoRoleKC = false;
+        } else {
+            $grupoRoleKC = true;
         }
 
         $escenarioGrupoRole = [
@@ -585,6 +648,22 @@ class AddSuperAdminCommand extends Command
         ];
 
         return $escenarioGrupoRole;
+    }
+
+    private function crearGrupoRoleKC($realm, $grupoKC, $roleKC, $roleName, $roleCode) {        
+        $this->kc->addRoleToGroup($realm, $grupoKC->id, $roleKC);
+        
+        $grupoRoleKC = $this->kc->getGroupRoleByName($realm, $grupoKC->id, $roleName);                                 
+        
+        return $grupoRoleKC;
+    }
+
+    private function crearGrupoRoleDB($grupoDB, $roleDB) {
+        $grupoRoleDB = new RoleGrupo();
+        $grupoRoleDB->setGrupo($grupoDB);
+        $grupoRoleDB->setRole($roleDB);        
+        $this->em->persist($grupoRoleDB);
+        return $grupoRoleDB;
     }
     
 }
