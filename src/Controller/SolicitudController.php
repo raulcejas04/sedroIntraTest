@@ -12,9 +12,11 @@ use App\Form\NuevaSolicitudType;
 use App\Form\RepresentacionType;
 use App\Service\KeycloakApiSrv;
 use App\Controller\KeycloakFullApiController;
+use App\Entity\DispositivoResponsable;
 use App\Entity\User;
 use App\Entity\Realm;
 use App\Form\ReenviarEmailType;
+use DateTime;
 use Proxies\__CG__\App\Entity\Menu;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -145,7 +147,27 @@ class SolicitudController extends AbstractController
         $entityManager = $this->getDoctrine()->getManager();
         $solicitud = $entityManager->getRepository('App\Entity\Solicitud')->findOneByHash($hash);
 
+
         $solicitud->setFechaAlta(new \DateTime('now'));
+
+        if ($solicitud->getDispositivo()) {
+            $this->addFlash('danger', 'El dispositivo ya fue creado.');
+           // return $this->redirectToRoute('dashboard');
+        } else {
+            $dispositivo = new Dispositivo();
+            $dispositivo->setNicname($solicitud->getNicname());
+            $dispositivo->setFechaAlta(new DateTime());
+            //Asignamos el responsable al dispositivo
+            $dispositivoResponsable = new DispositivoResponsable();
+            $dispositivoResponsable->setPersonaFisica($solicitud->getPersonaFisica());
+            $dispositivoResponsable->setDispositivo($dispositivo);
+            $dispositivoResponsable->setOwner(true);
+            $dispositivo->addResponsable($dispositivoResponsable);
+            $dispositivo->setPersonaJuridica($solicitud->getPersonaJuridica());
+            $solicitud->setDispositivo($dispositivo);
+            
+            $this->addFlash('success','Dispositivo creado correctamente.');
+        }
 
         $password = substr(md5(uniqid(rand(1, 100))), 1, 6);
         //Crea usuario en keycloak y en la tabla usuarios
@@ -153,17 +175,17 @@ class SolicitudController extends AbstractController
 
         if ($escenario['usuarioKeycloak'] == true && $escenario['usuarioDb'] == true) {
             $this->addFlash('danger', 'El usuario ya existe en Keycloak y en la base de datos');
-            return $this->redirectToRoute('dashboard');
+            //return $this->redirectToRoute('dashboard');
         }
 
         if ($escenario['usuarioKeycloak'] == true && $escenario['usuarioDb'] == false) {
             $this->addFlash('danger', 'Inconsistencia: El usuario ya existe en Keycloak pero no en la base de datos');
-            return $this->redirectToRoute('dashboard');
+            //return $this->redirectToRoute('dashboard');
         }
 
         if ($escenario['usuarioKeycloak'] == false && $escenario['usuarioDb'] == true) {
             $this->addFlash('danger', 'Inconsistencia: El usuario ya existe en la base de datos pero no en Keycloak');
-            return $this->redirectToRoute('dashboard');
+          //  return $this->redirectToRoute('dashboard');
         }
 
         if ($escenario['usuarioKeycloak'] == false && $escenario['usuarioDb'] == false) {
@@ -185,13 +207,13 @@ class SolicitudController extends AbstractController
                 ]);
             $solicitud->setUsuario($nuevoUsuarioDb);
             $mailer->send($email);
-        }
 
+            $this->addFlash('success', 'Usuario creado con éxito! Se envió un email a ' . $solicitud->getMail() . ' con los datos de acceso');
+
+        }
         $entityManager->persist($solicitud);
         $entityManager->flush();
-
-        $this->addFlash('success', 'Usuario creado con éxito! Se envió un email a ' . $solicitud->getMail() . ' con los datos de acceso');
-        //dd();            
+               
         return $this->redirectToRoute('dashboard');
     }
 
