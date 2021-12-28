@@ -108,7 +108,6 @@ class KeycloakFullApiController extends AbstractController
         // example creating user https://www.appsdeveloperblog.com/keycloak-rest-api-create-a-new-user/
 
         $user = $this->getUserByUsername($username);
-        //dd($user);
         $token = $this->getTokenAdmin();
         $base_uri_keycloak = $this->getParameter('keycloak-server-url');
         $uri =
@@ -134,7 +133,6 @@ class KeycloakFullApiController extends AbstractController
         $res = $this->client->put($uri, $params);
 
         $data = json_decode($res->getBody());
-        //dd($data);
         return $data;
     }
 
@@ -161,12 +159,11 @@ class KeycloakFullApiController extends AbstractController
             'json' => $modif,
         ];
 
-        //dd($params);
 
         $res = $this->client->put($uri, $params);
 
         $data = json_decode($res->getBody());
-        //dd($data);
+
         return $data;
     }
 
@@ -183,7 +180,6 @@ class KeycloakFullApiController extends AbstractController
         $uri = str_replace('{realm}', $realm, $uri);
         $uri = str_replace('{id}', $usuario_id, $uri);
 
-        //dd($uri);
         $params = [
             'headers' => ['Authorization' => 'Bearer ' . $token->access_token],
         ];
@@ -333,7 +329,11 @@ class KeycloakFullApiController extends AbstractController
         //echo $uri."<br>";
         $res = $this->client->get($uri, $params);
         $data = json_decode($res->getBody());
-        return new JsonResponse($data[0]);
+        if (is_array($data)) {
+            return $data[0];
+        } else {
+            return $data;
+        }
     }
 
     /**
@@ -595,7 +595,7 @@ class KeycloakFullApiController extends AbstractController
         $res = $this->client->put($uri, $params);
 
         $data = json_decode($res->getBody());
-        //dd($data);
+
         return $data;
     }
 
@@ -897,7 +897,6 @@ class KeycloakFullApiController extends AbstractController
 
     public function createRole($realm, $roleName, $roleCode)
     {
-        //dd($realm, $roleName, $roleCode);
         $token = $this->getTokenAdmin();
         $auth_url = $this->getParameter('keycloak-server-url');
         $uri = $auth_url . "/admin/realms/{realm}/roles";
@@ -910,12 +909,17 @@ class KeycloakFullApiController extends AbstractController
             'debug' => true,
             'json' => [
                 'name' => $roleName,                
-                'description' => $roleName
-                /* TODO: Esto no funciona, no se porque
+                'description' => $roleName,                
+                //Esto debería funcionar, pero no mete los atributos en el role
+                /*
                 'attributes' => [
-                    "Super_Admin"=> $roleCode
-                    ]
+                    0 => [
+                        "Super_Admin"=> $roleCode
+                    ],
+                    
+                ]     
                 */
+                           
             ],
         ];
 
@@ -939,7 +943,7 @@ class KeycloakFullApiController extends AbstractController
 
         $uri = str_replace('{realm}', $realm, $uri);
         $uri = $uri . "?briefRepresentation=" . ($briefRepresentation ? "true" : "false");
-        //dd($uri);
+
         $params = ['headers' => ['Authorization' => "Bearer " . $token->access_token]];
 
         $res = $this->client->get($uri, $params);
@@ -968,9 +972,7 @@ class KeycloakFullApiController extends AbstractController
             'debug' => true,
             'json' => [
                 'name' => $groupName,
-                'realmRoles' => [
-                    'SuperAdministradores'
-                ],
+                
             ],
         ];
         $res = $this->client->post($uri, $params);
@@ -990,6 +992,7 @@ class KeycloakFullApiController extends AbstractController
         $uri = str_replace('{realm}', $realm, $uri);
         $uri = str_replace('{group-id}', $groupId, $uri);
         $uri = str_replace('{role-name}', $roleKC->name, $uri);
+
         $params = [
             'headers' => [
                 'Content-Type' => 'application/json',
@@ -997,19 +1000,15 @@ class KeycloakFullApiController extends AbstractController
             ],
             'debug' => true,
             'json' => [
-                'RoleRepresentation' => [
-                    'id' => $roleKC->id,
-                    'name' => $roleKC->name,
-                    "scopeParamRequired" => false,
-                    "composite" => false,
-                    "clientRole" => false, 
-                    "containerId"=> $realm,
-                    
-                    
-                ]
-            ],
+                'id' => $roleKC->id,
+                'name' => $roleKC->name,
+                "scopeParamRequired" => false,
+                "composite" => false,
+                "clientRole" => false, 
+                "containerId"=> $realm,
+            ]
         ];
-        $res = $this->client->get($uri, $params);
+        $res = $this->client->post($uri, $params);
         $data = json_decode($res->getBody());
         return $data;
     }
@@ -1027,7 +1026,7 @@ class KeycloakFullApiController extends AbstractController
         return $data;
     }
 
-    public function getGroupRoleByName($realm, $groupId, $roleName)
+    public function getRoleGroupByName($realm, $groupId, $roleName)
     {
         $token = $this->getTokenAdmin();
         $auth_url = $this->getParameter('keycloak-server-url');
@@ -1055,6 +1054,29 @@ class KeycloakFullApiController extends AbstractController
         $params = ['headers' => ['Authorization' => "Bearer " . $token->access_token]];
         $res = $this->client->put($uri, $params);
         $data = json_decode($res->getBody());
+        return $data;
+    }
+
+    /**
+     * List one user in the realm by username
+     * GET /admin/realms/{realm}/users
+     */
+    public function getUserInRealmByUsername($realm, $username)
+    {
+        $token = $this->getTokenAdmin();
+
+        $auth_url = $this->getParameter('keycloak-server-url');
+        $uri = $auth_url . '/admin/realms/{realm}/users';    
+        $uri = str_replace('{realm}', $realm, $uri);
+        $uri = $uri . '?username=' . $username;
+
+        $params = [
+            'headers' => ['Authorization' => 'Bearer ' . $token->access_token],
+        ];
+        //echo $uri."<br>";
+        $res = $this->client->get($uri, $params);
+        $data = json_decode($res->getBody());
+
         return $data;
     }
     

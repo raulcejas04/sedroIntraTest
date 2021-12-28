@@ -72,31 +72,6 @@ class SuperAdminController extends AbstractController
     /******************************************************************************************
      * REALMS
      ******************************************************************************************/
-
-    #[Route('/realm-test', name: 'realm_index_test', methods: ['GET'])]
-    public function indexRealmTest(RealmRepository $realmRepository): Response
-    {
-        $roleKC = $this->ks->getRoleInRealmbyName('Intranet', 'SuperAdministrador');
-        
-        if ($roleKC == false) {
-            $roleKC = false;
-        } else {
-            $roleKC = true;
-        }
-
-        
-        $realm = $this->keycloak->getRealmByName('asdasdddasdasd');
-        $content = (json_decode($realm->getContent()))->content;
-        if ($content == 200 || $content == "200") {
-            $a = true;
-        } else {
-            $a = false;
-        }
-        return $this->renderView('realm/index.html.twig', [
-            'realms' => $realm
-        ]);
-    }
-
     #[Route('/realm/', name: 'realm_index', methods: ['GET'])]
     public function indexRealm(RealmRepository $realmRepository): Response
     {
@@ -761,5 +736,13 @@ class SuperAdminController extends AbstractController
 
         return $this->redirectToRoute('estado_civil_index', [], Response::HTTP_SEE_OTHER);
     }
+
+    #[Route('/escenarios/escenarios', name: 'escenarios', methods: ['GET'])]
+    public function escenarios(): Response
+    {
+        $response = new Response($this->renderView('escenarios/index.html.twig', []));
+        return $response;
+    }
+    
 
 }

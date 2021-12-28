@@ -22,7 +22,7 @@ class ValidarSolicitudSrv extends AbstractController
     }
 
     //public function validarSolicitud($solicitud){
-    public function validarSolicitud($personaFisica, $personaJuridica, $dispositivo, $usuario, $usuarioDispositivo){
+    public function validarSolicitud($personaFisica, $personaJuridica, $dispositivo, $usuario, $usuarioDispositivo, $ambiente = 'Intranet'){
         /*
         $entityManager = $this->getDoctrine()->getManager();
 
@@ -53,6 +53,17 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if ($personaFisica == true && $personaJuridica == true && $dispositivo == true && $usuario == true && $usuarioDispositivo == true) {
             $this->addFlash('danger', 'Escenario #1: Error no deja seguir si está vigente');
+            
+            switch ($ambiente) {
+                case 'Extranet':
+                    # code...
+                    break;
+                
+                default:
+                    # code...
+                    break;
+            }
+
             return $this->redirectToRoute('dashboard');
             
         }
@@ -67,6 +78,17 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if ($personaFisica == true && $personaJuridica == true && $dispositivo == true && $usuario == true && $usuarioDispositivo == false) {
             $this->addFlash('danger', 'Escenario # 2: Trabaja en otro dispositivo');
+            
+            switch ($ambiente) {
+                case 'Extranet':
+                    # code...
+                    break;
+                
+                default:
+                    # code...
+                    break;
+            }
+
             return $this->redirectToRoute('dashboard');
             
         }
@@ -81,6 +103,7 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if ($personaFisica == true && $personaJuridica == true && $dispositivo == true && $usuario == false && $usuarioDispositivo == true) {
             $this->addFlash('danger', 'Escenario # 3: INCONSISTENCIA');
+            
             return $this->redirectToRoute('dashboard');
             
         }
@@ -95,6 +118,17 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if ($personaFisica == true && $personaJuridica == true && $dispositivo == true && $usuario == false && $usuarioDispositivo == false) {
             $this->addFlash('danger', 'Escenario # 4: Paciente');
+            
+            switch ($ambiente) {
+                case 'Extranet':
+                    # code...
+                    break;
+                
+                default:
+                    # code...
+                    break;
+            }
+
             return $this->redirectToRoute('dashboard');
             
         }
@@ -109,6 +143,17 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if ($personaFisica == true && $personaJuridica == true && $dispositivo == false && $usuario == true && $usuarioDispositivo == true) {
             $this->addFlash('danger', 'Escenario # 5: El usuario existe en otro dispositivo');
+            
+            switch ($ambiente) {
+                case 'Extranet':
+                    # code...
+                    break;
+                
+                default:
+                    # code...
+                    break;
+            }
+
             return $this->redirectToRoute('dashboard');
             
         }
@@ -123,6 +168,17 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if ($personaFisica == true && $personaJuridica == true && $dispositivo == true && $usuario == true && $usuarioDispositivo == false) {
             $this->addFlash('danger', 'Escenario # 6: El usuario existe en otro dispositivo y se da de alta en un dispositivo nuevo');
+            
+            switch ($ambiente) {
+                case 'Extranet':
+                    # code...
+                    break;
+                
+                default:
+                    # code...
+                    break;
+            }
+
             return $this->redirectToRoute('dashboard');
             
         }
@@ -137,6 +193,7 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if ($personaFisica == true && $personaJuridica == true && $dispositivo == false && $usuario == false && $usuarioDispositivo == true) {
             $this->addFlash('danger', 'Escenario # 7: INCONSISTENCIA');
+            
             return $this->redirectToRoute('dashboard');
             
         }
@@ -151,6 +208,17 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if ($personaFisica == true && $personaJuridica == true && $dispositivo == false && $usuario == false && $usuarioDispositivo == false) {
             $this->addFlash('danger', 'Escenario # 8: Paciente en un dispositivo nuevo');
+            
+            switch ($ambiente) {
+                case 'Extranet':
+                    # code...
+                    break;
+                
+                default:
+                    # code...
+                    break;
+            }
+
             return $this->redirectToRoute('dashboard');
             
         }
@@ -165,6 +233,7 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if ($personaFisica == true && $personaJuridica == false && $dispositivo == true && $usuario == true && $usuarioDispositivo == true) {
             $this->addFlash('danger', 'Escenario # 9: INCONSISTENCIA');
+            
             return $this->redirectToRoute('dashboard');
             
         }
@@ -179,6 +248,7 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if ($personaFisica == true && $personaJuridica == false && $dispositivo == true && $usuario == true && $usuarioDispositivo == false) {
             $this->addFlash('danger', 'Escenario # 10: INCONSISTENCIA');
+            
             return $this->redirectToRoute('dashboard');
             
         }
@@ -193,6 +263,7 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if ($personaFisica == true && $personaJuridica == false && $dispositivo == true && $usuario == false && $usuarioDispositivo == true) {
             $this->addFlash('danger', 'Escenario # 11: INCONSISTENCIA');
+            
             return $this->redirectToRoute('dashboard');
             
         }
@@ -207,6 +278,7 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if ($personaFisica == true && $personaJuridica == false && $dispositivo == true && $usuario == false && $usuarioDispositivo == false) {
             $this->addFlash('danger', 'Escenario # 12: INCONSISTENCIA');
+            
             return $this->redirectToRoute('dashboard');
             
         }
@@ -221,6 +293,17 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if ($personaFisica == true && $personaJuridica == false && $dispositivo == false && $usuario == true && $usuarioDispositivo == true) {
             $this->addFlash('danger', 'Escenario # 13: INCOSISTENCIA');
+            
+            switch ($ambiente) {
+                case 'Extranet':
+                    # code...
+                    break;
+                
+                default:
+                    # code...
+                    break;
+            }
+
             return $this->redirectToRoute('dashboard');
             
         }
@@ -235,6 +318,17 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if ($personaFisica == true && $personaJuridica == false && $dispositivo == false && $usuario == true && $usuarioDispositivo == false) {
             $this->addFlash('danger', 'Escenario # 14: trabaja en otro dispositivo de otra razón social');
+            
+            switch ($ambiente) {
+                case 'Extranet':
+                    # code...
+                    break;
+                
+                default:
+                    # code...
+                    break;
+            }
+
             return $this->redirectToRoute('dashboard');
             
         }
@@ -249,6 +343,7 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if ($personaFisica == true && $personaJuridica == false && $dispositivo == false && $usuario == false && $usuarioDispositivo == true) {
             $this->addFlash('danger', 'Escenario # 15: INCONSISTENCIA');
+            
             return $this->redirectToRoute('dashboard');
             
         }
@@ -263,6 +358,17 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if ($personaFisica == true && $personaJuridica == false && $dispositivo == false && $usuario == false && $usuarioDispositivo == false) {
             $this->addFlash('danger', 'Escenario # 16: alta persona jur, dispositivo, usuario, usuario_dispositivo');
+            
+            switch ($ambiente) {
+                case 'Extranet':
+                    # code...
+                    break;
+                
+                default:
+                    # code...
+                    break;
+            }
+
             return $this->redirectToRoute('dashboard');
             
         }
@@ -277,6 +383,7 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if ($personaFisica == false && $personaJuridica == true && $dispositivo == true && $usuario == true && $usuarioDispositivo == true) {
             $this->addFlash('danger', 'Escenario # 17: INCONSISTENCIA');
+            
             return $this->redirectToRoute('dashboard');
             
         }
@@ -291,6 +398,7 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if ($personaFisica == false && $personaJuridica == true && $dispositivo == true && $usuario == true && $usuarioDispositivo == false) {
             $this->addFlash('danger', 'Escenario # 18: INCONSISTENCIA');
+            
             return $this->redirectToRoute('dashboard');
             
         }
@@ -305,6 +413,7 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if ($personaFisica == false && $personaJuridica == true && $dispositivo == true && $usuario == false && $usuarioDispositivo == true) {
             $this->addFlash('danger', 'Escenario # 19: INCONSISTENCIA');
+            
             return $this->redirectToRoute('dashboard');
             
         }
@@ -319,6 +428,7 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if ($personaFisica == false && $personaJuridica == true && $dispositivo == true && $usuario == false && $usuarioDispositivo == false) {
             $this->addFlash('danger', 'Escenario # 20: INCONSISTENCIA');
+            
             return $this->redirectToRoute('dashboard');
             
         }
@@ -333,6 +443,7 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if ($personaFisica == false && $personaJuridica == true && $dispositivo == false && $usuario == true && $usuarioDispositivo == true) {
             $this->addFlash('danger', 'Escenario # 21: INCONSISTENCIA');
+            
             return $this->redirectToRoute('dashboard');
             
         }
@@ -347,6 +458,7 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if ($personaFisica == false && $personaJuridica == true && $dispositivo == false && $usuario == true && $usuarioDispositivo == false) {
             $this->addFlash('danger', 'Escenario # 22: INCONSISTENCIA');
+            
             return $this->redirectToRoute('dashboard');
             
         }
@@ -361,6 +473,7 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if ($personaFisica == false && $personaJuridica == true && $dispositivo == false && $usuario == false && $usuarioDispositivo == true) {
             $this->addFlash('danger', 'Escenario # 23: INCONSISTENCIA');
+            
             return $this->redirectToRoute('dashboard');
             
         }
@@ -375,6 +488,17 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if ($personaFisica == false && $personaJuridica == true && $dispositivo == false && $usuario == false && $usuarioDispositivo == false) {
             $this->addFlash('danger', 'Escenario # 24: Alta persona fisica, dispositivo, usuario, usuario_dispositivo');
+            
+            switch ($ambiente) {
+                case 'Extranet':
+                    # code...
+                    break;
+                
+                default:
+                    # code...
+                    break;
+            }
+
             return $this->redirectToRoute('dashboard');
             
         }
@@ -389,6 +513,7 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if ($personaFisica == false && $personaJuridica == false && $dispositivo == true && $usuario == true && $usuarioDispositivo == true) {
             $this->addFlash('danger', 'Escenario # 25: INCONSISTENCIA');
+            
             return $this->redirectToRoute('dashboard');
             
         }
@@ -403,6 +528,7 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if ($personaFisica == false && $personaJuridica == false && $dispositivo == true && $usuario == true && $usuarioDispositivo == false) {
             $this->addFlash('danger', 'Escenario # 26: INCONSISTENCIA');
+            
             return $this->redirectToRoute('dashboard');
             
         }
@@ -417,6 +543,7 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if ($personaFisica == false && $personaJuridica == false && $dispositivo == true && $usuario == false && $usuarioDispositivo == true) {
             $this->addFlash('danger', 'Escenario # 27: INCONSISTENCIA');
+            
             return $this->redirectToRoute('dashboard');
             
         }
@@ -431,6 +558,7 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if ($personaFisica == false && $personaJuridica == false && $dispositivo == true && $usuario == false && $usuarioDispositivo == false) {
             $this->addFlash('danger', 'Escenario # 28: INCONSISTENCIA');
+            
             return $this->redirectToRoute('dashboard');
             
         }
@@ -445,6 +573,7 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if ($personaFisica == false && $personaJuridica == false && $dispositivo == false && $usuario == true && $usuarioDispositivo == true) {
             $this->addFlash('danger', 'Escenario # 29: INCONSISTENCIA');
+            
             return $this->redirectToRoute('dashboard');
             
         }
@@ -459,6 +588,7 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if ($personaFisica == false && $personaJuridica == false && $dispositivo == false && $usuario == true && $usuarioDispositivo == false) {
             $this->addFlash('danger', 'Escenario # 30: INCONSISTENCIA');
+            
             return $this->redirectToRoute('dashboard');
             
         }
@@ -473,6 +603,7 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if ($personaFisica == false && $personaJuridica == false && $dispositivo == false && $usuario == false && $usuarioDispositivo == true) {
             $this->addFlash('danger', 'Escenario # 31: INCONSISTENCIA');
+            
             return $this->redirectToRoute('dashboard');
             
         }
@@ -487,17 +618,39 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if ($personaFisica == false && $personaJuridica == false && $dispositivo == false && $usuario == false && $usuarioDispositivo == false) {
             $this->addFlash('danger', 'Escenario # 32: Alta persona fisica, dispositivo, usuario, usuario_dispositivo');
+            
+            switch ($ambiente) {
+                case 'Extranet':
+                    # code...
+                    break;
+                
+                default:
+                    # code...
+                    break;
+            }
+
             return $this->redirectToRoute('dashboard');
             
         }
 
         $this->addFlash('danger', 'Ningún escenario se cumple');
+        
+        switch ($ambiente) {
+            case 'Extranet':
+                # code...
+                break;
+            
+            default:
+                # code...
+                break;
+        }
+
         return $this->redirectToRoute('dashboard');
 
     }
 
-    private function asd() {
-        
+    private function accionesSobreInconsistencias($escenario) {
+        //enviar un email a todos los superadministradores
     }
 
 }
