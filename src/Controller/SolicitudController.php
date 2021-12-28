@@ -15,6 +15,7 @@ use App\Controller\KeycloakFullApiController;
 use App\Entity\DispositivoResponsable;
 use App\Entity\User;
 use App\Entity\Realm;
+use App\Form\RechazarSolicitudType;
 use App\Form\ReenviarEmailType;
 use DateTime;
 use Proxies\__CG__\App\Entity\Menu;
@@ -152,7 +153,7 @@ class SolicitudController extends AbstractController
 
         if ($solicitud->getDispositivo()) {
             $this->addFlash('danger', 'El dispositivo ya fue creado.');
-           // return $this->redirectToRoute('dashboard');
+            // return $this->redirectToRoute('dashboard');
         } else {
             $dispositivo = new Dispositivo();
             $dispositivo->setNicname($solicitud->getNicname());
@@ -165,8 +166,8 @@ class SolicitudController extends AbstractController
             $dispositivo->addResponsable($dispositivoResponsable);
             $dispositivo->setPersonaJuridica($solicitud->getPersonaJuridica());
             $solicitud->setDispositivo($dispositivo);
-            
-            $this->addFlash('success','Dispositivo creado correctamente.');
+
+            $this->addFlash('success', 'Dispositivo creado correctamente.');
         }
 
         $password = substr(md5(uniqid(rand(1, 100))), 1, 6);
@@ -185,7 +186,7 @@ class SolicitudController extends AbstractController
 
         if ($escenario['usuarioKeycloak'] == false && $escenario['usuarioDb'] == true) {
             $this->addFlash('danger', 'Inconsistencia: El usuario ya existe en la base de datos pero no en Keycloak');
-          //  return $this->redirectToRoute('dashboard');
+            //  return $this->redirectToRoute('dashboard');
         }
 
         if ($escenario['usuarioKeycloak'] == false && $escenario['usuarioDb'] == false) {
@@ -209,11 +210,10 @@ class SolicitudController extends AbstractController
             $mailer->send($email);
 
             $this->addFlash('success', 'Usuario creado con éxito! Se envió un email a ' . $solicitud->getMail() . ' con los datos de acceso');
-
         }
         $entityManager->persist($solicitud);
         $entityManager->flush();
-               
+
         return $this->redirectToRoute('dashboard');
     }
 
@@ -270,6 +270,64 @@ class SolicitudController extends AbstractController
             ])
         ]);
     }
+
+    #[Route('/dashboard/solicitud/{hash}/rechazar-solicitud', name: 'solicitud_rechazar')]
+    public function rechazarSolicitud(Request $request, $hash, MailerInterface $mailer): Response
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+        $solicitud = $entityManager->getRepository('App\Entity\Solicitud')->findOneByHash($hash);
+
+        if (!$solicitud) {
+            $this->addFlash('danger', 'La solicitud no se encuentra o no existe');
+            return new JsonResponse([
+                "status" => "error",
+                "html" => $this->renderView('modales/flashAlertsModal.html.twig')
+            ]);
+        }
+
+        /*  if ($solicitud->getFechaUso()) {
+            $this->addFlash('danger', 'Los datos de la solicitud ya han sido completados.');
+            return new JsonResponse([
+                "status" => "error",
+                "html" => $this->renderView('modales/flashAlertsModal.html.twig')
+            ]);
+        } */
+
+        $form = $this->createForm(RechazarSolicitudType::class, $solicitud);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $solicitud->setAceptada(false);
+
+            $email = (new TemplatedEmail())
+                ->from($this->getParameter('direccion_email_salida'))
+                ->to($solicitud->getMail())
+                ->subject('Solicitud de invitación rechazada')
+                ->htmlTemplate('emails/rechazoSolicitud.html.twig')
+                ->context([
+                    'solicitud' => $solicitud
+                ]);
+
+            $mailer->send($email);
+
+            $entityManager->persist($solicitud);
+            $entityManager->flush();
+
+            return new JsonResponse([
+                "status" => "success",
+                "message" => "Solicitud rechazada correctamente. Se ha enviado un correo a " . $solicitud->getMail() . " con el motivo del rechazo."
+            ]);
+        }
+
+        return new JsonResponse([
+            "status" => "success",
+            "html" => $this->renderView('modales/rechazarSolicitudModal.html.twig', [
+                'solicitud' => $solicitud,
+                'formRechazarSolicitud' => $form->createView()
+            ])
+        ]);
+    }
+
 
     public function verificar($solicitud, $password, $mailer)
     {
