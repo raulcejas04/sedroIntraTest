@@ -33,6 +33,8 @@ class AjaxController extends AbstractController
     #[Route('/ajax/persona_fisica_x_cuit', name: 'get_persona_fisica_x_cuit')]
     public function get_persona_fisica_x_cuit(Request $request ): Response
     {
+        $formData = $request->request->all();
+        $cuit = $formData['cuit'];
     	//recibe cuil siempre sin guiones
     	$status = 'Not_Found'; // o 'Error' si hay algún problema, si existe 'Found'
     	$response = array(

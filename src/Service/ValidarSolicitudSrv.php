@@ -22,7 +22,7 @@ class ValidarSolicitudSrv extends AbstractController
     }
 
     //public function validarSolicitud($solicitud){
-    public function validarSolicitud($personaFisica, $personaJuridica, $dispositivo, $usuario, $usuarioDispositivo, $ambiente = 'Intranet'){
+    public function validarSolicitud($personaFisica, $personaJuridica, $dispositivo, $usuario, $usuarioDispositivo, $ambiente = 'Intranet', $paso = '1'){
         /*
         $entityManager = $this->getDoctrine()->getManager();
 
@@ -56,11 +56,33 @@ class ValidarSolicitudSrv extends AbstractController
             
             switch ($ambiente) {
                 case 'Extranet':
-                    # code...
+                    switch ($paso) {
+                        case '1':
+                            # code...
+                            break;
+                        case '2':
+                            # code...
+                            break;
+                        case '3':
+                            # code...
+                            break;
+                    }
+                    
                     break;
-                
-                default:
-                    # code...
+
+                case 'Intranet':
+                    switch ($paso) {
+                        case '1':
+                            # code...
+                            break;
+                        case '2':
+                            # code...
+                            break;
+                        case '3':
+                            # code...
+                            break;
+                    }
+
                     break;
             }
 
@@ -81,11 +103,33 @@ class ValidarSolicitudSrv extends AbstractController
             
             switch ($ambiente) {
                 case 'Extranet':
-                    # code...
+                    switch ($paso) {
+                        case '1':
+                            # code...
+                            break;
+                        case '2':
+                            # code...
+                            break;
+                        case '3':
+                            # code...
+                            break;
+                    }
+                    
                     break;
-                
-                default:
-                    # code...
+
+                case 'Intranet':
+                    switch ($paso) {
+                        case '1':
+                            # code...
+                            break;
+                        case '2':
+                            # code...
+                            break;
+                        case '3':
+                            # code...
+                            break;
+                    }
+
                     break;
             }
 
@@ -102,7 +146,7 @@ class ValidarSolicitudSrv extends AbstractController
          * Observaciones:
          */
         if ($personaFisica == true && $personaJuridica == true && $dispositivo == true && $usuario == false && $usuarioDispositivo == true) {
-            $this->addFlash('danger', 'Escenario # 3: INCONSISTENCIA');
+            $this->accionesSobreInconsistencias('3');
             
             return $this->redirectToRoute('dashboard');
             
@@ -121,11 +165,33 @@ class ValidarSolicitudSrv extends AbstractController
             
             switch ($ambiente) {
                 case 'Extranet':
-                    # code...
+                    switch ($paso) {
+                        case '1':
+                            # code...
+                            break;
+                        case '2':
+                            # code...
+                            break;
+                        case '3':
+                            # code...
+                            break;
+                    }
+                    
                     break;
-                
-                default:
-                    # code...
+
+                case 'Intranet':
+                    switch ($paso) {
+                        case '1':
+                            # code...
+                            break;
+                        case '2':
+                            # code...
+                            break;
+                        case '3':
+                            # code...
+                            break;
+                    }
+
                     break;
             }
 
@@ -146,11 +212,33 @@ class ValidarSolicitudSrv extends AbstractController
             
             switch ($ambiente) {
                 case 'Extranet':
-                    # code...
+                    switch ($paso) {
+                        case '1':
+                            # code...
+                            break;
+                        case '2':
+                            # code...
+                            break;
+                        case '3':
+                            # code...
+                            break;
+                    }
+                    
                     break;
-                
-                default:
-                    # code...
+
+                case 'Intranet':
+                    switch ($paso) {
+                        case '1':
+                            # code...
+                            break;
+                        case '2':
+                            # code...
+                            break;
+                        case '3':
+                            # code...
+                            break;
+                    }
+
                     break;
             }
 
@@ -171,11 +259,33 @@ class ValidarSolicitudSrv extends AbstractController
             
             switch ($ambiente) {
                 case 'Extranet':
-                    # code...
+                    switch ($paso) {
+                        case '1':
+                            # code...
+                            break;
+                        case '2':
+                            # code...
+                            break;
+                        case '3':
+                            # code...
+                            break;
+                    }
+                    
                     break;
-                
-                default:
-                    # code...
+
+                case 'Intranet':
+                    switch ($paso) {
+                        case '1':
+                            # code...
+                            break;
+                        case '2':
+                            # code...
+                            break;
+                        case '3':
+                            # code...
+                            break;
+                    }
+
                     break;
             }
 
@@ -192,7 +302,7 @@ class ValidarSolicitudSrv extends AbstractController
          * Observaciones:
          */
         if ($personaFisica == true && $personaJuridica == true && $dispositivo == false && $usuario == false && $usuarioDispositivo == true) {
-            $this->addFlash('danger', 'Escenario # 7: INCONSISTENCIA');
+            $this->accionesSobreInconsistencias('7');
             
             return $this->redirectToRoute('dashboard');
             
@@ -211,11 +321,33 @@ class ValidarSolicitudSrv extends AbstractController
             
             switch ($ambiente) {
                 case 'Extranet':
-                    # code...
+                    switch ($paso) {
+                        case '1':
+                            # code...
+                            break;
+                        case '2':
+                            # code...
+                            break;
+                        case '3':
+                            # code...
+                            break;
+                    }
+                    
                     break;
-                
-                default:
-                    # code...
+
+                case 'Intranet':
+                    switch ($paso) {
+                        case '1':
+                            # code...
+                            break;
+                        case '2':
+                            # code...
+                            break;
+                        case '3':
+                            # code...
+                            break;
+                    }
+
                     break;
             }
 
@@ -232,7 +364,7 @@ class ValidarSolicitudSrv extends AbstractController
          * Observaciones:
          */
         if ($personaFisica == true && $personaJuridica == false && $dispositivo == true && $usuario == true && $usuarioDispositivo == true) {
-            $this->addFlash('danger', 'Escenario # 9: INCONSISTENCIA');
+            $this->accionesSobreInconsistencias('9');
             
             return $this->redirectToRoute('dashboard');
             
@@ -247,7 +379,7 @@ class ValidarSolicitudSrv extends AbstractController
          * Observaciones:
          */
         if ($personaFisica == true && $personaJuridica == false && $dispositivo == true && $usuario == true && $usuarioDispositivo == false) {
-            $this->addFlash('danger', 'Escenario # 10: INCONSISTENCIA');
+            $this->accionesSobreInconsistencias('10');
             
             return $this->redirectToRoute('dashboard');
             
@@ -262,7 +394,7 @@ class ValidarSolicitudSrv extends AbstractController
          * Observaciones:
          */
         if ($personaFisica == true && $personaJuridica == false && $dispositivo == true && $usuario == false && $usuarioDispositivo == true) {
-            $this->addFlash('danger', 'Escenario # 11: INCONSISTENCIA');
+            $this->accionesSobreInconsistencias('11');
             
             return $this->redirectToRoute('dashboard');
             
@@ -277,7 +409,7 @@ class ValidarSolicitudSrv extends AbstractController
          * Observaciones:
          */
         if ($personaFisica == true && $personaJuridica == false && $dispositivo == true && $usuario == false && $usuarioDispositivo == false) {
-            $this->addFlash('danger', 'Escenario # 12: INCONSISTENCIA');
+            $this->accionesSobreInconsistencias('12');
             
             return $this->redirectToRoute('dashboard');
             
@@ -296,11 +428,33 @@ class ValidarSolicitudSrv extends AbstractController
             
             switch ($ambiente) {
                 case 'Extranet':
-                    # code...
+                    switch ($paso) {
+                        case '1':
+                            # code...
+                            break;
+                        case '2':
+                            # code...
+                            break;
+                        case '3':
+                            # code...
+                            break;
+                    }
+                    
                     break;
-                
-                default:
-                    # code...
+
+                case 'Intranet':
+                    switch ($paso) {
+                        case '1':
+                            # code...
+                            break;
+                        case '2':
+                            # code...
+                            break;
+                        case '3':
+                            # code...
+                            break;
+                    }
+
                     break;
             }
 
@@ -321,11 +475,33 @@ class ValidarSolicitudSrv extends AbstractController
             
             switch ($ambiente) {
                 case 'Extranet':
-                    # code...
+                    switch ($paso) {
+                        case '1':
+                            # code...
+                            break;
+                        case '2':
+                            # code...
+                            break;
+                        case '3':
+                            # code...
+                            break;
+                    }
+                    
                     break;
-                
-                default:
-                    # code...
+
+                case 'Intranet':
+                    switch ($paso) {
+                        case '1':
+                            # code...
+                            break;
+                        case '2':
+                            # code...
+                            break;
+                        case '3':
+                            # code...
+                            break;
+                    }
+
                     break;
             }
 
@@ -342,7 +518,7 @@ class ValidarSolicitudSrv extends AbstractController
          * Observaciones:
          */
         if ($personaFisica == true && $personaJuridica == false && $dispositivo == false && $usuario == false && $usuarioDispositivo == true) {
-            $this->addFlash('danger', 'Escenario # 15: INCONSISTENCIA');
+            $this->accionesSobreInconsistencias('15');
             
             return $this->redirectToRoute('dashboard');
             
@@ -361,11 +537,33 @@ class ValidarSolicitudSrv extends AbstractController
             
             switch ($ambiente) {
                 case 'Extranet':
-                    # code...
+                    switch ($paso) {
+                        case '1':
+                            # code...
+                            break;
+                        case '2':
+                            # code...
+                            break;
+                        case '3':
+                            # code...
+                            break;
+                    }
+                    
                     break;
-                
-                default:
-                    # code...
+
+                case 'Intranet':
+                    switch ($paso) {
+                        case '1':
+                            # code...
+                            break;
+                        case '2':
+                            # code...
+                            break;
+                        case '3':
+                            # code...
+                            break;
+                    }
+
                     break;
             }
 
@@ -382,7 +580,7 @@ class ValidarSolicitudSrv extends AbstractController
          * Observaciones:
          */
         if ($personaFisica == false && $personaJuridica == true && $dispositivo == true && $usuario == true && $usuarioDispositivo == true) {
-            $this->addFlash('danger', 'Escenario # 17: INCONSISTENCIA');
+            $this->accionesSobreInconsistencias('17');
             
             return $this->redirectToRoute('dashboard');
             
@@ -397,7 +595,7 @@ class ValidarSolicitudSrv extends AbstractController
          * Observaciones:
          */
         if ($personaFisica == false && $personaJuridica == true && $dispositivo == true && $usuario == true && $usuarioDispositivo == false) {
-            $this->addFlash('danger', 'Escenario # 18: INCONSISTENCIA');
+            $this->accionesSobreInconsistencias('18');
             
             return $this->redirectToRoute('dashboard');
             
@@ -412,7 +610,7 @@ class ValidarSolicitudSrv extends AbstractController
          * Observaciones:
          */
         if ($personaFisica == false && $personaJuridica == true && $dispositivo == true && $usuario == false && $usuarioDispositivo == true) {
-            $this->addFlash('danger', 'Escenario # 19: INCONSISTENCIA');
+            $this->accionesSobreInconsistencias('19');
             
             return $this->redirectToRoute('dashboard');
             
@@ -427,7 +625,7 @@ class ValidarSolicitudSrv extends AbstractController
          * Observaciones:
          */
         if ($personaFisica == false && $personaJuridica == true && $dispositivo == true && $usuario == false && $usuarioDispositivo == false) {
-            $this->addFlash('danger', 'Escenario # 20: INCONSISTENCIA');
+            $this->accionesSobreInconsistencias('20');
             
             return $this->redirectToRoute('dashboard');
             
@@ -442,7 +640,7 @@ class ValidarSolicitudSrv extends AbstractController
          * Observaciones:
          */
         if ($personaFisica == false && $personaJuridica == true && $dispositivo == false && $usuario == true && $usuarioDispositivo == true) {
-            $this->addFlash('danger', 'Escenario # 21: INCONSISTENCIA');
+            $this->accionesSobreInconsistencias('21');
             
             return $this->redirectToRoute('dashboard');
             
@@ -457,7 +655,7 @@ class ValidarSolicitudSrv extends AbstractController
          * Observaciones:
          */
         if ($personaFisica == false && $personaJuridica == true && $dispositivo == false && $usuario == true && $usuarioDispositivo == false) {
-            $this->addFlash('danger', 'Escenario # 22: INCONSISTENCIA');
+            $this->accionesSobreInconsistencias('22');
             
             return $this->redirectToRoute('dashboard');
             
@@ -472,7 +670,7 @@ class ValidarSolicitudSrv extends AbstractController
          * Observaciones:
          */
         if ($personaFisica == false && $personaJuridica == true && $dispositivo == false && $usuario == false && $usuarioDispositivo == true) {
-            $this->addFlash('danger', 'Escenario # 23: INCONSISTENCIA');
+            $this->accionesSobreInconsistencias('23');
             
             return $this->redirectToRoute('dashboard');
             
@@ -491,11 +689,33 @@ class ValidarSolicitudSrv extends AbstractController
             
             switch ($ambiente) {
                 case 'Extranet':
-                    # code...
+                    switch ($paso) {
+                        case '1':
+                            # code...
+                            break;
+                        case '2':
+                            # code...
+                            break;
+                        case '3':
+                            # code...
+                            break;
+                    }
+                    
                     break;
-                
-                default:
-                    # code...
+
+                case 'Intranet':
+                    switch ($paso) {
+                        case '1':
+                            # code...
+                            break;
+                        case '2':
+                            # code...
+                            break;
+                        case '3':
+                            # code...
+                            break;
+                    }
+
                     break;
             }
 
@@ -512,7 +732,7 @@ class ValidarSolicitudSrv extends AbstractController
          * Observaciones:
          */
         if ($personaFisica == false && $personaJuridica == false && $dispositivo == true && $usuario == true && $usuarioDispositivo == true) {
-            $this->addFlash('danger', 'Escenario # 25: INCONSISTENCIA');
+            $this->accionesSobreInconsistencias('25');
             
             return $this->redirectToRoute('dashboard');
             
@@ -527,7 +747,7 @@ class ValidarSolicitudSrv extends AbstractController
          * Observaciones:
          */
         if ($personaFisica == false && $personaJuridica == false && $dispositivo == true && $usuario == true && $usuarioDispositivo == false) {
-            $this->addFlash('danger', 'Escenario # 26: INCONSISTENCIA');
+            $this->accionesSobreInconsistencias('26');
             
             return $this->redirectToRoute('dashboard');
             
@@ -542,7 +762,7 @@ class ValidarSolicitudSrv extends AbstractController
          * Observaciones:
          */
         if ($personaFisica == false && $personaJuridica == false && $dispositivo == true && $usuario == false && $usuarioDispositivo == true) {
-            $this->addFlash('danger', 'Escenario # 27: INCONSISTENCIA');
+            $this->accionesSobreInconsistencias('27');
             
             return $this->redirectToRoute('dashboard');
             
@@ -557,7 +777,7 @@ class ValidarSolicitudSrv extends AbstractController
          * Observaciones:
          */
         if ($personaFisica == false && $personaJuridica == false && $dispositivo == true && $usuario == false && $usuarioDispositivo == false) {
-            $this->addFlash('danger', 'Escenario # 28: INCONSISTENCIA');
+            $this->accionesSobreInconsistencias('28');
             
             return $this->redirectToRoute('dashboard');
             
@@ -572,7 +792,7 @@ class ValidarSolicitudSrv extends AbstractController
          * Observaciones:
          */
         if ($personaFisica == false && $personaJuridica == false && $dispositivo == false && $usuario == true && $usuarioDispositivo == true) {
-            $this->addFlash('danger', 'Escenario # 29: INCONSISTENCIA');
+            $this->accionesSobreInconsistencias('29');
             
             return $this->redirectToRoute('dashboard');
             
@@ -587,7 +807,7 @@ class ValidarSolicitudSrv extends AbstractController
          * Observaciones:
          */
         if ($personaFisica == false && $personaJuridica == false && $dispositivo == false && $usuario == true && $usuarioDispositivo == false) {
-            $this->addFlash('danger', 'Escenario # 30: INCONSISTENCIA');
+            $this->accionesSobreInconsistencias('30');
             
             return $this->redirectToRoute('dashboard');
             
@@ -602,7 +822,7 @@ class ValidarSolicitudSrv extends AbstractController
          * Observaciones:
          */
         if ($personaFisica == false && $personaJuridica == false && $dispositivo == false && $usuario == false && $usuarioDispositivo == true) {
-            $this->addFlash('danger', 'Escenario # 31: INCONSISTENCIA');
+            $this->accionesSobreInconsistencias('31');
             
             return $this->redirectToRoute('dashboard');
             
@@ -621,11 +841,33 @@ class ValidarSolicitudSrv extends AbstractController
             
             switch ($ambiente) {
                 case 'Extranet':
-                    # code...
+                    switch ($paso) {
+                        case '1':
+                            # code...
+                            break;
+                        case '2':
+                            # code...
+                            break;
+                        case '3':
+                            # code...
+                            break;
+                    }
+                    
                     break;
-                
-                default:
-                    # code...
+
+                case 'Intranet':
+                    switch ($paso) {
+                        case '1':
+                            # code...
+                            break;
+                        case '2':
+                            # code...
+                            break;
+                        case '3':
+                            # code...
+                            break;
+                    }
+
                     break;
             }
 
@@ -637,12 +879,31 @@ class ValidarSolicitudSrv extends AbstractController
         
         switch ($ambiente) {
             case 'Extranet':
+                switch ($paso) {
+                    case '1':
+                        # code...
+                        break;
+                    case '2':
+                        # code...
+                        break;
+                    case '3':
+                        # code...
+                        break;
+                }
                 # code...
                 break;
-            
-            default:
-                # code...
-                break;
+            case 'Intranet':
+                switch ($paso) {
+                    case '1':
+                        # code...
+                        break;
+                    case '2':
+                        # code...
+                        break;
+                    case '3':
+                        # code...
+                        break;
+                }
         }
 
         return $this->redirectToRoute('dashboard');
