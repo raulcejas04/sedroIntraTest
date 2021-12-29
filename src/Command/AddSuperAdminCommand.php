@@ -76,7 +76,7 @@ class AddSuperAdminCommand extends Command
 
         $estadoCivil = $this->em->getRepository(EstadoCivil::class)->findAll();
         if (!$estadoCivil) {
-            $output->writeln('No hay tipos de estados civiles difinidos en la base de datos');
+            $output->writeln('<info>No hay tipos de estados civiles difinidos en la base de datos... agregando<info>');
             $estadoCivil1 = new EstadoCivil;
             $estadoCivil1->setEstadoCivil('Soltero/a');
             $this->em->persist($estadoCivil1);
@@ -97,7 +97,7 @@ class AddSuperAdminCommand extends Command
 
         $sexo = $this->em->getRepository(Sexo::class)->findAll();
         if (!$sexo) {
-            $output->writeln('No hay sexos definidos en la base de datos');
+            $output->writeln('<info>No hay sexos definidos en la base de datos... agregando<info>');
             $sexo1 = new Sexo;
             $sexo1->setSexo('M');
             $sexo1->setDescripcion('Masculino');
@@ -116,7 +116,7 @@ class AddSuperAdminCommand extends Command
         
         $tipoDocumento = $this->em->getRepository(TipoDocumento::class)->findAll();
         if (!$tipoDocumento) {
-            $output->writeln('No hay tipos de documentos definidos en la base de datos');
+            $output->writeln('<info>No hay tipos de documentos definidos en la base de datos... agregando<info>');
             $tipoDocumento1 = new TipoDocumento;
             $tipoDocumento1->setTipoDocumento('DNI');
             $this->em->persist($tipoDocumento1);
@@ -136,7 +136,7 @@ class AddSuperAdminCommand extends Command
 
         $tipoCuitCuil = $this->em->getRepository(TipoCuitCuil::class)->findAll();
         if (!$tipoCuitCuil) {
-            $output->writeln('No hay tipos de CUIT/CUIL definidos en la base de datos');
+            $output->writeln('<info>No hay tipos de CUIT/CUIL definidos en la base de datos... agregando<info>');
             $tipoCuitCuil1 = new TipoCuitCuil;
             $tipoCuitCuil1->setTipoCuitCuil('CUIT');
             $this->em->persist($tipoCuitCuil1);
@@ -148,7 +148,7 @@ class AddSuperAdminCommand extends Command
 
         $nacionalidad = $this->em->getRepository(Nacionalidad::class)->findAll();
         if (!$nacionalidad) {
-            $output->writeln('No hay nacionalidades definidas en la base de datos');
+            $output->writeln('<info>No hay nacionalidades definidas en la base de datos... agregando<info>');
             $nacionalidad1 = new Nacionalidad;
             $nacionalidad1->setPais('Argentina');
             $nacionalidad1->setCodigo('AR');
@@ -188,7 +188,7 @@ class AddSuperAdminCommand extends Command
         $escenarioRealm = $this->verificarRealm($realm);
         if ($escenarioRealm['realmDB'] == true && $escenarioRealm['realmKC'] == true) {
             $output->writeln([                
-                'Existe el reaml en la DB y en KC... continuando',
+                '<info>Existe el reaml en la DB y en KC... continuando<info>',
                 '',
             ]);
             $realmDB = $this->em->getRepository(Realm::class)->findOneBy(['realm' => $realm]);
@@ -197,7 +197,7 @@ class AddSuperAdminCommand extends Command
 
         if ($escenarioRealm['realmDB'] == true && $escenarioRealm['realmKC'] == false) {
             $output->writeln([                
-                'Existe el reaml en la DB y no en KC... creando realm en KC',
+                '<info>Existe el reaml en la DB y no en KC... creando realm en KC<info>',
                 '',
             ]);
             $realmDB = $this->em->getRepository(Realm::class)->findOneBy(['realm' => $realm]);
@@ -206,7 +206,7 @@ class AddSuperAdminCommand extends Command
 
         if ($escenarioRealm['realmDB'] == false && $escenarioRealm['realmKC'] == true) {
             $output->writeln([                
-                'Existe el reaml en KC y no en la DB... creando realm en la DB',
+                '<info>Existe el reaml en KC y no en la DB... creando realm en la DB<info>',
                 '',
             ]);
             $realmDB = $this->crearRealmDB();
@@ -215,7 +215,7 @@ class AddSuperAdminCommand extends Command
 
         if ($escenarioRealm['realmDB'] == false && $escenarioRealm['realmKC'] == false){
             $output->writeln([                
-                'No existe el reaml en la DB ni en KC... creando realm en la DB y en KC',
+                '<info>No existe el reaml en la DB ni en KC... creando realm en la DB y en KC<info>',
                 '',
             ]);
             $realmDB = $this->crearRealmDB();
@@ -228,7 +228,7 @@ class AddSuperAdminCommand extends Command
         $escenarioRol = $this->verificarRol($realm, $grupo, $roleCode, $roleName);
         if ($escenarioRol['roleKC'] == true && $escenarioRol['roleDB'] == true) {
             $output->writeln([                
-                'Existe el rol en la DB y en KC... continuando',
+                '<info>Existe el rol en la DB y en KC... continuando<info>',
                 '',
             ]);
             $roleKC = $this->kc->getRoleInRealmbyName($realm, $roleName);
@@ -237,7 +237,7 @@ class AddSuperAdminCommand extends Command
 
         if ($escenarioRol['roleKC'] == true && $escenarioRol['roleDB'] == false) {
             $output->writeln([                
-                'Existe el rol en KC y no en la DB... creando rol en la DB',
+                '<info>Existe el rol en KC y no en la DB... creando rol en la DB<info>',
                 '',
             ]);
             $roleKC = $this->kc->getRoleInRealmbyName($realm, $roleName);   
@@ -246,7 +246,7 @@ class AddSuperAdminCommand extends Command
 
         if ($escenarioRol['roleKC'] == false && $escenarioRol['roleDB'] == true) {
             $output->writeln([                
-                'Existe el rol en la DB y no en KC... creando rol en KC',
+                '<info>Existe el rol en la DB y no en KC... creando rol en KC<info>',
                 '',
             ]);
             $roleKC = $this->crearRoleKC($realm, $grupoKC, $roleCode, $roleName);
@@ -255,7 +255,7 @@ class AddSuperAdminCommand extends Command
 
         if ($escenarioRol['roleKC'] == false && $escenarioRol['roleDB'] == false) {
             $output->writeln([                
-                'No existe el rol en la DB ni en KC... creando rol en la DB y KC',
+                '<info>No existe el rol en la DB ni en KC... creando rol en la DB y KC<info>',
                 '',
             ]);
             $roleKC = $this->crearRoleKC($realm, $grupoKC, $roleCode, $roleName);
@@ -279,7 +279,7 @@ class AddSuperAdminCommand extends Command
 
         if ($escenarioGrupo['grupoDB'] == true && $escenarioGrupo['grupoKC'] == false) {
             $output->writeln([                
-                'Existe el grupo en la DB y no en KC... creando grupo en KC',
+                '<info>Existe el grupo en la DB y no en KC... creando grupo en KC<info>',
                 '',
             ]);
             $grupoKC = $this->crearGrupoKC($realm, $grupo);
@@ -289,7 +289,7 @@ class AddSuperAdminCommand extends Command
 
         if ($escenarioGrupo['grupoDB'] == false && $escenarioGrupo['grupoKC'] == true) {
             $output->writeln([                
-                'Existe el grupo en KC y no en la DB... creando grupo en la DB',
+                '<info>Existe el grupo en KC y no en la DB... creando grupo en la DB<info>',
                 '',
             ]);
             $grupoKC = $this->getGroupKC($realm, $grupo) ;
@@ -298,7 +298,7 @@ class AddSuperAdminCommand extends Command
 
         if ($escenarioGrupo['grupoDB'] == false && $escenarioGrupo['grupoKC'] == false){
             $output->writeln([                
-                'No existe el grupo en la DB ni en KC... creando grupo en la DB y en KC',
+                '<info>No existe el grupo en la DB ni en KC... creando grupo en la DB y en KC<info>',
                 '',
             ]);
             $grupoKC = $this->crearGrupoKC($realm, $grupo);
@@ -313,7 +313,7 @@ class AddSuperAdminCommand extends Command
        
         if ($escenarioRoleGrupo['roleGrupoKC'] == true && $escenarioRoleGrupo['roleGrupoDB'] == true) {
             $output->writeln([                
-                'Existe la relación entre grupo y rol en la DB y KC... continuando',
+                '<info>Existe la relación entre grupo y rol en la DB y KC... continuando<info>',
                 '',
             ]);
             $roleGrupoKC = $this->kc->getRoleGroupByName($realm, $grupoKC->id, $roleName);
@@ -322,7 +322,7 @@ class AddSuperAdminCommand extends Command
 
         if ($escenarioRoleGrupo['roleGrupoKC'] == true && $escenarioRoleGrupo['roleGrupoDB'] == false) {
             $output->writeln([                
-                'Existe la relación entre grupo y rol en la DB y no KC... creando relación en la DB',
+                '<info>Existe la relación entre grupo y rol en la DB y no KC... creando relación en la DB<info>',
                 '',
             ]);
             $roleGrupoKC = $this->kc->getRoleGroupByName($realm, $grupoKC->id, $roleName);
@@ -331,7 +331,7 @@ class AddSuperAdminCommand extends Command
 
         if ($escenarioRoleGrupo['roleGrupoKC'] == false && $escenarioRoleGrupo['roleGrupoDB'] == true) {
             $output->writeln([                
-                'Existe la relación entre grupo y rol en DB y no en la KC... creando relación en KC',
+                '<info>Existe la relación entre grupo y rol en DB y no en la KC... creando relación en KC<info>',
                 '',
             ]);
             $roleGrupoKC = $this->crearRoleGrupoKC($realm, $grupoKC, $roleKC, $roleName, $roleCode);
@@ -340,7 +340,7 @@ class AddSuperAdminCommand extends Command
 
         if ($escenarioRoleGrupo['roleGrupoKC'] == false && $escenarioRoleGrupo['roleGrupoDB'] == false) {
             $output->writeln([                
-                'No existe la relación entre grupo y rol en la DB ni en KC... creando relación en la DB y KC',
+                '<info>No existe la relación entre grupo y rol en la DB ni en KC... creando relación en la DB y KC<info>',
                 '',
             ]);
             $roleGrupoKC = $this->crearRoleGrupoKC($realm, $grupoKC, $roleKC, $roleName, $roleCode);
@@ -387,17 +387,59 @@ class AddSuperAdminCommand extends Command
             ]);
             $question5 = new Question('Ingrese el sexo del nuevo super administrador, tal como figura en su DNI (Opciones posibles: 1 M, 2 F, 3 X  ');
             $sexo = $helper->ask($input, $output, $question5);
-            $sexo = $this->em->getRepository(Sexo::class)->findOneBy(['id' => $sexo]);
 
             $output->writeln([
                 '',
             ]);
-            $question6 = new Question('Ingrese el estado Civil del nuevo super administrador (Opciones posibles: 1 Soltero/a, 2 Casado/a, 3 Divorciado/a, 4 Viudo/a  ');
-            $estadoCivil = $helper->ask($input, $output, $question6);
+            while ($sexo != 1 && $sexo != 2 && $sexo != 3) {
+                $output->writeln([
+                    '',
+                ]);
+                $question5 = new Question('Ingrese el sexo del nuevo super administrador, tal como figura en su DNI (Opciones posibles: 1 M, 2 F, 3 X  ');
+                $sexo = $helper->ask($input, $output, $question5);
+            }
+
+            switch ($sexo) {
+                case '1':
+                    $sexo = $this->em->getRepository(Sexo::class)->findOneBy(['sexo' => 'M']);
+                    break;
+                case '2':
+                    $sexo = $this->em->getRepository(Sexo::class)->findOneBy(['sexo' => 'F']);
+                    break;
+                case '3':
+                    $sexo = $this->em->getRepository(Sexo::class)->findOneBy(['sexo' => 'X']);
+                    break;
+            }
+            
+            
+            //$question6 = new Question('Ingrese el estado Civil del nuevo super administrador (Opciones posibles: 1 Soltero/a, 2 Casado/a, 3 Divorciado/a, 4 Viudo/a  ');
+            //$estadoCivil = $helper->ask($input, $output, $question6);
+            while ($estadoCivil != 1 && $estadoCivil != 2 && $estadoCivil != 3 && $estadoCivil != 4) {
+                $output->writeln([
+                    '',
+                ]);
+                $question6 = new Question('Ingrese el estado Civil del nuevo super administrador (Opciones posibles: 1 Soltero/a, 2 Casado/a, 3 Divorciado/a, 4 Viudo/a  ');
+                $estadoCivil = $helper->ask($input, $output, $question6);
+            }
+
+            switch ($estadoCivil) {
+                case '1':
+                    $estadoCivil = $this->em->getRepository(EstadoCivil::class)->findOneBy(['estadoCivil' => 'Soltero/a']);
+                    break;
+                case '2':
+                    $estadoCivil = $this->em->getRepository(EstadoCivil::class)->findOneBy(['estadoCivil' => 'Casado/a']);
+                    break;
+                case '3':
+                    $estadoCivil = $this->em->getRepository(EstadoCivil::class)->findOneBy(['estadoCivil' => 'Divorciado/a']);
+                    break;
+                case '4':
+                    $estadoCivil = $this->em->getRepository(EstadoCivil::class)->findOneBy(['estadoCivil' => 'Viudo/a']);
+                    break;                
+            }
             $estadoCivil = $this->em->getRepository(EstadoCivil::class)->findOneBy(['id' => $estadoCivil]);
 
-            $tipoDocumento = $this->em->getRepository(TipoDocumento::class)->findOneBy(['id' => 1]);
-            $tipoCuitCuil = $this->em->getRepository(TipoCuitCuil::class)->findOneBy(['id' => 1]);
+            $tipoDocumento = $this->em->getRepository(TipoDocumento::class)->findOneBy(['tipoDocumento' => 'DNI']);
+            $tipoCuitCuil = $this->em->getRepository(TipoCuitCuil::class)->findOneBy(['tipoCuitCuil' => 'CUIT']);
             $nacionalidad = $this->em->getRepository(Nacionalidad::class)->findOneBy(['pais' => 'Argentina']);
 
             $personaFisica = new PersonaFisica();
