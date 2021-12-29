@@ -887,7 +887,7 @@ class KeycloakFullApiController extends AbstractController
         try {
             $res = $this->client->get($uri, $params);
             $role = json_decode($res->getBody());
-            return true;
+            return $role;
         } catch (\Exception $e) {
             return false;
         }
@@ -910,16 +910,20 @@ class KeycloakFullApiController extends AbstractController
             'json' => [
                 'name' => $roleName,                
                 'description' => $roleName,                
-                //Esto debería funcionar, pero no mete los atributos en el role
-                /*
-                'attributes' => [
+                //TODO: Agregar atributos del rol
+                //Esto no funciona... parece que attributes no va
+                //'attributes' => [
+                //    'role-code' => $roleCode,
+                //],
+
+                /*'attributes' => [
                     0 => [
-                        "Super_Admin"=> $roleCode
+                        'name' => 'role-code',
+                        'value' => $roleCode,
                     ],
-                    
-                ]     
+                ],
                 */
-                           
+                
             ],
         ];
 
@@ -991,7 +995,7 @@ class KeycloakFullApiController extends AbstractController
         $uri = $auth_url . "/admin/realms/{realm}/groups/{group-id}/role-mappings/realm";
         $uri = str_replace('{realm}', $realm, $uri);
         $uri = str_replace('{group-id}', $groupId, $uri);
-        $uri = str_replace('{role-name}', $roleKC->name, $uri);
+        //$uri = str_replace('{role-name}', $roleKC->name, $uri);
 
         $params = [
             'headers' => [
@@ -1000,12 +1004,10 @@ class KeycloakFullApiController extends AbstractController
             ],
             'debug' => true,
             'json' => [
-                'id' => $roleKC->id,
-                'name' => $roleKC->name,
-                "scopeParamRequired" => false,
-                "composite" => false,
-                "clientRole" => false, 
-                "containerId"=> $realm,
+                0 => [
+                    'id' => $roleKC->id,
+                    'name' => $roleKC->name
+                ]
             ]
         ];
         $res = $this->client->post($uri, $params);

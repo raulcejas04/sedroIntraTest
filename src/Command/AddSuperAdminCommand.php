@@ -48,15 +48,7 @@ class AddSuperAdminCommand extends Command
                 // Descripción corta cuando hacés un "php bin/console list"
             ->setDescription('Agrega el primer Superadministrador para cuando el sistema acaba de ser instalado')
             ->setHelp('Agrega el primer Superadministrador tanto en KC como en la DB para cuando el sistema acaba de ser instalado. Se solicitarán nombre de usuario y contraseña.')
-            
-            //->addArgument('dni', InputArgument::REQUIRED, 'Ingrese el DNI del nuevo super administrador')
-            ->addArgument('nombre', InputArgument::OPTIONAL, 'Ingrese el nombre del nuevo super administrador')
-            ->addArgument('apellido', InputArgument::OPTIONAL, 'Ingrese el apellido del nuevo super administrador')
-            ->addArgument('cuit', InputArgument::OPTIONAL, 'Ingrese el CUIT (sin guiones) del nuevo super administrador')
-            ->addArgument('sexo', InputArgument::OPTIONAL, 'Ingrese el sexo del nuevo super administrador, tal como figura en su DNI (Opciones posibles: 1 M, 2 F, 3 X')
-            ->addArgument('estadoCivil', InputArgument::OPTIONAL, 'Ingrese el estado Civil del nuevo super administrador')
-
-        ;
+            ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -240,7 +232,7 @@ class AddSuperAdminCommand extends Command
                 '',
             ]);
             $roleKC = $this->kc->getRoleInRealmbyName($realm, $roleName);
-            $roleDB = $this->em->getRepository(Rol::class)->findOneBy(['nombre' => $roleCode]);
+            $roleDB = $this->em->getRepository(Role::class)->findOneBy(['code' => $roleCode]);
         }
 
         if ($escenarioRol['roleKC'] == true && $escenarioRol['roleDB'] == false) {
@@ -248,7 +240,7 @@ class AddSuperAdminCommand extends Command
                 'Existe el rol en KC y no en la DB... creando rol en la DB',
                 '',
             ]);
-            $roleKC = $this->kc->getRole($roleName, $realm);
+            $roleKC = $this->kc->getRoleInRealmbyName($realm, $roleName);   
             $roleDB = $this->crearRoleDB($realmDB, $grupoDB, $roleName, $roleCode, $roleKC);
         }
 
@@ -258,7 +250,7 @@ class AddSuperAdminCommand extends Command
                 '',
             ]);
             $roleKC = $this->crearRoleKC($realm, $grupoKC, $roleCode, $roleName);
-            $roleDB = $this->em->getRepository(Rol::class)->findOneBy(['nombre' => $roleCode]);
+            $roleDB = $this->em->getRepository(Role::class)->findOneBy(['code' => $roleCode]);
         }
 
         if ($escenarioRol['roleKC'] == false && $escenarioRol['roleDB'] == false) {
@@ -325,7 +317,7 @@ class AddSuperAdminCommand extends Command
                 '',
             ]);
             $roleGrupoKC = $this->kc->getRoleGroupByName($realm, $grupoKC->id, $roleName);
-            $roleGrupoDB = $this->em->getRepository(GrupoRol::class)->findOneBy(['grupo' => $grupoDB, 'rol' => $roleDB]);
+            $roleGrupoDB = $this->em->getRepository(RoleGrupo::class)->findOneBy(['grupo' => $grupoDB, 'role' => $roleDB]);
         }
 
         if ($escenarioRoleGrupo['roleGrupoKC'] == true && $escenarioRoleGrupo['roleGrupoDB'] == false) {
@@ -339,11 +331,11 @@ class AddSuperAdminCommand extends Command
 
         if ($escenarioRoleGrupo['roleGrupoKC'] == false && $escenarioRoleGrupo['roleGrupoDB'] == true) {
             $output->writeln([                
-                'Existe la relación entre grupo y rol en KC y no en la DB... creando relación en KC',
+                'Existe la relación entre grupo y rol en DB y no en la KC... creando relación en KC',
                 '',
             ]);
             $roleGrupoKC = $this->crearRoleGrupoKC($realm, $grupoKC, $roleKC, $roleName, $roleCode);
-            $roleGrupoDB = $this->em->getRepository(GrupoRol::class)->findOneBy(['grupo' => $grupoDB, 'rol' => $roleDB]);
+            $roleGrupoDB = $this->em->getRepository(RoleGrupo::class)->findOneBy(['grupo' => $grupoDB, 'role' => $roleDB]);
         }
 
         if ($escenarioRoleGrupo['roleGrupoKC'] == false && $escenarioRoleGrupo['roleGrupoDB'] == false) {
@@ -549,12 +541,10 @@ class AddSuperAdminCommand extends Command
             } else {
                 $group = null;
             }
-             
         }
 
         if (is_array($group)) {
             $group = json_decode(json_encode($group));
-            dd($group);
         }
 
         return $group;
@@ -562,7 +552,6 @@ class AddSuperAdminCommand extends Command
 
     private function crearGrupoKC($realm, $grupo){
         $a = $this->kc->createGroup($realm, $grupo);
-        //dd($a);
         $grupoKC = $this->kc->getRealmGroups($grupo, $realm, $briefRepresentation = false);
         if (is_array($grupoKC)) {
             $grupoKC = $grupoKC[0];
@@ -670,9 +659,8 @@ class AddSuperAdminCommand extends Command
         return $escenarioRoleGrupo;
     }
 
-    private function crearRoleGrupoKC($realm, $grupoKC, $roleKC, $roleName, $roleCode) {        
-        $this->kc->addRoleToGroup($realm, $grupoKC->id, $roleKC);
-        
+    private function crearRoleGrupoKC($realm, $grupoKC, $roleKC, $roleName, $roleCode) {
+        $this->kc->addRoleToGroup($realm, $grupoKC->id, $roleKC);        
         $grupoRoleKC = $this->kc->getRoleGroupByName($realm, $grupoKC->id, $roleName);                                 
         
         return $grupoRoleKC;
