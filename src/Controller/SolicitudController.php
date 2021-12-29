@@ -17,6 +17,7 @@ use App\Entity\User;
 use App\Entity\Realm;
 use App\Form\RechazarSolicitudType;
 use App\Form\ReenviarEmailType;
+use App\Service\ValidarSolicitudSrv;
 use DateTime;
 use Proxies\__CG__\App\Entity\Menu;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -35,11 +36,13 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 class SolicitudController extends AbstractController
 {
     private $keycloak;
+    private $validador;
 
-    public function __construct(KeycloakApiSrv $keycloak, UrlGeneratorInterface $router)
+    public function __construct(KeycloakApiSrv $keycloak, UrlGeneratorInterface $router,ValidarSolicitudSrv $validador)
     {
         $this->keycloak = $keycloak;
         $this->router = $router;
+        $this->validador = $validador;
     }
 
 
@@ -59,7 +62,7 @@ class SolicitudController extends AbstractController
                 return $this->redirectToRoute('dashboard');
             }
 
-            //verifica persona física y/o jurídica preexistente            
+           /*  //verifica persona física y/o jurídica preexistente            
             $personaFisica = $entityManager->getRepository(PersonaFisica::class)->findOneBy(['cuitCuil' => $solicitud->getCuil()]);
             $personaJuridica = $entityManager->getRepository(PersonaJuridica::class)->findOneBy(['cuit' => $solicitud->getCuit()]);
 
@@ -70,10 +73,10 @@ class SolicitudController extends AbstractController
             if ($personaJuridica) {
                 $solicitud->setPersonaJuridica($personaJuridica);
             }
-
-            $hash = md5(uniqid(rand(), true));
-            $solicitud->setHash($hash);
-
+            */
+            
+            //PROBANDO VALIDADOR ESCENARIO 32
+            $solicitud = $this->validador->validarSolicitud($solicitud);
             $entityManager->persist($solicitud);
             $entityManager->flush();
 
