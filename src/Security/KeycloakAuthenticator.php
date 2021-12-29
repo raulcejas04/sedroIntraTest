@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
 
 /**
  * Class KeycloakAuthenticator
@@ -52,11 +53,17 @@ class KeycloakAuthenticator extends SocialAuthenticator
     public function getCredentials(Request $request)
     {
         $credentials = $this->fetchAccessToken($this->getKeycloakClient());
+
+        $lifetime = new NativeSessionStorage();
+        $lifetime->setOptions(array('cookie_lifetime' =>$credentials->getExpires() ));
+
         $refreshToken = $credentials->getRefreshToken();
         $token = $credentials->getToken();
+        $expire = $credentials->getExpires();
         $session = new Session();
         $session->set('refreshToken', $refreshToken);
         $session->set('token', $token);
+        $session->set('token_expire', $expire);
 
         return $credentials;
     }

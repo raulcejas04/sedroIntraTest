@@ -72,7 +72,7 @@ class OAuthController extends AbstractController
         $this->get('security.token_storage')->setToken(null);
         $this->get('session')->invalidate();
 
-        return $this->redirectToRoute('dashboard');
+        return $this->redirectToRoute('home');
     }
 
 

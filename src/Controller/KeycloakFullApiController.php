@@ -933,6 +933,7 @@ class KeycloakFullApiController extends AbstractController
         } catch (\Exception $e) {
             $role = $e;            
         }
+
         return $role;
     }
 

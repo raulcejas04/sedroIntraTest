@@ -291,9 +291,13 @@ var isConstructorLegacy = function (argument) {
     case 'AsyncFunction':
     case 'GeneratorFunction':
     case 'AsyncGeneratorFunction': return false;
+  }
+  try {
     // we can't check .prototype since constructors produced by .bind haven't it
   } return INCORRECT_TO_STRING || !!exec(constructorRegExp, inspectSource(argument));
 };
+
+isConstructorLegacy.sham = true;
 
 // `IsConstructor` abstract operation
 // https://tc39.es/ecma262/#sec-isconstructor

@@ -387,6 +387,7 @@ class AddSuperAdminCommand extends Command
             ]);
             $question5 = new Question('Ingrese el sexo del nuevo super administrador, tal como figura en su DNI (Opciones posibles: 1 M, 2 F, 3 X  ');
             $sexo = $helper->ask($input, $output, $question5);
+            //$sexo = $this->em->getRepository(Sexo::class)->findOneBy(['id' => $sexo]);
 
             $output->writeln([
                 '',
