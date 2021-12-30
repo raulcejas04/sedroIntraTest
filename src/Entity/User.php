@@ -88,11 +88,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface {
      */
     private $fechaEliminacion;
 
+    /**
+     * @ORM\OneToMany(targetEntity=IssueReport::class, mappedBy="usuario")
+     */
+    private $issuesReports;
+
     public function __construct() {
         $this->solicitudes = new ArrayCollection();
         $this->usuarioDispositivos = new ArrayCollection();
         $this->userGroups = new ArrayCollection();
         $this->alertas = new ArrayCollection();
+        $this->issuesReports = new ArrayCollection();
     }
 
     public function __toString() {
@@ -333,6 +339,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface {
     public function setRealm(?Realm $realm): self
     {
         $this->realm = $realm;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|IssueReport[]
+     */
+    public function getIssuesReports(): Collection
+    {
+        return $this->issuesReports;
+    }
+
+    public function addIssuesReport(IssueReport $issuesReport): self
+    {
+        if (!$this->issuesReports->contains($issuesReport)) {
+            $this->issuesReports[] = $issuesReport;
+            $issuesReport->setUsuario($this);
+        }
+
+        return $this;
+    }
+
+    public function removeIssuesReport(IssueReport $issuesReport): self
+    {
+        if ($this->issuesReports->removeElement($issuesReport)) {
+            // set the owning side to null (unless already changed)
+            if ($issuesReport->getUsuario() === $this) {
+                $issuesReport->setUsuario(null);
+            }
+        }
 
         return $this;
     }

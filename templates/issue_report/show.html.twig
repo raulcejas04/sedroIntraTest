@@ -1,0 +1,30 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}IssueReport{% endblock %}
+
+{% block body %}
+    <h1>IssueReport</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ issue_report.id }}</td>
+            </tr>
+            <tr>
+                <th>Issue</th>
+                <td>{{ issue_report.issue }}</td>
+            </tr>
+            <tr>
+                <th>Creacion</th>
+                <td>{{ issue_report.creacion ? issue_report.creacion|date('Y-m-d H:i:s') : '' }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('issue_report_index') }}">back to list</a>
+
+    <a href="{{ path('issue_report_edit', {'id': issue_report.id}) }}">edit</a>
+
+    {{ include('issue_report/_delete_form.html.twig') }}
+{% endblock %}

@@ -45,6 +45,17 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->getResult();    
     }
 
+    public function getAllSuperAdminUsers()
+    {
+        return $this->createQueryBuilder('u')
+            ->join('u.userGroups', 'ug')
+            ->join('ug.group', 'g')
+            ->where('g.nombre = :nombre')
+            ->setParameter('nombre', 'SuperAdministradores')
+            ->getQuery()
+            ->getResult();    
+    }
+
     // /**
     //  * @return User[] Returns an array of User objects
     //  */

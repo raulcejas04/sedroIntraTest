@@ -36,6 +36,9 @@ use App\Entity\EstadoCivil;
 use App\Form\EstadoCivilType;
 use App\Repository\EstadoCivilRepository;
 use App\Service\KeycloakApiSrv;
+use App\Entity\IssueReport;
+use App\Form\IssueReportType;
+use App\Repository\IssueReportRepository;
 
 #[Route('/dashboard/super-admines')]
 class SuperAdminController extends AbstractController
@@ -708,7 +711,7 @@ class SuperAdminController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'estado_civil_edit', methods: ['GET', 'POST'])]
+    #[Route('/tipos/estado-civil/{id}/edit', name: 'estado_civil_edit', methods: ['GET', 'POST'])]
     public function editEstadoCivil(Request $request, EstadoCivil $estadoCivil, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(EstadoCivilType::class, $estadoCivil);
@@ -743,6 +746,56 @@ class SuperAdminController extends AbstractController
         $response = new Response($this->renderView('escenarios/index.html.twig', []));
         return $response;
     }
-    
+
+
+
+    /*****************************************************************************************
+     * ********** ISSUES REPORTS **********
+     *****************************************************************************************/
+    #[Route('/issues-reports', name: 'issue_report_index', methods: ['GET'])]
+    public function indexIssuesReports(IssueReportRepository $issueReportRepository): Response
+    {
+        return $this->render('issue_report/index.html.twig', [
+            'issue_reports' => $issueReportRepository->findAll(),
+        ]);
+    }
+
+    #[Route('/issues-reports/{id}', name: 'issue_report_show', methods: ['GET'])]
+    public function showIssueReport(IssueReport $issueReport): Response
+    {
+        return $this->render('issue_report/show.html.twig', [
+            'issue_report' => $issueReport,
+        ]);
+    }
+
+    #[Route('/issues-reports/{id}/edit', name: 'issue_report_edit', methods: ['GET','POST'])]
+    public function editIssuesReports(Request $request, IssueReport $issueReport): Response
+    {
+        $form = $this->createForm(IssueReportType::class, $issueReport);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->getDoctrine()->getManager()->flush();
+
+            return $this->redirectToRoute('issue_report_index', [], Response::HTTP_SEE_OTHER);
+        }
+
+        return $this->renderForm('issue_report/edit.html.twig', [
+            'issue_report' => $issueReport,
+            'form' => $form,
+        ]);
+    }
+
+    #[Route('/issues-reports/{id}', name: 'issue_report_delete', methods: ['POST'])]
+    public function deleteIssuesReports(Request $request, IssueReport $issueReport): Response
+    {
+        if ($this->isCsrfTokenValid('delete'.$issueReport->getId(), $request->request->get('_token'))) {
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->remove($issueReport);
+            $entityManager->flush();
+        }
+
+        return $this->redirectToRoute('issue_report_index', [], Response::HTTP_SEE_OTHER);
+    }
 
 }

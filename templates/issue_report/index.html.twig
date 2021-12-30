@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}IssueReport index{% endblock %}
+
+{% block body %}
+    <h1>IssueReport index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Issue</th>
+                <th>usuario</th>
+                <th>Creacion</th>
+
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for issue_report in issue_reports %}
+            <tr>
+                <td>{{ issue_report.id }}</td>
+                <td>{{ issue_report.issue }}</td>
+                <td>{{ issue_report.usuario }}</td>
+                <td>{{ issue_report.creacion ? issue_report.creacion|date('d-m-Y H:i:s') : '' }}</td>
+                <td>
+                    <a href="{{ path('issue_report_show', {'id': issue_report.id}) }}">show</a>
+                    <a href="{{ path('issue_report_edit', {'id': issue_report.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="4">no hay issues</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('issue_report_new') }}">Create new</a>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New IssueReport{% endblock %}
+
+{% block body %}
+    <h2>Reporte de error</h2>
+
+    <p><b>Hola {{ app.user.username }}!</b> Aquí podrás explicarnos un poco mejor de qué se trata el error que vas a reportarnos</p>
+
+    <p>Algunos consejos para que el error sea más fácil de resolver:</p>
+    <ul>
+        <li>Tratá de especificar qué pasó antes y que pasó después</li>
+        <li>Explicanos por qué crees que es un error</li>
+    
+        <li>¿Tenés alguna sugerencia para que podamos resolverlo a la brevedad? Por favor, también redactala</li>
+        
+    </ul>
+       
+    <div class="row">
+        <div class="d-flex justify-content-center">
+            <div class="col-md-6">
+
+                {{ include('issue_report/_form.html.twig') }}
+
+                <div class="text-center">
+                    <div class="center-block">
+                        <a href="{{ path('solicitudes') }}">Volver</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Entity\UsuarioDispositivo;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -9,6 +10,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use GuzzleHttp;
 use App\Service\KeycloakApiSrv;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Service\AuxSrv;
 
 class ValidarSolicitudSrv extends AbstractController
 {
@@ -16,13 +18,17 @@ class ValidarSolicitudSrv extends AbstractController
     private $parameterBag;
     private $kc;
     private $em;
+    private $auxSrv;
+    private $sendAlertsSrv;
 
-    public function __construct(ParameterBagInterface $parameterBag, KeycloakApiSrv $kc, EntityManagerInterface $em)
+    public function __construct(ParameterBagInterface $parameterBag, KeycloakApiSrv $kc, EntityManagerInterface $em, SendAlertsSrv $sendAlertsSrv, AuxSrv $auxSrv)
     {
         $this->client = new GuzzleHttp\Client();
         $this->parameterBag = $parameterBag;
         $this->kc = $kc;
         $this->em = $em;
+        $this->sendAlertsSrv = $sendAlertsSrv;
+        $this->auxSrv = $auxSrv;
     }
 
     //public function validarSolicitud($solicitud){
@@ -66,7 +72,6 @@ class ValidarSolicitudSrv extends AbstractController
          * Observaciones: Error si no expiró
          */
         if ($personaFisica == true && $personaJuridica == true && $dispositivo == true && $usuario == true && $usuarioDispositivo == true) {
-            $this->addFlash('danger', 'Escenario #1: Error no deja seguir si está vigente');
 
             switch ($ambiente) {
                 case 'Extranet':
@@ -75,7 +80,7 @@ class ValidarSolicitudSrv extends AbstractController
                             # code...
                             break;
                         case '2':
-                            # code...
+                            //TODO: verificar si es Pastor Joao, Pastor Jimenez o Jony de ese dispositivo
                             break;
                         case '3':
                             # code...
@@ -87,13 +92,16 @@ class ValidarSolicitudSrv extends AbstractController
                 case 'Intranet':
                     switch ($paso) {
                         case '1':
-                            # code...
+                            $this->addFlash('error', 'La persona ' . $personaFisica->getNombre() . ' ' . $personaFisica->getApellido() . ' ya está vinculado a ese dispositivo. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>');
+                            return $this->redirectToRoute('solicitudes');
                             break;
                         case '2':
-                            # code...
+                            $this->addFlash('error', 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>');
+                            return $this->redirectToRoute('dashboard');
                             break;
                         case '3':
-                            # code...
+                            $this->addFlash('error', 'La persona ' . $personaFisica->getNombre() . ' ' . $personaFisica->getApellido() . ' ya está vinculado a ese dispositivo. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>');
+                            return $this->redirectToRoute('solicitudes');
                             break;
                     }
 
@@ -121,7 +129,17 @@ class ValidarSolicitudSrv extends AbstractController
                             # code...
                             break;
                         case '2':
-                            # code...
+                            $datos = [
+                                'personaFisica' => $personaFisica,
+                                'personaJuridica' => $personaJuridica,
+                                'dispositivo' => $dispositivo,
+                                'usuario' => $usuario,
+                                'usuarioDispositivo' => $usuarioDispositivo,
+                                'ambiente' => $ambiente,
+                                'paso' => $paso,
+                            ];
+                            return $datos;
+                            break;
                             break;
                         case '3':
                             # code...
@@ -133,13 +151,34 @@ class ValidarSolicitudSrv extends AbstractController
                 case 'Intranet':
                     switch ($paso) {
                         case '1':
-                            # code...
+                            $datos = [
+                                'personaFisica' => $personaFisica,
+                                'personaJuridica' => $personaJuridica,
+                                'dispositivo' => $dispositivo,
+                                'usuario' => $usuario,
+                                'usuarioDispositivo' => null,
+                                'ambiente' => $ambiente,
+                                'paso' => $paso,
+                            ];
+                            return $datos;
                             break;
                         case '2':
-                            # code...
+                            $this->addFlash('error', 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>');
+                            return $this->redirectToRoute('dashboard');
                             break;
                         case '3':
-                            # code...
+                            $usuarioDispositivo = new UsuarioDispositivo();
+                            $usuarioDispositivo->setUsuario($usuario);
+                            $usuarioDispositivo->setDispositivo($dispositivo);
+                            $usuarioDispositivo->setFechaAlta(new \DateTime());
+                            $usuarioDispositivo->setFechaBaja(null);
+
+                            $this->em->persist($usuarioDispositivo);
+                            $this->em->flush();
+
+                            $this->addFlash('info', 'El usuario, la persona física, la persona jurídica y el dispositivo existían con anterioridad.');
+                            $this->addFlash('success', 'Se ha vinculado el usuario ' . $usuario->getPersonaFisica()->getNombres() . ' ' . $usuario->getPersonaFisica()->getApellido() . '(' . $usuario->getUsername() . ')' . ' a ' . $dispositivo->getNicname());
+                            return $this->redirectToRoute('solicitudes');
                             break;
                     }
 
@@ -180,9 +219,20 @@ class ValidarSolicitudSrv extends AbstractController
                         case '1':
                             # code...
                             break;
+
                         case '2':
-                            # code...
+                            $datos = [
+                                'personaFisica' => $personaFisica,
+                                'personaJuridica' => $personaJuridica,
+                                'dispositivo' => $dispositivo,
+                                'usuario' => null,
+                                'usuarioDispositivo' => null,
+                                'ambiente' => $ambiente,
+                                'paso' => $paso,
+                            ];
+                            return $datos;
                             break;
+
                         case '3':
                             # code...
                             break;
@@ -193,13 +243,28 @@ class ValidarSolicitudSrv extends AbstractController
                 case 'Intranet':
                     switch ($paso) {
                         case '1':
-                            # code...
+                            $datos = [
+                                'personaFisica' => $personaFisica,
+                                'personaJuridica' => $personaJuridica,
+                                'dispositivo' => $dispositivo,
+                                'usuario' => $usuario,
+                                'usuarioDispositivo' => $usuarioDispositivo,
+                                'ambiente' => $ambiente,
+                                'paso' => $paso,
+                            ];
+                            return $datos;
                             break;
+
                         case '2':
-                            # code...
+                            $this->addFlash('error', 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>');
+                            return $this->redirectToRoute('dashboard');
                             break;
+
                         case '3':
-                            # code...
+                            //Crea un nuevo usuario de Extranet en KC, en la DB y envía un email con los datos de acceso
+                            $this->AuxSrv->createKeycloakcAndDatabaseUser($personaFisica, $solicitud, 'Extranet');
+                            
+
                             break;
                     }
 
@@ -242,7 +307,8 @@ class ValidarSolicitudSrv extends AbstractController
                             # code...
                             break;
                         case '2':
-                            # code...
+                            $this->addFlash('error', 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>');
+                            return $this->redirectToRoute('dashboard');
                             break;
                         case '3':
                             # code...
@@ -288,7 +354,8 @@ class ValidarSolicitudSrv extends AbstractController
                             # code...
                             break;
                         case '2':
-                            # code...
+                            $this->addFlash('error', 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>');
+                            return $this->redirectToRoute('dashboard');
                             break;
                         case '3':
                             # code...
@@ -348,7 +415,8 @@ class ValidarSolicitudSrv extends AbstractController
                             # code...
                             break;
                         case '2':
-                            # code...
+                            $this->addFlash('error', 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>');
+                            return $this->redirectToRoute('dashboard');
                             break;
                         case '3':
                             # code...
@@ -450,7 +518,8 @@ class ValidarSolicitudSrv extends AbstractController
                             # code...
                             break;
                         case '2':
-                            # code...
+                            $this->addFlash('error', 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>');
+                            return $this->redirectToRoute('dashboard');
                             break;
                         case '3':
                             # code...
@@ -496,7 +565,8 @@ class ValidarSolicitudSrv extends AbstractController
                             # code...
                             break;
                         case '2':
-                            # code...
+                            $this->addFlash('error', 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>');
+                            return $this->redirectToRoute('dashboard');
                             break;
                         case '3':
                             # code...
@@ -556,7 +626,8 @@ class ValidarSolicitudSrv extends AbstractController
                             # code...
                             break;
                         case '2':
-                            # code...
+                            $this->addFlash('error', 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>');
+                            return $this->redirectToRoute('dashboard');
                             break;
                         case '3':
                             # code...
@@ -700,7 +771,8 @@ class ValidarSolicitudSrv extends AbstractController
                             # code...
                             break;
                         case '2':
-                            # code...
+                            $this->addFlash('error', 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>');
+                            return $this->redirectToRoute('dashboard');
                             break;
                         case '3':
                             # code...
@@ -846,7 +918,8 @@ class ValidarSolicitudSrv extends AbstractController
                             $this->addFlash('danger', 'Escenario # 32: Paso uno.');           
                             break;
                         case '2':
-                            # code...
+                            $this->addFlash('error', 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>');                      case '2':
+                            return $this->redirectToRoute('dashboard');
                             break;
                         case '3':
                             # code...
@@ -884,7 +957,7 @@ class ValidarSolicitudSrv extends AbstractController
                         # code...
                         break;
                     case '2':
-                        # code...
+                        $this->addFlash('error', 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>');
                         break;
                     case '3':
                         # code...
@@ -897,6 +970,9 @@ class ValidarSolicitudSrv extends AbstractController
 
     private function accionesSobreInconsistencias($escenario)
     {
+        $this->sendAlertsSrv->sendBadStageAlertToSuperAdmins($escenario);
+        $this->addFlash('danger', 'Escenario # ' . $escenario . ' con inconsistencias. Se ha comunicado a soporte');
+        return $this->redirectToRoute('dashboard');
         //enviar un email a todos los superadministradores
     }
 }
