@@ -42,6 +42,9 @@ class ValidarSolicitudSrv extends AbstractController
         $usuario =  $this->em->getRepository('App:User')->findOneBy(['username' => $solicitud->getCuit()]);
         $usuarioDispositivo = $this->em->getRepository('App:UsuarioDispositivo')->findOneBy(["usuario" => $usuario, "dispositivo" => $dispositivo]);
 
+        $flagOk = false;
+        $redirectForError = false;
+        $data = null;
 
         /*
         $entityManager = $this->getDoctrine()->getManager();
@@ -71,19 +74,53 @@ class ValidarSolicitudSrv extends AbstractController
          * Inicia: Extranet
          * Observaciones: Error si no expiró
          */
-        if ($personaFisica == true && $personaJuridica == true && $dispositivo == true && $usuario == true && $usuarioDispositivo == true) {
+        if ($personaFisica && $personaJuridica && $dispositivo && $usuario && $usuarioDispositivo) {
 
             switch ($ambiente) {
                 case 'Extranet':
                     switch ($paso) {
                         case '1':
-                            # code...
+                            $this->addFlash('danger', 'Sin permisos suficientes para iniciar una solicitud');
+                            $flagOk = false;
+                            $redirectForError = true;
+                            $data = null;
+                            $solicitud = null;
                             break;
                         case '2':
                             //TODO: verificar si es Pastor Joao, Pastor Jimenez o Jony de ese dispositivo
+                            //TODO: Preguntarle a Walter si así se usa lo de Dispositivo Responsable
+                            $responsable = $this->em->getRepository('App:DispositivoResponsable')->findOneBy(['dispositivo' => $dispositivo,'personaFisica' => $personaFisica, 'owner' => true]);
+                            if ($responsable) {
+                                $flagOk = false;
+                                $redirectForError = true;
+                                $data = null;
+                                $solicitud = null;
+                                $this->addFlash('danger', 'No se puede continuar con la solicitud, ya que el dispositivo ya tiene asociado a la persona.');
+                            } else {
+                                $solicitudActiva = $this->em->getRepository('App\Entity\Solicitud')->findSolicitudActiva($solicitud->getMail(), $solicitud->getNicname(), $solicitud->getCuit(), $solicitud->getCuil());
+                                if ($solicitudActiva) {
+                                    $flagOk = false;
+                                    $redirectForError = true;
+                                    $data = null;
+                                    $solicitud = null;
+                                    $this->addFlash('danger', 'No se puede continuar con la solicitud, ya que está activa (esperando datos del invitado).');
+                                } else {
+                                    $flagOk = true;
+                                $redirectForError = false;
+                                $data = null;
+                                $solicitud->setPersonaFisica($personaFisica);
+                                $solicitud->setPersonaJuridica($personaJuridica);
+                                $solicitud->setDispositivo($dispositivo);
+                                }
+                            }
+                            
                             break;
                         case '3':
-                            # code...
+                            $this->addFlash('danger', 'Sin permisos suficientes para aceptar o rechazar una solicitud');
+                            $flagOk = false;
+                            $redirectForError = true;
+                            $data = null;
+                            $solicitud = null;
                             break;
                     }
 
@@ -92,16 +129,38 @@ class ValidarSolicitudSrv extends AbstractController
                 case 'Intranet':
                     switch ($paso) {
                         case '1':
-                            $this->addFlash('error', 'La persona ' . $personaFisica->getNombre() . ' ' . $personaFisica->getApellido() . ' ya está vinculado a ese dispositivo. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>');
-                            return $this->redirectToRoute('solicitudes');
+                            $solicitudActiva = $this->em->getRepository('App\Entity\Solicitud')->findSolicitudActiva($solicitud->getMail(), $solicitud->getNicname(), $solicitud->getCuit(), $solicitud->getCuil());
+                            if ($solicitudActiva) {
+                                $flagOk = false;
+                                $redirectForError = true;
+                                $data = null;
+                                $solicitud = null;
+                                $this->addFlash('danger', 'No se puede continuar con la solicitud, ya que está activa (esperando datos del invitado).');
+                            } else {
+                                $flagOk = true;
+                                $redirectForError = false;
+                                $data = null;
+                                $solicitud->setPersonaFisica($personaFisica);
+                                $solicitud->setPersonaJuridica($personaJuridica);
+                                $solicitud->setDispositivo($dispositivo);
+                                $this->addFlash('success', 'Solicitud creada correctamente');
+                            }
                             break;
+
                         case '2':
-                            $this->addFlash('error', 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>');
-                            return $this->redirectToRoute('dashboard');
+                            $flagOk = false;
+                            $redirectForError = true;
+                            $data = null;
+                            $solicitud = null;
+                            $this->addFlash('danger', 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>');
                             break;
-                        case '3':
-                            $this->addFlash('error', 'La persona ' . $personaFisica->getNombre() . ' ' . $personaFisica->getApellido() . ' ya está vinculado a ese dispositivo. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>');
-                            return $this->redirectToRoute('solicitudes');
+
+                        case '3':                            
+                            $flagOk = true;
+                            $redirectForError = false;
+                            $data = null;
+                            $solicitud->setFechaAlta(new \DateTime('now'));
+                            $this->addFlash('danger', 'La persona ' . $personaFisica->getNombre() . ' ' . $personaFisica->getApellido() . ' ya está vinculado a ese dispositivo. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>');
                             break;
                     }
 
@@ -119,17 +178,23 @@ class ValidarSolicitudSrv extends AbstractController
          * Inicia: Extranet
          * Observaciones: Trabaja en otro dispositivo
          */
-        if ($personaFisica == true && $personaJuridica == true && $dispositivo == true && $usuario == true && $usuarioDispositivo == false) {
+        if ($personaFisica && $personaJuridica && $dispositivo && $usuario && !$usuarioDispositivo) {
             $this->addFlash('danger', 'Escenario # 2: Trabaja en otro dispositivo');
 
             switch ($ambiente) {
                 case 'Extranet':
                     switch ($paso) {
                         case '1':
-                            # code...
+                            $this->addFlash('danger', 'Sin permisos suficientes para iniciar una solicitud');
+                            $flagOk = false;
+                            $redirectForError = true;
+                            $data = null;
+                            $solicitud = null;
                             break;
                         case '2':
-                            $datos = [
+                            $flahOk = true;
+                            $redirectForError = false;
+                            $data = [
                                 'personaFisica' => $personaFisica,
                                 'personaJuridica' => $personaJuridica,
                                 'dispositivo' => $dispositivo,
@@ -138,11 +203,13 @@ class ValidarSolicitudSrv extends AbstractController
                                 'ambiente' => $ambiente,
                                 'paso' => $paso,
                             ];
-                            return $datos;
-                            break;
                             break;
                         case '3':
-                            # code...
+                            $this->addFlash('danger', 'Sin permisos suficientes para aceptar o rechazar una solicitud');
+                            $flagOk = false;
+                            $redirectForError = true;
+                            $data = null;
+                            $solicitud = null;
                             break;
                     }
 
@@ -160,11 +227,20 @@ class ValidarSolicitudSrv extends AbstractController
                                 'ambiente' => $ambiente,
                                 'paso' => $paso,
                             ];
-                            return $datos;
+                            //return $datos;
+                            //$flagOk = false;
+                            //$redirectForError = true;
+                            //$data = null;
+                            //$solicitud = null;
+
                             break;
                         case '2':
-                            $this->addFlash('error', 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>');
-                            return $this->redirectToRoute('dashboard');
+                            $this->addFlash('danger', 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>');
+                            //$flagOk = false;
+                            //$redirectForError = true;
+                            //$data = null;
+                            //$solicitud = null;
+
                             break;
                         case '3':
                             $usuarioDispositivo = new UsuarioDispositivo();
@@ -178,7 +254,11 @@ class ValidarSolicitudSrv extends AbstractController
 
                             $this->addFlash('info', 'El usuario, la persona física, la persona jurídica y el dispositivo existían con anterioridad.');
                             $this->addFlash('success', 'Se ha vinculado el usuario ' . $usuario->getPersonaFisica()->getNombres() . ' ' . $usuario->getPersonaFisica()->getApellido() . '(' . $usuario->getUsername() . ')' . ' a ' . $dispositivo->getNicname());
-                            return $this->redirectToRoute('solicitudes');
+                            //$flagOk = false;
+                            //$redirectForError = true;
+                            //$data = null;
+                            //$solicitud = null;
+
                             break;
                     }
 
@@ -196,10 +276,10 @@ class ValidarSolicitudSrv extends AbstractController
          * Inicia:
          * Observaciones:
          */
-        if ($personaFisica == true && $personaJuridica == true && $dispositivo == true && $usuario == false && $usuarioDispositivo == true) {
-            $this->accionesSobreInconsistencias('3');
-
-            return $this->redirectToRoute('dashboard');
+        if ($personaFisica && $personaJuridica && $dispositivo && !$usuario && $usuarioDispositivo) {
+            $salida = $this->accionesSobreInconsistencias('3');
+            
+            return $salida;
         }
 
         /**
@@ -210,14 +290,18 @@ class ValidarSolicitudSrv extends AbstractController
          * Inicia: Extranet
          * Observaciones: Paciente
          */
-        if ($personaFisica == true && $personaJuridica == true && $dispositivo == true && $usuario == false && $usuarioDispositivo == false) {
+        if ($personaFisica && $personaJuridica && $dispositivo && !$usuario && !$usuarioDispositivo) {
             $this->addFlash('danger', 'Escenario # 4: Paciente');
 
             switch ($ambiente) {
                 case 'Extranet':
                     switch ($paso) {
                         case '1':
-                            # code...
+                            $this->addFlash('danger', 'Sin permisos suficientes para iniciar una solicitud');
+                            $flagOk = false;
+                            $redirectForError = true;
+                            $data = null;
+                            $solicitud = null;
                             break;
 
                         case '2':
@@ -230,11 +314,21 @@ class ValidarSolicitudSrv extends AbstractController
                                 'ambiente' => $ambiente,
                                 'paso' => $paso,
                             ];
-                            return $datos;
+                            //$flagOk = false;
+                            //$redirectForError = true;
+                            //$data = null;
+                            //$solicitud = null;
+
+                            //return $datos;
                             break;
 
                         case '3':
-                            # code...
+                            $this->addFlash('danger', 'Sin permisos suficientes para aceptar o rechazar una solicitud');
+                            $flagOk = false;
+                            $redirectForError = true;
+                            $data = null;
+                            $solicitud = null;
+                            
                             break;
                     }
 
@@ -252,18 +346,31 @@ class ValidarSolicitudSrv extends AbstractController
                                 'ambiente' => $ambiente,
                                 'paso' => $paso,
                             ];
-                            return $datos;
+                            //$flagOk = false;
+                            //$redirectForError = true;
+                            //$data = null;
+                            //$solicitud = null;
+
+                            //return $datos;
                             break;
 
                         case '2':
-                            $this->addFlash('error', 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>');
-                            return $this->redirectToRoute('dashboard');
+                            $this->addFlash('danger', 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>');
+                            //$flagOk = false;
+                            //$redirectForError = true;
+                            //$data = null;
+                            //$solicitud = null;
+
                             break;
 
                         case '3':
                             //Crea un nuevo usuario de Extranet en KC, en la DB y envía un email con los datos de acceso
                             $this->AuxSrv->createKeycloakcAndDatabaseUser($personaFisica, $solicitud, 'Extranet');
-                            
+                            //$flagOk = false;
+                            //$redirectForError = true;
+                            //$data = null;
+                            //$solicitud = null;
+
 
                             break;
                     }
@@ -282,20 +389,30 @@ class ValidarSolicitudSrv extends AbstractController
          * Inicia: Intranet
          * Observaciones: El usuario existe en otro dispositivo
          */
-        if ($personaFisica == true && $personaJuridica == true && $dispositivo == false && $usuario == true && $usuarioDispositivo == true) {
+        if ($personaFisica && $personaJuridica && !$dispositivo && $usuario && $usuarioDispositivo) {
             $this->addFlash('danger', 'Escenario # 5: El usuario existe en otro dispositivo');
 
             switch ($ambiente) {
                 case 'Extranet':
                     switch ($paso) {
                         case '1':
-                            # code...
+                            $this->addFlash('danger', 'Sin permisos suficientes para iniciar una solicitud');
+                            $flagOk = false;
+                            $redirectForError = true;
+                            $data = null;
+                            $solicitud = null;
+                            
                             break;
                         case '2':
                             # code...
                             break;
                         case '3':
-                            # code...
+                            $this->addFlash('danger', 'Sin permisos suficientes para aceptar o rechazar una solicitud');
+                            $flagOk = false;
+                            $redirectForError = true;
+                            $data = null;
+                            $solicitud = null;
+                            
                             break;
                     }
 
@@ -304,14 +421,26 @@ class ValidarSolicitudSrv extends AbstractController
                 case 'Intranet':
                     switch ($paso) {
                         case '1':
-                            # code...
+                            //$flagOk = false;
+                            //$redirectForError = true;
+                            //$data = null;
+                            //$solicitud = null;
+
                             break;
                         case '2':
-                            $this->addFlash('error', 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>');
-                            return $this->redirectToRoute('dashboard');
+                            $this->addFlash('danger', 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>');
+                            //$flagOk = false;
+                            //$redirectForError = true;
+                            //$data = null;
+                            //$solicitud = null;
+
                             break;
                         case '3':
-                            # code...
+                            //$flagOk = false;
+                            //$redirectForError = true;
+                            //$data = null;
+                            //$solicitud = null;
+
                             break;
                     }
 
@@ -329,20 +458,33 @@ class ValidarSolicitudSrv extends AbstractController
          * Inicia: Intranet
          * Observaciones: El usuario existe en otro dispositivo y se da de alta en un dispositivo nuevo
          */
-        if ($personaFisica == true && $personaJuridica == true && $dispositivo == true && $usuario == true && $usuarioDispositivo == false) {
+        if ($personaFisica && $personaJuridica && !$dispositivo && $usuario && !$usuarioDispositivo) {
             $this->addFlash('danger', 'Escenario # 6: El usuario existe en otro dispositivo y se da de alta en un dispositivo nuevo');
 
             switch ($ambiente) {
                 case 'Extranet':
                     switch ($paso) {
                         case '1':
-                            # code...
+                            $this->addFlash('danger', 'Sin permisos suficientes para iniciar una solicitud');
+                            $flagOk = false;
+                            $redirectForError = true;
+                            $data = null;
+                            $solicitud = null;
+                            
                             break;
                         case '2':
-                            # code...
+                            //$flagOk = false;
+                            //$redirectForError = true;
+                            //$data = null;
+                            //$solicitud = null;
+
                             break;
                         case '3':
-                            # code...
+                            $this->addFlash('danger', 'Sin permisos suficientes para aceptar o rechazar una solicitud');
+                            $flagOk = false;
+                            $redirectForError = true;
+                            $data = null;
+                            $solicitud = null;
                             break;
                     }
 
@@ -351,14 +493,26 @@ class ValidarSolicitudSrv extends AbstractController
                 case 'Intranet':
                     switch ($paso) {
                         case '1':
-                            # code...
+                            //$flagOk = false;
+                            //$redirectForError = true;
+                            //$data = null;
+                            //$solicitud = null;
+
                             break;
                         case '2':
-                            $this->addFlash('error', 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>');
-                            return $this->redirectToRoute('dashboard');
+                            $this->addFlash('danger', 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>');
+                            $flagOk = false;
+                            $redirectForError = true;
+                            $data = null;
+                            $solicitud = null;
+
                             break;
                         case '3':
-                            # code...
+                            //$flagOk = false;
+                            //$redirectForError = true;
+                            //$data = null;
+                            //$solicitud = null;
+
                             break;
                     }
 
@@ -376,10 +530,10 @@ class ValidarSolicitudSrv extends AbstractController
          * Inicia:
          * Observaciones:
          */
-        if ($personaFisica == true && $personaJuridica == true && $dispositivo == false && $usuario == false && $usuarioDispositivo == true) {
-            $this->accionesSobreInconsistencias('7');
-
-            return $this->redirectToRoute('dashboard');
+        if ($personaFisica && $personaJuridica && !$dispositivo && !$usuario && $usuarioDispositivo) {
+            $salida = $this->accionesSobreInconsistencias('7');
+            
+            return $salida;
         }
 
         /**
@@ -390,20 +544,31 @@ class ValidarSolicitudSrv extends AbstractController
          * Inicia: Intranet
          * Observaciones: Paciente en un dispositivo nuevo
          */
-        if ($personaFisica == true && $personaJuridica == true && $dispositivo == false && $usuario == false && $usuarioDispositivo == false) {
+        if ($personaFisica && $personaJuridica && !$dispositivo && !$usuario && !$usuarioDispositivo) {
             $this->addFlash('danger', 'Escenario # 8: Paciente en un dispositivo nuevo');
 
             switch ($ambiente) {
                 case 'Extranet':
                     switch ($paso) {
                         case '1':
-                            # code...
+                            $this->addFlash('danger', 'Sin permisos suficientes para iniciar una solicitud');
+                            $flagOk = false;
+                            $redirectForError = true;
+                            $data = null;
+                            $solicitud = null;
                             break;
                         case '2':
                             # code...
                             break;
                         case '3':
-                            # code...
+                            $this->addFlash('danger', 'Sin permisos suficientes para aceptar o rechazar una solicitud');
+                            $flagOk = false;
+                            $redirectForError = true;
+                            $data = null;
+                            $solicitud = null;
+                            //$data = null;
+                            //$solicitud = null;
+
                             break;
                     }
 
@@ -412,14 +577,26 @@ class ValidarSolicitudSrv extends AbstractController
                 case 'Intranet':
                     switch ($paso) {
                         case '1':
-                            # code...
+                            //$flagOk = false;
+                            //$redirectForError = true;
+                            //$data = null;
+                            //$solicitud = null;
+
                             break;
                         case '2':
-                            $this->addFlash('error', 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>');
-                            return $this->redirectToRoute('dashboard');
+                            $this->addFlash('danger', 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>');
+                            //$flagOk = false;
+                            //$redirectForError = true;
+                            //$data = null;
+                            //$solicitud = null;
+
                             break;
                         case '3':
-                            # code...
+                            //$flagOk = false;
+                            //$redirectForError = true;
+                            //$data = null;
+                            //$solicitud = null;
+
                             break;
                     }
 
@@ -437,10 +614,10 @@ class ValidarSolicitudSrv extends AbstractController
          * Inicia:
          * Observaciones:
          */
-        if ($personaFisica == true && $personaJuridica == false && $dispositivo == true && $usuario == true && $usuarioDispositivo == true) {
-            $this->accionesSobreInconsistencias('9');
-
-            return $this->redirectToRoute('dashboard');
+        if ($personaFisica && !$personaJuridica && $dispositivo && $usuario && $usuarioDispositivo) {
+            $salida = $this->accionesSobreInconsistencias('9');
+            
+            return $salida;
         }
 
         /**
@@ -451,10 +628,10 @@ class ValidarSolicitudSrv extends AbstractController
          * Inicia:
          * Observaciones:
          */
-        if ($personaFisica == true && $personaJuridica == false && $dispositivo == true && $usuario == true && $usuarioDispositivo == false) {
-            $this->accionesSobreInconsistencias('10');
-
-            return $this->redirectToRoute('dashboard');
+        if ($personaFisica && !$personaJuridica && $dispositivo && $usuario && !$usuarioDispositivo) {
+            $salida = $this->accionesSobreInconsistencias('10');
+            
+            return $salida;
         }
 
         /**
@@ -465,10 +642,10 @@ class ValidarSolicitudSrv extends AbstractController
          * Inicia:
          * Observaciones:
          */
-        if ($personaFisica == true && $personaJuridica == false && $dispositivo == true && $usuario == false && $usuarioDispositivo == true) {
-            $this->accionesSobreInconsistencias('11');
-
-            return $this->redirectToRoute('dashboard');
+        if ($personaFisica && !$personaJuridica && $dispositivo && !$usuario && $usuarioDispositivo) {
+            $salida = $this->accionesSobreInconsistencias('11');
+            
+            return $salida;
         }
 
         /**
@@ -479,10 +656,10 @@ class ValidarSolicitudSrv extends AbstractController
          * Inicia:
          * Observaciones:
          */
-        if ($personaFisica == true && $personaJuridica == false && $dispositivo == true && $usuario == false && $usuarioDispositivo == false) {
-            $this->accionesSobreInconsistencias('12');
-
-            return $this->redirectToRoute('dashboard');
+        if ($personaFisica && !$personaJuridica && $dispositivo && !$usuario && !$usuarioDispositivo) {
+            $salida = $this->accionesSobreInconsistencias('12');
+            
+            return $salida;
         }
 
         /**
@@ -493,20 +670,33 @@ class ValidarSolicitudSrv extends AbstractController
          * Inicia:
          * Observaciones:
          */
-        if ($personaFisica == true && $personaJuridica == false && $dispositivo == false && $usuario == true && $usuarioDispositivo == true) {
+        if ($personaFisica && !$personaJuridica && !$dispositivo && $usuario && $usuarioDispositivo) {
             $this->addFlash('danger', 'Escenario # 13: INCOSISTENCIA');
 
             switch ($ambiente) {
                 case 'Extranet':
                     switch ($paso) {
                         case '1':
-                            # code...
+                            $this->addFlash('danger', 'Sin permisos suficientes para iniciar una solicitud');
+                            $flagOk = false;
+                            $redirectForError = true;
+                            $data = null;
+                            $solicitud = null;
                             break;
                         case '2':
-                            # code...
+                            //$flagOk = false;
+                            //$redirectForError = true;
+                            //$data = null;
+                            //$solicitud = null;
+
                             break;
                         case '3':
-                            # code...
+                            $this->addFlash('danger', 'Sin permisos suficientes para aceptar o rechazar una solicitud');
+                            $flagOk = false;
+                            $redirectForError = true;
+                            $data = null;
+                            $solicitud = null;
+                            
                             break;
                     }
 
@@ -515,14 +705,26 @@ class ValidarSolicitudSrv extends AbstractController
                 case 'Intranet':
                     switch ($paso) {
                         case '1':
-                            # code...
+                            //$flagOk = false;
+                            //$redirectForError = true;
+                            //$data = null;
+                            //$solicitud = null;
+
                             break;
                         case '2':
-                            $this->addFlash('error', 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>');
-                            return $this->redirectToRoute('dashboard');
+                            $this->addFlash('danger', 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>');
+                            //$flagOk = false;
+                            //$redirectForError = true;
+                            //$data = null;
+                            //$solicitud = null;
+
                             break;
                         case '3':
-                            # code...
+                            //$flagOk = false;
+                            //$redirectForError = true;
+                            //$data = null;
+                            //$solicitud = null;
+
                             break;
                     }
 
@@ -540,20 +742,33 @@ class ValidarSolicitudSrv extends AbstractController
          * Inicia: Intranet
          * Observaciones: trabaja en otro dispositivo de otra razón social
          */
-        if ($personaFisica == true && $personaJuridica == false && $dispositivo == false && $usuario == true && $usuarioDispositivo == false) {
+        if ($personaFisica && !$personaJuridica && !$dispositivo && $usuario && !$usuarioDispositivo) {
             $this->addFlash('danger', 'Escenario # 14: trabaja en otro dispositivo de otra razón social');
 
             switch ($ambiente) {
                 case 'Extranet':
                     switch ($paso) {
                         case '1':
-                            # code...
+                            $this->addFlash('danger', 'Sin permisos suficientes para iniciar una solicitud');
+                            $flagOk = false;
+                            $redirectForError = true;
+                            $data = null;
+                            $solicitud = null;
                             break;
                         case '2':
-                            # code...
+                            //$flagOk = false;
+                            //$redirectForError = true;
+                            //$data = null;
+                            //$solicitud = null;
+
                             break;
                         case '3':
-                            # code...
+                            $this->addFlash('danger', 'Sin permisos suficientes para aceptar o rechazar una solicitud');
+                            $flagOk = false;
+                            $redirectForError = true;
+                            $data = null;
+                            $solicitud = null;
+
                             break;
                     }
 
@@ -562,14 +777,26 @@ class ValidarSolicitudSrv extends AbstractController
                 case 'Intranet':
                     switch ($paso) {
                         case '1':
-                            # code...
+                            //$flagOk = false;
+                            //$redirectForError = true;
+                            //$data = null;
+                            //$solicitud = null;
+
                             break;
                         case '2':
-                            $this->addFlash('error', 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>');
-                            return $this->redirectToRoute('dashboard');
+                            $this->addFlash('danger', 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>');
+                            //$flagOk = false;
+                            //$redirectForError = true;
+                            //$data = null;
+                            //$solicitud = null;
+
                             break;
                         case '3':
-                            # code...
+                            //$flagOk = false;
+                            //$redirectForError = true;
+                            //$data = null;
+                            //$solicitud = null;
+
                             break;
                     }
 
@@ -587,10 +814,10 @@ class ValidarSolicitudSrv extends AbstractController
          * Inicia:
          * Observaciones:
          */
-        if ($personaFisica == true && $personaJuridica == false && $dispositivo == false && $usuario == false && $usuarioDispositivo == true) {
-            $this->accionesSobreInconsistencias('15');
-
-            return $this->redirectToRoute('dashboard');
+        if ($personaFisica && !$personaJuridica && !$dispositivo && !$usuario && $usuarioDispositivo) {
+            $salida = $this->accionesSobreInconsistencias('15');
+            
+            return $salida;
         }
 
         /**
@@ -601,20 +828,33 @@ class ValidarSolicitudSrv extends AbstractController
          * Inicia: Intranet
          * Observaciones:
          */
-        if ($personaFisica == true && $personaJuridica == false && $dispositivo == false && $usuario == false && $usuarioDispositivo == false) {
+        if ($personaFisica && !$personaJuridica && !$dispositivo && !$usuario && !$usuarioDispositivo) {
             $this->addFlash('danger', 'Escenario # 16: alta persona jur, dispositivo, usuario, usuario_dispositivo');
 
             switch ($ambiente) {
                 case 'Extranet':
                     switch ($paso) {
                         case '1':
-                            # code...
+                            $this->addFlash('danger', 'Sin permisos suficientes para iniciar una solicitud');
+                            $flagOk = false;
+                            $redirectForError = true;
+                            $data = null;
+                            $solicitud = null;
                             break;
                         case '2':
-                            # code...
+                            //$flagOk = false;
+                            //$redirectForError = true;
+                            //$data = null;
+                            //$solicitud = null;
+
                             break;
                         case '3':
-                            # code...
+                            $this->addFlash('danger', 'Sin permisos suficientes para aceptar o rechazar una solicitud');
+                            $flagOk = false;
+                            $redirectForError = true;
+                            $data = null;
+                            $solicitud = null;
+
                             break;
                     }
 
@@ -623,14 +863,26 @@ class ValidarSolicitudSrv extends AbstractController
                 case 'Intranet':
                     switch ($paso) {
                         case '1':
-                            # code...
+                            //$flagOk = false;
+                            //$redirectForError = true;
+                            //$data = null;
+                            //$solicitud = null;
+                            
                             break;
                         case '2':
-                            $this->addFlash('error', 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>');
-                            return $this->redirectToRoute('dashboard');
+                            $this->addFlash('danger', 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>');
+                            //$flagOk = false;
+                            //$redirectForError = true;
+                            //$data = null;
+                            //$solicitud = null;
+
                             break;
                         case '3':
-                            # code...
+                            //$flagOk = false;
+                            //$redirectForError = true;
+                            //$data = null;
+                            //$solicitud = null;
+
                             break;
                     }
 
@@ -648,10 +900,10 @@ class ValidarSolicitudSrv extends AbstractController
          * Inicia:
          * Observaciones:
          */
-        if ($personaFisica == false && $personaJuridica == true && $dispositivo == true && $usuario == true && $usuarioDispositivo == true) {
-            $this->accionesSobreInconsistencias('17');
-
-            return $this->redirectToRoute('dashboard');
+        if (!$personaFisica && $personaJuridica && $dispositivo && $usuario && $usuarioDispositivo) {
+            $salida = $this->accionesSobreInconsistencias('17');
+            
+            return $salida;
         }
 
         /**
@@ -662,10 +914,10 @@ class ValidarSolicitudSrv extends AbstractController
          * Inicia:
          * Observaciones:
          */
-        if ($personaFisica == false && $personaJuridica == true && $dispositivo == true && $usuario == true && $usuarioDispositivo == false) {
-            $this->accionesSobreInconsistencias('18');
-
-            return $this->redirectToRoute('dashboard');
+        if (!$personaFisica && $personaJuridica && $dispositivo && $usuario && !$usuarioDispositivo) {
+            $salida = $this->accionesSobreInconsistencias('18');
+            
+            return $salida;
         }
 
         /**
@@ -676,10 +928,10 @@ class ValidarSolicitudSrv extends AbstractController
          * Inicia:
          * Observaciones:
          */
-        if ($personaFisica == false && $personaJuridica == true && $dispositivo == true && $usuario == false && $usuarioDispositivo == true) {
-            $this->accionesSobreInconsistencias('19');
-
-            return $this->redirectToRoute('dashboard');
+        if (!$personaFisica && $personaJuridica && $dispositivo && !$usuario && $usuarioDispositivo) {
+            $salida = $this->accionesSobreInconsistencias('19');
+            
+            return $salida;
         }
 
         /**
@@ -690,10 +942,10 @@ class ValidarSolicitudSrv extends AbstractController
          * Inicia:
          * Observaciones:
          */
-        if ($personaFisica == false && $personaJuridica == true && $dispositivo == true && $usuario == false && $usuarioDispositivo == false) {
-            $this->accionesSobreInconsistencias('20');
-
-            return $this->redirectToRoute('dashboard');
+        if (!$personaFisica && $personaJuridica && $dispositivo && !$usuario && !$usuarioDispositivo) {
+            $salida = $this->accionesSobreInconsistencias('20');
+            
+            return $salida;
         }
 
         /**
@@ -704,10 +956,10 @@ class ValidarSolicitudSrv extends AbstractController
          * Inicia:
          * Observaciones:
          */
-        if ($personaFisica == false && $personaJuridica == true && $dispositivo == false && $usuario == true && $usuarioDispositivo == true) {
-            $this->accionesSobreInconsistencias('21');
-
-            return $this->redirectToRoute('dashboard');
+        if (!$personaFisica && $personaJuridica && !$dispositivo && $usuario && $usuarioDispositivo) {
+            $salida = $this->accionesSobreInconsistencias('21');
+            
+            return $salida;
         }
 
         /**
@@ -718,10 +970,10 @@ class ValidarSolicitudSrv extends AbstractController
          * Inicia:
          * Observaciones:
          */
-        if ($personaFisica == false && $personaJuridica == true && $dispositivo == false && $usuario == true && $usuarioDispositivo == false) {
-            $this->accionesSobreInconsistencias('22');
-
-            return $this->redirectToRoute('dashboard');
+        if (!$personaFisica && $personaJuridica && !$dispositivo && $usuario && !$usuarioDispositivo) {
+            $salida = $this->accionesSobreInconsistencias('22');
+            
+            return $salida;
         }
 
         /**
@@ -732,10 +984,10 @@ class ValidarSolicitudSrv extends AbstractController
          * Inicia:
          * Observaciones:
          */
-        if ($personaFisica == false && $personaJuridica == true && $dispositivo == false && $usuario == false && $usuarioDispositivo == true) {
-            $this->accionesSobreInconsistencias('23');
-
-            return $this->redirectToRoute('dashboard');
+        if (!$personaFisica && $personaJuridica && !$dispositivo && !$usuario && $usuarioDispositivo) {
+            $salida = $this->accionesSobreInconsistencias('23');
+            
+            return $salida;
         }
 
         /**
@@ -746,20 +998,33 @@ class ValidarSolicitudSrv extends AbstractController
          * Inicia: Intranet
          * Observaciones:
          */
-        if ($personaFisica == false && $personaJuridica == true && $dispositivo == false && $usuario == false && $usuarioDispositivo == false) {
+        if (!$personaFisica && $personaJuridica && !$dispositivo && !$usuario && !$usuarioDispositivo) {
             $this->addFlash('danger', 'Escenario # 24: Alta persona fisica, dispositivo, usuario, usuario_dispositivo');
 
             switch ($ambiente) {
                 case 'Extranet':
                     switch ($paso) {
                         case '1':
-                            # code...
+                            $this->addFlash('danger', 'Sin permisos suficientes para iniciar una solicitud');
+                            $flagOk = false;
+                            $redirectForError = true;
+                            $data = null;
+                            $solicitud = null;
                             break;
                         case '2':
-                            # code...
+                            //$flagOk = false;
+                            //$redirectForError = true;
+                            //$data = null;
+                            //$solicitud = null;
+
                             break;
                         case '3':
-                            # code...
+                            $this->addFlash('danger', 'Sin permisos suficientes para aceptar o rechazar una solicitud');
+                            $flagOk = false;
+                            $redirectForError = true;
+                            $data = null;
+                            $solicitud = null;
+
                             break;
                     }
 
@@ -768,14 +1033,26 @@ class ValidarSolicitudSrv extends AbstractController
                 case 'Intranet':
                     switch ($paso) {
                         case '1':
-                            # code...
+                            //$flagOk = false;
+                            //$redirectForError = true;
+                            //$data = null;
+                            //$solicitud = null;
+
                             break;
                         case '2':
-                            $this->addFlash('error', 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>');
-                            return $this->redirectToRoute('dashboard');
+                            $this->addFlash('danger', 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>');
+                            //$flagOk = false;
+                            //$redirectForError = true;
+                            //$data = null;
+                            //$solicitud = null;
+
                             break;
                         case '3':
-                            # code...
+                            //$flagOk = false;
+                            //$redirectForError = true;
+                            //$data = null;
+                            //$solicitud = null;
+
                             break;
                     }
 
@@ -793,10 +1070,10 @@ class ValidarSolicitudSrv extends AbstractController
          * Inicia:
          * Observaciones:
          */
-        if ($personaFisica == false && $personaJuridica == false && $dispositivo == true && $usuario == true && $usuarioDispositivo == true) {
-            $this->accionesSobreInconsistencias('25');
-
-            return $this->redirectToRoute('dashboard');
+        if (!$personaFisica && !$personaJuridica && $dispositivo && $usuario && $usuarioDispositivo) {
+            $salida = $this->accionesSobreInconsistencias('25');
+            
+            return $salida;
         }
 
         /**
@@ -807,10 +1084,10 @@ class ValidarSolicitudSrv extends AbstractController
          * Inicia:
          * Observaciones:
          */
-        if ($personaFisica == false && $personaJuridica == false && $dispositivo == true && $usuario == true && $usuarioDispositivo == false) {
-            $this->accionesSobreInconsistencias('26');
-
-            return $this->redirectToRoute('dashboard');
+        if (!$personaFisica && !$personaJuridica && $dispositivo && $usuario && !$usuarioDispositivo) {
+            $salida = $this->accionesSobreInconsistencias('26');
+            
+            return $salida;
         }
 
         /**
@@ -821,10 +1098,10 @@ class ValidarSolicitudSrv extends AbstractController
          * Inicia:
          * Observaciones:
          */
-        if ($personaFisica == false && $personaJuridica == false && $dispositivo == true && $usuario == false && $usuarioDispositivo == true) {
-            $this->accionesSobreInconsistencias('27');
-
-            return $this->redirectToRoute('dashboard');
+        if (!$personaFisica && !$personaJuridica && $dispositivo && !$usuario && $usuarioDispositivo) {
+            $salida = $this->accionesSobreInconsistencias('27');
+            
+            return $salida;
         }
 
         /**
@@ -835,10 +1112,10 @@ class ValidarSolicitudSrv extends AbstractController
          * Inicia:
          * Observaciones:
          */
-        if ($personaFisica == false && $personaJuridica == false && $dispositivo == true && $usuario == false && $usuarioDispositivo == false) {
-            $this->accionesSobreInconsistencias('28');
-
-            return $this->redirectToRoute('dashboard');
+        if (!$personaFisica && !$personaJuridica && $dispositivo && !$usuario && !$usuarioDispositivo) {
+            $salida = $this->accionesSobreInconsistencias('28');
+            
+            return $salida;
         }
 
         /**
@@ -849,10 +1126,10 @@ class ValidarSolicitudSrv extends AbstractController
          * Inicia:
          * Observaciones:
          */
-        if ($personaFisica == false && $personaJuridica == false && $dispositivo == false && $usuario == true && $usuarioDispositivo == true) {
-            $this->accionesSobreInconsistencias('29');
-
-            return $this->redirectToRoute('dashboard');
+        if (!$personaFisica && !$personaJuridica && !$dispositivo && $usuario && $usuarioDispositivo) {
+            $salida = $this->accionesSobreInconsistencias('29');
+            
+            return $salida;
         }
 
         /**
@@ -863,10 +1140,10 @@ class ValidarSolicitudSrv extends AbstractController
          * Inicia:
          * Observaciones:
          */
-        if ($personaFisica == false && $personaJuridica == false && $dispositivo == false && $usuario == true && $usuarioDispositivo == false) {
-            $this->accionesSobreInconsistencias('30');
-
-            return $this->redirectToRoute('dashboard');
+        if (!$personaFisica && !$personaJuridica && !$dispositivo && $usuario && !$usuarioDispositivo) {
+            $salida = $this->accionesSobreInconsistencias('30');
+            
+            return $salida;
         }
 
         /**
@@ -877,10 +1154,10 @@ class ValidarSolicitudSrv extends AbstractController
          * Inicia:
          * Observaciones:
          */
-        if ($personaFisica == false && $personaJuridica == false && $dispositivo == false && $usuario == false && $usuarioDispositivo == true) {
-            $this->accionesSobreInconsistencias('31');
-
-            return $this->redirectToRoute('dashboard');
+        if (!$personaFisica && !$personaJuridica && !$dispositivo && !$usuario && $usuarioDispositivo) {
+            $salida = $this->accionesSobreInconsistencias('31');
+            
+            return $salida;
         }
 
         /**
@@ -891,20 +1168,33 @@ class ValidarSolicitudSrv extends AbstractController
          * Inicia: Intranet
          * Observaciones:
          */
-        if ($personaFisica == false && $personaJuridica == false && $dispositivo == false && $usuario == false && $usuarioDispositivo == false) {
+        if (!$personaFisica && !$personaJuridica && !$dispositivo && !$usuario && !$usuarioDispositivo) {
             $this->addFlash('danger', 'Escenario # 32: Alta persona fisica, dispositivo, usuario, usuario_dispositivo');
 
             switch ($ambiente) {
                 case 'Extranet':
                     switch ($paso) {
                         case '1':
-                            # code...
+                            $this->addFlash('danger', 'Sin permisos suficientes para iniciar una solicitud');
+                            $flagOk = false;
+                            $redirectForError = true;
+                            $data = null;
+                            $solicitud = null;
                             break;
                         case '2':
-                            # code...
+                            //$flagOk = false;
+                            //$redirectForError = true;
+                            //$data = null;
+                            //$solicitud = null;
+
                             break;
                         case '3':
-                            # code...
+                            $this->addFlash('danger', 'Sin permisos suficientes para aceptar o rechazar una solicitud');
+                            $flagOk = false;
+                            $redirectForError = true;
+                            $data = null;
+                            $solicitud = null;
+
                             break;
                     }
 
@@ -912,17 +1202,29 @@ class ValidarSolicitudSrv extends AbstractController
 
                 case 'Intranet':
                     switch ($paso) {
-                        case '1':
+                        case '1':   
+                            
                             $hash = md5(uniqid(rand(), true));
-                            $solicitud->setHash($hash);     
-                            $this->addFlash('danger', 'Escenario # 32: Paso uno.');           
+                            $solicitud->setHash($hash);  
+                            $flagOk = true;
+                            $redirectForError = false;
+                            $data = null;                            
+                            $this->addFlash('Success', 'Escenario # 32: Paso uno.');
                             break;
                         case '2':
-                            $this->addFlash('error', 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>');                      case '2':
-                            return $this->redirectToRoute('dashboard');
+                            $this->addFlash('danger', 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>');                      case '2':
+                            //$flagOk = false;
+                            //$redirectForError = true;
+                            //$data = null;
+                            //$solicitud = null;
+
                             break;
                         case '3':
-                            # code...
+                            //$flagOk = false;
+                            //$redirectForError = true;
+                            //$data = null;
+                            //$solicitud = null;
+
                             break;
                     }
 
@@ -940,13 +1242,24 @@ class ValidarSolicitudSrv extends AbstractController
             case 'Extranet':
                 switch ($paso) {
                     case '1':
-                        # code...
+                        $this->addFlash('danger', 'Sin permisos suficientes para iniciar una solicitud');
+                        $flagOk = false;
+                        $redirectForError = true;
+                        $data = null;
+                        $solicitud = null;
+                        //$flagOk = false;
+                            //$redirectForError = true;
+                            //$data = null;
+                            //$solicitud = null;
+
                         break;
                     case '2':
-                        # code...
+                        //$flagOk = false;
+                        //$redirectForError = true;
                         break;
                     case '3':
-                        # code...
+                        //$flagOk = false;
+                        //$redirectForError = true;
                         break;
                 }
                 # code...
@@ -954,25 +1267,43 @@ class ValidarSolicitudSrv extends AbstractController
             case 'Intranet':
                 switch ($paso) {
                     case '1':
-                        # code...
+                        //$flagOk = false;
+                        //$redirectForError = true;
                         break;
                     case '2':
-                        $this->addFlash('error', 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>');
+                        $this->addFlash('danger', 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>');
+                        //$flagOk = false;
+                        //$redirectForError = true;
                         break;
                     case '3':
-                        # code...
+                        //$flagOk = false;
+                        //$redirectForError = true;
                         break;
                 }
         }
 
-        return $this->redirectToRoute('dashboard');
+        $salida = [
+            'flagOk' => $flagOk,
+            'redirectForError' => $redirectForError,
+            'data' => $data,
+            'solicitud' => $solicitud,
+        ];
+
+        return $salida;        
     }
 
     private function accionesSobreInconsistencias($escenario)
     {
         $this->sendAlertsSrv->sendBadStageAlertToSuperAdmins($escenario);
         $this->addFlash('danger', 'Escenario # ' . $escenario . ' con inconsistencias. Se ha comunicado a soporte');
-        return $this->redirectToRoute('dashboard');
-        //enviar un email a todos los superadministradores
+
+        $salida = [
+            'flagOk' => false,
+            'redirectForError' => true,
+            'data' => null,
+            'solicitud' => null,
+        ];
+        
+        return $salida;
     }
 }

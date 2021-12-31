@@ -485,7 +485,7 @@ class AddSuperAdminCommand extends Command
                 $usuario->setPersonaFisica($personaFisica);
                 $usuario->setRealm($realmDB);
                 $usuario->setKeycloakId($usuarioKC->id);
-                //TODO: meter el usuario en el grupo en la DB y en KC
+                
                 $this->em->persist($usuario);
 
                 $usuarioGrupo = new UserGrupo();
@@ -503,7 +503,7 @@ class AddSuperAdminCommand extends Command
 
         $this->em->flush();
 
-        $io->success('listo!');
+        $io->success('listo! El password temporal es el DNI ingresado');
 
         return Command::SUCCESS;
     

@@ -30,7 +30,6 @@ class AuxSrv extends AbstractController
     /**
      * Crea un usuario en Keycloak, en la DB y envía un email al invitado con los datos de acceso
      */
-
     public function createKeycloakcAndDatabaseUser($personaFisica, $solicitud, $realm, MailerInterface $mailer) {
         $entityManager = $this->getDoctrine()->getManager();
         $password = substr(md5(uniqid(rand(1, 100))), 1, 6);

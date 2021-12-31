@@ -39,12 +39,13 @@ class SolicitudRepository extends ServiceEntityRepository
     
     public function findSolicitudActiva($mail, $nicname, $cuit, $cuil)
     {
+        $hoy = new \DateTime();
         return $this->createQueryBuilder('s')
         ->andWhere('s.mail = :mail')
         ->andWhere('s.nicname = :nicname')
         ->andWhere('s.cuit = :cuit')
         ->andWhere('s.cuil = :cuil')
-        ->andWhere('s.fechaExpiracion IS NULL')
+        ->andWhere('s.fechaExpiracion > ' . $hoy->format('Y-m-d H:i:s'))
         ->andWhere('s.fechaAlta IS NULL')
         ->andWhere('s.correccion IS NULL')
         ->andWhere('s.usada IS NULL')
