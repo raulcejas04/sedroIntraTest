@@ -38,7 +38,7 @@ class SolicitudController extends AbstractController
     private $keycloak;
     private $validador;
 
-    public function __construct(KeycloakApiSrv $keycloak, UrlGeneratorInterface $router,ValidarSolicitudSrv $validador)
+    public function __construct(KeycloakApiSrv $keycloak, UrlGeneratorInterface $router, ValidarSolicitudSrv $validador)
     {
         $this->keycloak = $keycloak;
         $this->router = $router;
@@ -62,7 +62,7 @@ class SolicitudController extends AbstractController
                 return $this->redirectToRoute('dashboard');
             }
 
-           /*  //verifica persona física y/o jurídica preexistente            
+            /*  //verifica persona física y/o jurídica preexistente            
             $personaFisica = $entityManager->getRepository(PersonaFisica::class)->findOneBy(['cuitCuil' => $solicitud->getCuil()]);
             $personaJuridica = $entityManager->getRepository(PersonaJuridica::class)->findOneBy(['cuit' => $solicitud->getCuit()]);
 
@@ -74,9 +74,14 @@ class SolicitudController extends AbstractController
                 $solicitud->setPersonaJuridica($personaJuridica);
             }
             */
-            
-            //PROBANDO VALIDADOR ESCENARIO 32
-            $solicitud = $this->validador->validarSolicitud($solicitud);
+
+            $validacion = $this->validador->validarSolicitud($solicitud, $this->getParameter('keycloak_realm'), Solicitud::PASO_UNO);
+            if (!$validacion["flagOk"]) {
+                $this->addFlash('danger', $validacion["message"]);
+                return $this->redirectToRoute('dashboard');
+            }
+
+            $solicitud = $validacion["solicitud"];
             $entityManager->persist($solicitud);
             $entityManager->flush();
 
@@ -95,8 +100,8 @@ class SolicitudController extends AbstractController
                 ]);
 
             $mailer->send($email);
-
-            $this->addFlash('success', 'Invitación creada con éxito. Se ha enviado un email a ' . $solicitud->getMail() . ' con instrucciones para completar el registro.');
+            $this->addFlash('success', $validacion["message"]);
+            $this->addFlash('success', 'Se ha enviado un email a ' . $solicitud->getMail() . ' con instrucciones para completar el registro.');
             return $this->redirectToRoute('dashboard');
         }
 
@@ -146,77 +151,21 @@ class SolicitudController extends AbstractController
     /**
      * @Route("dashboard/solicitud/{hash}/aceptar-solicitud", name="aceptarSolicitud")
      */
-    public function aceptarSolicitud($hash, MailerInterface $mailer): Response
+    public function aceptarSolicitud($hash): Response
     {
         $entityManager = $this->getDoctrine()->getManager();
         $solicitud = $entityManager->getRepository('App\Entity\Solicitud')->findOneByHash($hash);
 
-
-        $solicitud->setFechaAlta(new \DateTime('now'));
-
-        if ($solicitud->getDispositivo()) {
-            $this->addFlash('danger', 'El dispositivo ya fue creado.');
-            // return $this->redirectToRoute('dashboard');
-        } else {
-            $dispositivo = new Dispositivo();
-            $dispositivo->setNicname($solicitud->getNicname());
-            $dispositivo->setFechaAlta(new DateTime());
-            //Asignamos el responsable al dispositivo
-            $dispositivoResponsable = new DispositivoResponsable();
-            $dispositivoResponsable->setPersonaFisica($solicitud->getPersonaFisica());
-            $dispositivoResponsable->setDispositivo($dispositivo);
-            $dispositivoResponsable->setOwner(true);
-            $dispositivo->addResponsable($dispositivoResponsable);
-            $dispositivo->setPersonaJuridica($solicitud->getPersonaJuridica());
-            $solicitud->setDispositivo($dispositivo);
-
-            $this->addFlash('success', 'Dispositivo creado correctamente.');
+        $validacion = $this->validador->validarSolicitud($solicitud, $this->getParameter('keycloak_realm'), Solicitud::PASO_TRES);
+        if (!$validacion["flagOk"]) {
+            $this->addFlash('danger', $validacion["message"]);
+            return $this->redirectToRoute('dashboard');
         }
-
-        $password = substr(md5(uniqid(rand(1, 100))), 1, 6);
-        //Crea usuario en keycloak y en la tabla usuarios
-        $escenario = $this->verificar($solicitud, $password, $mailer);
-
-        if ($escenario['usuarioKeycloak'] == true && $escenario['usuarioDb'] == true) {
-            $this->addFlash('danger', 'El usuario ya existe en Keycloak y en la base de datos');
-            //return $this->redirectToRoute('dashboard');
-        }
-
-        if ($escenario['usuarioKeycloak'] == true && $escenario['usuarioDb'] == false) {
-            $this->addFlash('danger', 'Inconsistencia: El usuario ya existe en Keycloak pero no en la base de datos');
-            //return $this->redirectToRoute('dashboard');
-        }
-
-        if ($escenario['usuarioKeycloak'] == false && $escenario['usuarioDb'] == true) {
-            $this->addFlash('danger', 'Inconsistencia: El usuario ya existe en la base de datos pero no en Keycloak');
-            //  return $this->redirectToRoute('dashboard');
-        }
-
-        if ($escenario['usuarioKeycloak'] == false && $escenario['usuarioDb'] == false) {
-
-            $nuevoUsuarioKeycloak = $this->crearUsuarioKeycloak($solicitud, $password);
-            $nuevoUsuarioDb = $this->crearUsuarioDb($solicitud, $nuevoUsuarioKeycloak[0]);
-
-            //Envia mail con los datos de acceso
-            $email = (new TemplatedEmail())
-                ->from($this->getParameter('direccion_email_salida'))
-                ->to($solicitud->getMail())
-                ->subject('Solicitud aprobada: Datos de acceso')
-                ->htmlTemplate('emails/invitacionPasoTres.html.twig')
-                ->context([
-                    'nicname' => $solicitud->getNicname(),
-                    'user' => $solicitud->getPersonaFisica()->getCuitCuil(),
-                    'password' => $password,
-                    'url' => $this->router->generate('dashboard', [], urlGeneratorInterface::ABSOLUTE_URL)
-                ]);
-            $solicitud->setUsuario($nuevoUsuarioDb);
-            $mailer->send($email);
-
-            $this->addFlash('success', 'Usuario creado con éxito! Se envió un email a ' . $solicitud->getMail() . ' con los datos de acceso');
-        }
+        $solicitud = $validacion["solicitud"];
         $entityManager->persist($solicitud);
         $entityManager->flush();
 
+        $this->addFlash('success', $validacion["message"]);
         return $this->redirectToRoute('dashboard');
     }
 

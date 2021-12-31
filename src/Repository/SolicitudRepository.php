@@ -36,34 +36,33 @@ class SolicitudRepository extends ServiceEntityRepository
     }
     */
 
-    
+
     public function findSolicitudActiva($mail, $nicname, $cuit, $cuil)
     {
         $hoy = new \DateTime();
         return $this->createQueryBuilder('s')
-        ->andWhere('s.mail = :mail')
-        ->andWhere('s.nicname = :nicname')
-        ->andWhere('s.cuit = :cuit')
-        ->andWhere('s.cuil = :cuil')
-        ->andWhere('s.fechaExpiracion > ' . $hoy->format('Y-m-d H:i:s'))
-        ->andWhere('s.fechaAlta IS NULL')
-        ->andWhere('s.correccion IS NULL')
-        ->andWhere('s.usada IS NULL')
-        ->setParameter('mail', $mail)
-        ->setParameter('nicname', $nicname)
-        ->setParameter('cuit', $cuit)
-        ->setParameter('cuil', $cuil)
-        ->getQuery()
-        ->getOneOrNullResult()    
-        ;
+            ->andWhere('s.mail = :mail')
+            ->andWhere('s.nicname = :nicname')
+            ->andWhere('s.cuit = :cuit')
+            ->andWhere('s.cuil = :cuil')
+            ->andWhere('s.fechaExpiracion < :hoy')
+            ->andWhere('s.fechaAlta IS NULL')
+            ->andWhere('s.correccion IS NULL')
+            ->andWhere('s.usada IS NULL')
+            ->setParameter('mail', $mail)
+            ->setParameter('nicname', $nicname)
+            ->setParameter('cuit', $cuit)
+            ->setParameter('cuil', $cuil)
+            ->setParameter('hoy', $hoy->format('Y-m-d H:i:s'))
+            ->getQuery()
+            ->getOneOrNullResult();
 
-        return $this->createQueryBuilder('pf')            
+/*         return $this->createQueryBuilder('pf')
             ->leftJoin('pf.representaciones', 'r')
             ->leftJoin('r.personaJuridica', 'pj')
             ->leftJoin('pj.dispositivos', 'd')
             ->leftJoin('pj.solicitudes', 's')
             ->getQuery()
-            ->getResult();
+            ->getResult(); */
     }
-    
 }
