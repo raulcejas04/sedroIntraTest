@@ -17,9 +17,10 @@ $(document).ready(function() {
 			async:true,
 			success: function(data){
 				console.log(data);
+				alert(data);
 				//ret = eval('('+data+')');		
 				//console.log('ret '+ret);	
-				if(data != null && data.status=='Found'){
+				if(data.status=='Found'){
 					$("#nueva_solicitud_razon_social").val(data.message); 
 				}else{
 					$("#nueva_solicitud_razon_social").val('Persona jurídica nueva'); 	
@@ -30,15 +31,16 @@ $(document).ready(function() {
 	$('#nueva_solicitud_cuil').on('change onfocusout', function () {
 		console.log('parametro '+$(this).val());
 		$.ajax({
-			url: $(this).data('get_persona_juridica_x_cuit'),
+			url: $(this).data('get_persona_fisica_x_cuil'),
 			type:"POST",
 			data:{"cuil":$(this).val().replace('/-/g','')}, 
 			async:true,
 			success: function(data){
 				console.log(data);
+				alert(data);
 				//ret = eval('('+data+')');		
 				//console.log('ret '+ret);	
-				if(data != null && data.status=='Found'){
+				if(data.status=='Found'){
 					$("#nueva_solicitud_denominacion").val(data.message); 
 				}else{
 					$("#nueva_solicitud_denominacion").val('Persona física nueva'); 	
