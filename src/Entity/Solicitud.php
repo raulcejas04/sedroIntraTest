@@ -123,8 +123,6 @@ class Solicitud
      */
     public function setPrePersistValues(): void
     {
-        $hash = md5(uniqid(rand(), true));
-        $this->setHash($hash);
         $creacion = new \DateTimeImmutable();
         $fechaExpiracion = $creacion->modify('+7 days');
         

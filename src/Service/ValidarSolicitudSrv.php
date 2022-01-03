@@ -50,6 +50,9 @@ class ValidarSolicitudSrv extends AbstractController
         $data = null;
         $message = "";
 
+        //PARA PROPOSITOS DE PRUEBA
+        $debugMode = true;
+
         /*
         $entityManager = $this->getDoctrine()->getManager();
 
@@ -79,6 +82,9 @@ class ValidarSolicitudSrv extends AbstractController
          * Observaciones: Error si no expiró
          */
         if ($personaFisica && $personaJuridica && $dispositivo && $usuario && $usuarioDispositivo) {
+            if ($debugMode) {
+                $this->addFlash('success', 'Escenario: 1 - Paso: ' . $paso . ' - Ambiente: ' . $ambiente);
+            }
 
             switch ($ambiente) {
                 case 'Extranet':
@@ -184,7 +190,9 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if ($personaFisica && $personaJuridica && $dispositivo && $usuario && !$usuarioDispositivo) {
             //$this->addFlash('danger', 'Escenario # 2: Trabaja en otro dispositivo');
-
+            if ($debugMode) {
+                $this->addFlash('success', 'Escenario: 2 - Paso: ' . $paso . ' - Ambiente: ' . $ambiente);
+            }
             switch ($ambiente) {
                 case 'Extranet':
                     switch ($paso) {
@@ -247,15 +255,7 @@ class ValidarSolicitudSrv extends AbstractController
 
                             break;
                         case '3':
-                            $usuarioDispositivo = new UsuarioDispositivo();
-                            $usuarioDispositivo->setUsuario($usuario);
-                            $usuarioDispositivo->setDispositivo($dispositivo);
-                            $usuarioDispositivo->setFechaAlta(new \DateTime());
-                            $usuarioDispositivo->setFechaBaja(null);
-
-                            $this->em->persist($usuarioDispositivo);
-                            $this->em->flush();
-
+                            $this->auxSrv->createUsuarioDispositivo($dispositivo, $usuario);
                             $message = 'El usuario, la persona física, la persona jurídica y el dispositivo existían con anterioridad.';
                             $message .= 'Se ha vinculado el usuario ' . $usuario->getPersonaFisica()->getNombres() . ' ' . $usuario->getPersonaFisica()->getApellido() . '(' . $usuario->getUsername() . ')' . ' a ' . $dispositivo->getNicname();
 
@@ -280,6 +280,9 @@ class ValidarSolicitudSrv extends AbstractController
          * Observaciones:
          */
         if ($personaFisica && $personaJuridica && $dispositivo && !$usuario && $usuarioDispositivo) {
+            if ($debugMode) {
+                $this->addFlash('success', 'Escenario: 3 - Paso: ' . $paso . ' - Ambiente: ' . $ambiente);
+            }
             $salida = $this->accionesSobreInconsistencias('3');
 
             return $salida;
@@ -295,7 +298,9 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if ($personaFisica && $personaJuridica && $dispositivo && !$usuario && !$usuarioDispositivo) {
             // $this->addFlash('danger', 'Escenario # 4: Paciente');
-
+            if ($debugMode) {
+                $this->addFlash('success', 'Escenario: 4 - Paso: ' . $paso . ' - Ambiente: ' . $ambiente);
+            }
             switch ($ambiente) {
                 case 'Extranet':
                     switch ($paso) {
@@ -368,7 +373,7 @@ class ValidarSolicitudSrv extends AbstractController
 
                         case '3':
                             //Crea un nuevo usuario de Extranet en KC, en la DB y envía un email con los datos de acceso
-                            $this->AuxSrv->createKeycloakcAndDatabaseUser($personaFisica, $solicitud, 'Extranet');
+                            $this->auxSrv->createKeycloakcAndDatabaseUser($personaFisica, $solicitud, 'Extranet');
                             //$flagOk = false;
                             //$redirectForError = true;
                             //$data = null;
@@ -394,7 +399,9 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if ($personaFisica && $personaJuridica && !$dispositivo && $usuario && $usuarioDispositivo) {
             // $this->addFlash('danger', 'Escenario # 5: El usuario existe en otro dispositivo');
-
+            if ($debugMode) {
+                $this->addFlash('success', 'Escenario: 5 - Paso: ' . $paso . ' - Ambiente: ' . $ambiente);
+            }
             switch ($ambiente) {
                 case 'Extranet':
                     switch ($paso) {
@@ -463,7 +470,9 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if ($personaFisica && $personaJuridica && !$dispositivo && $usuario && !$usuarioDispositivo) {
             //$this->addFlash('danger', 'Escenario # 6: El usuario existe en otro dispositivo y se da de alta en un dispositivo nuevo');
-
+            if ($debugMode) {
+                $this->addFlash('success', 'Escenario: 6 - Paso: ' . $paso . ' - Ambiente: ' . $ambiente);
+            }
             switch ($ambiente) {
                 case 'Extranet':
                     switch ($paso) {
@@ -496,11 +505,16 @@ class ValidarSolicitudSrv extends AbstractController
                 case 'Intranet':
                     switch ($paso) {
                         case '1':
-                            //$flagOk = false;
-                            //$redirectForError = true;
-                            //$data = null;
-                            //$solicitud = null;
-
+                            $hash = md5(uniqid(rand(), true));
+                            $solicitud->setHash($hash);
+                            $solicitud->setPersonaFisica($personaFisica);
+                            $solicitud->setPersonaJuridica($personaJuridica);
+                            $solicitud->setUsuario($usuario);
+                            $this->auxSrv->EnviarCorreoInvitacion($solicitud);
+                            $flagOk = true;
+                            $redirectForError = false;
+                            $data = null;
+                            $message = 'Invitación generada correctamente.';
                             break;
                         case '2':
                             $message = 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>';
@@ -508,14 +522,14 @@ class ValidarSolicitudSrv extends AbstractController
                             $redirectForError = true;
                             $data = null;
                             $solicitud = null;
-
                             break;
                         case '3':
-                            //$flagOk = false;
-                            //$redirectForError = true;
-                            //$data = null;
-                            //$solicitud = null;
-
+                            $this->auxSrv->createDispositivoAndUserDispositivo($solicitud);
+                            $flagOk = true;
+                            $redirectForError = false;
+                            $data = null;
+                            $message = "Invitación aceptada correctamente. El usuario, la persona física y la persona jurídica existían con anterioridad.<br/>";
+                            $message .= "Se ha creado el Dispositivo y se ha relacionado el usuario responsable con exito.";
                             break;
                     }
 
@@ -534,6 +548,9 @@ class ValidarSolicitudSrv extends AbstractController
          * Observaciones:
          */
         if ($personaFisica && $personaJuridica && !$dispositivo && !$usuario && $usuarioDispositivo) {
+            if ($debugMode) {
+                $this->addFlash('success', 'Escenario: 7 - Paso: ' . $paso . ' - Ambiente: ' . $ambiente);
+            }
             $salida = $this->accionesSobreInconsistencias('7');
 
             return $salida;
@@ -549,7 +566,9 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if ($personaFisica && $personaJuridica && !$dispositivo && !$usuario && !$usuarioDispositivo) {
             //$this->addFlash('danger', 'Escenario # 8: Paciente en un dispositivo nuevo');
-
+            if ($debugMode) {
+                $this->addFlash('success', 'Escenario: 8 - Paso: ' . $paso . ' - Ambiente: ' . $ambiente);
+            }
             switch ($ambiente) {
                 case 'Extranet':
                     switch ($paso) {
@@ -579,7 +598,7 @@ class ValidarSolicitudSrv extends AbstractController
 
                 case 'Intranet':
                     switch ($paso) {
-                        case '1':                           
+                        case '1':
                             //$flagOk = false;
                             //$redirectForError = true;
                             //$data = null;
@@ -594,9 +613,9 @@ class ValidarSolicitudSrv extends AbstractController
                             //$solicitud = null;
 
                             break;
-                        case '3':      
-                            $this->auxSrv->CrearDispositivoAndResponsable($solicitud);                   
-                            $this->auxSrv->createKeycloakcAndDatabaseUser($personaFisica, $solicitud, 'Extranet');                            
+                        case '3':
+                            $this->auxSrv->createKeycloakcAndDatabaseUser($personaFisica, $solicitud, 'Extranet');
+                            $this->auxSrv->createDispositivoAndUserDispositivo($solicitud);
                             $flagOk = true;
                             $redirectForError = false;
                             $data = null;
@@ -619,6 +638,9 @@ class ValidarSolicitudSrv extends AbstractController
          * Observaciones:
          */
         if ($personaFisica && !$personaJuridica && $dispositivo && $usuario && $usuarioDispositivo) {
+            if ($debugMode) {
+                $this->addFlash('success', 'Escenario: 9 - Paso: ' . $paso . ' - Ambiente: ' . $ambiente);
+            }
             $salida = $this->accionesSobreInconsistencias('9');
 
             return $salida;
@@ -633,6 +655,9 @@ class ValidarSolicitudSrv extends AbstractController
          * Observaciones:
          */
         if ($personaFisica && !$personaJuridica && $dispositivo && $usuario && !$usuarioDispositivo) {
+            if ($debugMode) {
+                $this->addFlash('success', 'Escenario: 10 - Paso: ' . $paso . ' - Ambiente: ' . $ambiente);
+            }
             $salida = $this->accionesSobreInconsistencias('10');
 
             return $salida;
@@ -647,6 +672,9 @@ class ValidarSolicitudSrv extends AbstractController
          * Observaciones:
          */
         if ($personaFisica && !$personaJuridica && $dispositivo && !$usuario && $usuarioDispositivo) {
+            if ($debugMode) {
+                $this->addFlash('success', 'Escenario: 11 - Paso: ' . $paso . ' - Ambiente: ' . $ambiente);
+            }
             $salida = $this->accionesSobreInconsistencias('11');
 
             return $salida;
@@ -661,6 +689,9 @@ class ValidarSolicitudSrv extends AbstractController
          * Observaciones:
          */
         if ($personaFisica && !$personaJuridica && $dispositivo && !$usuario && !$usuarioDispositivo) {
+            if ($debugMode) {
+                $this->addFlash('success', 'Escenario: 12 - Paso: ' . $paso . ' - Ambiente: ' . $ambiente);
+            }
             $salida = $this->accionesSobreInconsistencias('12');
 
             return $salida;
@@ -676,7 +707,9 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if ($personaFisica && !$personaJuridica && !$dispositivo && $usuario && $usuarioDispositivo) {
             //$this->addFlash('danger', 'Escenario # 13: INCOSISTENCIA');
-
+            if ($debugMode) {
+                $this->addFlash('success', 'Escenario: 13 - Paso: ' . $paso . ' - Ambiente: ' . $ambiente);
+            }
             switch ($ambiente) {
                 case 'Extranet':
                     switch ($paso) {
@@ -748,7 +781,9 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if ($personaFisica && !$personaJuridica && !$dispositivo && $usuario && !$usuarioDispositivo) {
             //$this->addFlash('danger', 'Escenario # 14: trabaja en otro dispositivo de otra razón social');
-
+            if ($debugMode) {
+                $this->addFlash('success', 'Escenario: 14 - Paso: ' . $paso . ' - Ambiente: ' . $ambiente);
+            }
             switch ($ambiente) {
                 case 'Extranet':
                     switch ($paso) {
@@ -819,6 +854,9 @@ class ValidarSolicitudSrv extends AbstractController
          * Observaciones:
          */
         if ($personaFisica && !$personaJuridica && !$dispositivo && !$usuario && $usuarioDispositivo) {
+            if ($debugMode) {
+                $this->addFlash('success', 'Escenario: 15 - Paso: ' . $paso . ' - Ambiente: ' . $ambiente);
+            }
             $salida = $this->accionesSobreInconsistencias('15');
 
             return $salida;
@@ -905,6 +943,9 @@ class ValidarSolicitudSrv extends AbstractController
          * Observaciones:
          */
         if (!$personaFisica && $personaJuridica && $dispositivo && $usuario && $usuarioDispositivo) {
+            if ($debugMode) {
+                $this->addFlash('success', 'Escenario: 17 - Paso: ' . $paso . ' - Ambiente: ' . $ambiente);
+            }
             $salida = $this->accionesSobreInconsistencias('17');
 
             return $salida;
@@ -919,6 +960,9 @@ class ValidarSolicitudSrv extends AbstractController
          * Observaciones:
          */
         if (!$personaFisica && $personaJuridica && $dispositivo && $usuario && !$usuarioDispositivo) {
+            if ($debugMode) {
+                $this->addFlash('success', 'Escenario: 18 - Paso: ' . $paso . ' - Ambiente: ' . $ambiente);
+            }
             $salida = $this->accionesSobreInconsistencias('18');
 
             return $salida;
@@ -933,6 +977,9 @@ class ValidarSolicitudSrv extends AbstractController
          * Observaciones:
          */
         if (!$personaFisica && $personaJuridica && $dispositivo && !$usuario && $usuarioDispositivo) {
+            if ($debugMode) {
+                $this->addFlash('success', 'Escenario: 19 - Paso: ' . $paso . ' - Ambiente: ' . $ambiente);
+            }
             $salida = $this->accionesSobreInconsistencias('19');
 
             return $salida;
@@ -947,6 +994,9 @@ class ValidarSolicitudSrv extends AbstractController
          * Observaciones:
          */
         if (!$personaFisica && $personaJuridica && $dispositivo && !$usuario && !$usuarioDispositivo) {
+            if ($debugMode) {
+                $this->addFlash('success', 'Escenario: 20 - Paso: ' . $paso . ' - Ambiente: ' . $ambiente);
+            }
             $salida = $this->accionesSobreInconsistencias('20');
 
             return $salida;
@@ -961,6 +1011,9 @@ class ValidarSolicitudSrv extends AbstractController
          * Observaciones:
          */
         if (!$personaFisica && $personaJuridica && !$dispositivo && $usuario && $usuarioDispositivo) {
+            if ($debugMode) {
+                $this->addFlash('success', 'Escenario: 21 - Paso: ' . $paso . ' - Ambiente: ' . $ambiente);
+            }
             $salida = $this->accionesSobreInconsistencias('21');
 
             return $salida;
@@ -975,6 +1028,9 @@ class ValidarSolicitudSrv extends AbstractController
          * Observaciones:
          */
         if (!$personaFisica && $personaJuridica && !$dispositivo && $usuario && !$usuarioDispositivo) {
+            if ($debugMode) {
+                $this->addFlash('success', 'Escenario: 22 - Paso: ' . $paso . ' - Ambiente: ' . $ambiente);
+            }
             $salida = $this->accionesSobreInconsistencias('22');
 
             return $salida;
@@ -989,6 +1045,9 @@ class ValidarSolicitudSrv extends AbstractController
          * Observaciones:
          */
         if (!$personaFisica && $personaJuridica && !$dispositivo && !$usuario && $usuarioDispositivo) {
+            if ($debugMode) {
+                $this->addFlash('success', 'Escenario: 23 - Paso: ' . $paso . ' - Ambiente: ' . $ambiente);
+            }
             $salida = $this->accionesSobreInconsistencias('23');
 
             return $salida;
@@ -1004,7 +1063,9 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if (!$personaFisica && $personaJuridica && !$dispositivo && !$usuario && !$usuarioDispositivo) {
             //$this->addFlash('danger', 'Escenario # 24: Alta persona fisica, dispositivo, usuario, usuario_dispositivo');
-
+            if ($debugMode) {
+                $this->addFlash('success', 'Escenario: 24 - Paso: ' . $paso . ' - Ambiente: ' . $ambiente);
+            }
             switch ($ambiente) {
                 case 'Extranet':
                     switch ($paso) {
@@ -1075,6 +1136,9 @@ class ValidarSolicitudSrv extends AbstractController
          * Observaciones:
          */
         if (!$personaFisica && !$personaJuridica && $dispositivo && $usuario && $usuarioDispositivo) {
+            if ($debugMode) {
+                $this->addFlash('success', 'Escenario: 25 - Paso: ' . $paso . ' - Ambiente: ' . $ambiente);
+            }
             $salida = $this->accionesSobreInconsistencias('25');
 
             return $salida;
@@ -1089,6 +1153,9 @@ class ValidarSolicitudSrv extends AbstractController
          * Observaciones:
          */
         if (!$personaFisica && !$personaJuridica && $dispositivo && $usuario && !$usuarioDispositivo) {
+            if ($debugMode) {
+                $this->addFlash('success', 'Escenario: 26 - Paso: ' . $paso. ' - Ambiente: '.$ambiente);
+            }
             $salida = $this->accionesSobreInconsistencias('26');
 
             return $salida;
@@ -1103,6 +1170,9 @@ class ValidarSolicitudSrv extends AbstractController
          * Observaciones:
          */
         if (!$personaFisica && !$personaJuridica && $dispositivo && !$usuario && $usuarioDispositivo) {
+            if ($debugMode) {
+                $this->addFlash('success', 'Escenario: 27 - Paso: ' . $paso. ' - Ambiente: '.$ambiente);
+            }
             $salida = $this->accionesSobreInconsistencias('27');
 
             return $salida;
@@ -1117,6 +1187,9 @@ class ValidarSolicitudSrv extends AbstractController
          * Observaciones:
          */
         if (!$personaFisica && !$personaJuridica && $dispositivo && !$usuario && !$usuarioDispositivo) {
+            if ($debugMode) {
+                $this->addFlash('success', 'Escenario: 28 - Paso: ' . $paso. ' - Ambiente: '.$ambiente);
+            }
             $salida = $this->accionesSobreInconsistencias('28');
 
             return $salida;
@@ -1131,6 +1204,9 @@ class ValidarSolicitudSrv extends AbstractController
          * Observaciones:
          */
         if (!$personaFisica && !$personaJuridica && !$dispositivo && $usuario && $usuarioDispositivo) {
+            if ($debugMode) {
+                $this->addFlash('success', 'Escenario: 29 - Paso: ' . $paso. ' - Ambiente: '.$ambiente);
+            }
             $salida = $this->accionesSobreInconsistencias('29');
 
             return $salida;
@@ -1145,6 +1221,9 @@ class ValidarSolicitudSrv extends AbstractController
          * Observaciones:
          */
         if (!$personaFisica && !$personaJuridica && !$dispositivo && $usuario && !$usuarioDispositivo) {
+            if ($debugMode) {
+                $this->addFlash('success', 'Escenario: 30 - Paso: ' . $paso. ' - Ambiente: '.$ambiente);
+            }
             $salida = $this->accionesSobreInconsistencias('30');
 
             return $salida;
@@ -1159,6 +1238,9 @@ class ValidarSolicitudSrv extends AbstractController
          * Observaciones:
          */
         if (!$personaFisica && !$personaJuridica && !$dispositivo && !$usuario && $usuarioDispositivo) {
+            if ($debugMode) {
+                $this->addFlash('success', 'Escenario: 31 - Paso: ' . $paso. ' - Ambiente: '.$ambiente);
+            }
             $salida = $this->accionesSobreInconsistencias('31');
 
             return $salida;
@@ -1172,9 +1254,11 @@ class ValidarSolicitudSrv extends AbstractController
          * Inicia: Intranet
          * Observaciones:
          */
-        if (!$personaFisica && !$personaJuridica && !$dispositivo && !$usuario && !$usuarioDispositivo){
+        if (!$personaFisica && !$personaJuridica && !$dispositivo && !$usuario && !$usuarioDispositivo) {
             //$this->addFlash('danger', 'Escenario # 32: Alta persona fisica, dispositivo, usuario, usuario_dispositivo');
-
+            if ($debugMode) {
+                $this->addFlash('success', 'Escenario: 32 - Paso: ' . $paso. ' - Ambiente: '.$ambiente);
+            }
             switch ($ambiente) {
                 case 'Extranet':
                     switch ($paso) {
@@ -1207,11 +1291,13 @@ class ValidarSolicitudSrv extends AbstractController
                 case 'Intranet':
                     switch ($paso) {
                         case '1':
-                            $solicitud->setPrePersistValues();
+                            $hash = md5(uniqid(rand(), true));
+                            $solicitud->setHash($hash);
+                            $this->auxSrv->EnviarCorreoInvitacion($solicitud);
                             $flagOk = true;
                             $redirectForError = false;
                             $data = null;
-                            $message = 'Solicitud generada correctamente.';
+                            $message = 'Invitación generada correctamente.';
                             break;
                         case '2':
                             $message = 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>';
@@ -1221,7 +1307,7 @@ class ValidarSolicitudSrv extends AbstractController
                             //$solicitud = null;
 
                             break;
-                        case '3':                                                      
+                        case '3':
                             $flagOk = false;
                             $redirectForError = true;
                             $data = null;
@@ -1231,57 +1317,7 @@ class ValidarSolicitudSrv extends AbstractController
 
                     break;
             }
-
-            // return $solicitud;
-
-            //   return $this->redirectToRoute('dashboard');
         }
-
-        //$this->addFlash('danger', 'Ningún escenario se cumple');
-
-       /*  switch ($ambiente) {
-            case 'Extranet':
-                switch ($paso) {
-                    case '1':
-                        $message = 'Sin permisos suficientes para iniciar una solicitud';
-                        $flagOk = false;
-                        $redirectForError = true;
-                        $data = null;
-                        $solicitud = null;
-                        //$flagOk = false;
-                        //$redirectForError = true;
-                        //$data = null;
-                        //$solicitud = null;
-
-                        break;
-                    case '2':
-                        //$flagOk = false;
-                        //$redirectForError = true;
-                        break;
-                    case '3':
-                        //$flagOk = false;
-                        //$redirectForError = true;
-                        break;
-                }
-                # code...
-                break;
-            case 'Intranet':
-                switch ($paso) {
-                    case '1':
-                        //$flagOk = false;
-                        //$redirectForError = true;
-                        break;
-                    case '2':
-                        $message = 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>';
-                        //$flagOk = false;
-                        //$redirectForError = true;
-                        break;
-                    case '3':
-                        //$flagOk = false;
-                        //$redirectForError = true;
-                        break;
-                }
-        } */
 
         $salida = [
             'flagOk' => $flagOk,

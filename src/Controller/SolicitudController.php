@@ -56,24 +56,10 @@ class SolicitudController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager = $this->getDoctrine()->getManager();
-
             //Verifica si ya existe una solicitud activa
             if ($this->verificarSolicitud($solicitud) == true) {
                 return $this->redirectToRoute('dashboard');
             }
-
-            /*  //verifica persona física y/o jurídica preexistente            
-            $personaFisica = $entityManager->getRepository(PersonaFisica::class)->findOneBy(['cuitCuil' => $solicitud->getCuil()]);
-            $personaJuridica = $entityManager->getRepository(PersonaJuridica::class)->findOneBy(['cuit' => $solicitud->getCuit()]);
-
-            if ($personaFisica) {
-                $solicitud->setPersonaFisica($personaFisica);
-            }
-
-            if ($personaJuridica) {
-                $solicitud->setPersonaJuridica($personaJuridica);
-            }
-            */
 
             $validacion = $this->validador->validarSolicitud($solicitud, $this->getParameter('keycloak_realm'), Solicitud::PASO_UNO);
             if (!$validacion["flagOk"]) {
@@ -83,25 +69,8 @@ class SolicitudController extends AbstractController
 
             $solicitud = $validacion["solicitud"];
             $entityManager->persist($solicitud);
-            $entityManager->flush();
-
-            //TODO: Verificar que el email se haya enviado sin errores
-            //TODO: ¿Crear una funcion privada para enviar emails en este controller?
-            //public para que el firewall lo deje pasar
-            $url = $this->getParameter('extranet_url') . '/public/' . $solicitud->getHash() . '/completar-datos';
-            $email = (new TemplatedEmail())
-                ->from($this->getParameter('direccion_email_salida'))
-                ->to($solicitud->getMail())
-                ->subject('Invitación para dar de alta usuario y dispositivo nuevo')
-                ->htmlTemplate('emails/invitacionPasoUno.html.twig')
-                ->context([
-                    'nicname' => $solicitud->getNicname(),
-                    'url' => $url
-                ]);
-
-            $mailer->send($email);
+            $entityManager->flush();          
             $this->addFlash('success', $validacion["message"]);
-            $this->addFlash('success', 'Se ha enviado un email a ' . $solicitud->getMail() . ' con instrucciones para completar el registro.');
             return $this->redirectToRoute('dashboard');
         }
 
@@ -155,7 +124,6 @@ class SolicitudController extends AbstractController
     {
         $entityManager = $this->getDoctrine()->getManager();
         $solicitud = $entityManager->getRepository('App\Entity\Solicitud')->findOneByHash($hash);
-
         $validacion = $this->validador->validarSolicitud($solicitud, $this->getParameter('keycloak_realm'), Solicitud::PASO_TRES);
         if (!$validacion["flagOk"]) {
             $this->addFlash('danger', $validacion["message"]);
@@ -164,7 +132,6 @@ class SolicitudController extends AbstractController
         $solicitud = $validacion["solicitud"];
         $entityManager->persist($solicitud);
         $entityManager->flush();
-
         $this->addFlash('success', $validacion["message"]);
         return $this->redirectToRoute('dashboard');
     }
