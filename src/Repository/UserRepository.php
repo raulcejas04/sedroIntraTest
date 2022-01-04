@@ -49,7 +49,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     {
         return $this->createQueryBuilder('u')
             ->join('u.userGroups', 'ug')
-            ->join('ug.group', 'g')
+            ->join('ug.grupo', 'g')
             ->where('g.nombre = :nombre')
             ->setParameter('nombre', 'SuperAdministradores')
             ->getQuery()

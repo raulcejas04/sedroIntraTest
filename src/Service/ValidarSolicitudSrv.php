@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Entity\Dispositivo;
 use App\Entity\DispositivoResponsable;
+use App\Entity\Realm;
 use App\Entity\UsuarioDispositivo;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -38,40 +39,25 @@ class ValidarSolicitudSrv extends AbstractController
     // public function validarSolicitud($personaFisica, $personaJuridica, $dispositivo, $usuario, $usuarioDispositivo, $ambiente = 'Intranet', $paso = '1')
     public function validarSolicitud($solicitud, $ambiente = 'Intranet', $paso = '1')
     {
-
-        $personaFisica = $this->em->getRepository('App:PersonaFisica')->findOneBy(['cuitCuil' => $solicitud->getCuit()]);
-        $personaJuridica = $this->em->getRepository('App:PersonaJuridica')->findOneBy(['cuit' => $solicitud->getCuil()]);
-        $dispositivo =  $this->em->getRepository('App:Dispositivo')->findOneBy(['nicname' => $solicitud->getNicname()]);
-        $usuario =  $this->em->getRepository('App:User')->findOneBy(['username' => $solicitud->getCuit()]);
+        $realm = $this->getDoctrine()->getRepository(Realm::class)->findOneBy(['realm' => $this->getParameter('keycloak_extranet_realm')]);
+        $personaFisica = $this->em->getRepository('App:PersonaFisica')->findOneBy(['cuitCuil' => $solicitud->getCuil()]);
+        $personaJuridica = $this->em->getRepository('App:PersonaJuridica')->findOneBy(['cuit' => $solicitud->getCuit()]);
+        $dispositivo =  $this->em->getRepository('App:Dispositivo')->findOneBy(['nicname' => $solicitud->getNicname(), 'personaJuridica' => $personaJuridica]);  //TODO:A futuro otro parametro para dispositivo va a ser Localidad
+        //TODO:Filtrar su correo tambien. El error actual es que si existe otro user con el mismo correo en el mismo realm, tira error en KC.
+        //Se podría arreglar validando antes el email de la solicitud.
+        $usuario =  $this->em->getRepository('App:User')->findOneBy(['username' => $solicitud->getCuil(), 'realm' => $realm]);
         $usuarioDispositivo = $this->em->getRepository('App:UsuarioDispositivo')->findOneBy(["usuario" => $usuario, "dispositivo" => $dispositivo]);
+
+        // dd($personaFisica,$personaJuridica,$dispositivo,$usuario,$usuarioDispositivo);
 
         $flagOk = false;
         $redirectForError = false;
         $data = null;
         $message = "";
 
-        //PARA PROPOSITOS DE PRUEBA
+        //El debugMode habilita los flash para saber a que escenario entró el validador.
+        //Poner en false en producción.
         $debugMode = true;
-
-        /*
-        $entityManager = $this->getDoctrine()->getManager();
-
-        $personaFisica = $entityManager->getRepository('App:PersonaFisica')->findOneBy(['cuitCuil' => $solicitud->getCuit()]);
-        $personaJuridica = $entityManager->getRepository('App:PersonaJuridica')->findOneBy(['cuit' => $solicitud->getCuil()]);
-        $dispositivo = $entityManager->getRepository('App:Dispositivo')->findOneBy(['nicname' => $solicitud->getNicname()]);
-        $usuario = $entityManager->getRepository('App:Usuario')->findOneBy(['username' => $solicitud->getUsername()]);
-
-        if ($usuario && $dispositivo) {
-            
-            $usuarioDispositivo = $entityManager->getRepository('App:UsuarioDispositivo')->findOneBy(['usuario' => $usuario, 'dispositivo' => $dispositivo]);
-            if (!$usuarioDispositivo) {               
-                $usuarioDispositivo = false;
-            }
-        } else {
-            $usuarioDispositivo = false;
-        }
-        */
-
 
         /**
          * escenario 1:
@@ -85,95 +71,21 @@ class ValidarSolicitudSrv extends AbstractController
             if ($debugMode) {
                 $this->addFlash('success', 'Escenario: 1 - Paso: ' . $paso . ' - Ambiente: ' . $ambiente);
             }
-
+            //TODO: Verificar que la PJ Del dispositivo coincida con PJ
             switch ($ambiente) {
+                case 'Intranet':
                 case 'Extranet':
                     switch ($paso) {
                         case '1':
-                            $message = 'Sin permisos suficientes para iniciar una solicitud';
-                            $flagOk = false;
-                            $redirectForError = true;
-                            $data = null;
-                            $solicitud = null;
-                            break;
                         case '2':
-                            //TODO: verificar si es Pastor Joao, Pastor Jimenez o Jony de ese dispositivo
-                            //TODO: Preguntarle a Walter si así se usa lo de Dispositivo Responsable
-                            $responsable = $this->em->getRepository('App:DispositivoResponsable')->findOneBy(['dispositivo' => $dispositivo, 'personaFisica' => $personaFisica, 'owner' => true, 'fechaBaja' => null]);
-                            if ($responsable) {
-                                $flagOk = false;
-                                $redirectForError = true;
-                                $data = null;
-                                $solicitud = null;
-                                $message = 'No se puede continuar con la solicitud, ya que el dispositivo ya tiene asociado a la persona.';
-                            } else {
-                                $solicitudActiva = $this->em->getRepository('App\Entity\Solicitud')->findSolicitudActiva($solicitud->getMail(), $solicitud->getNicname(), $solicitud->getCuit(), $solicitud->getCuil());
-                                if ($solicitudActiva) {
-                                    $flagOk = false;
-                                    $redirectForError = true;
-                                    $data = null;
-                                    $solicitud = null;
-                                    $message = 'No se puede continuar con la solicitud, ya que está activa (esperando datos del invitado).';
-                                } else {
-                                    $flagOk = true;
-                                    $redirectForError = false;
-                                    $data = null;
-                                    $solicitud->setPersonaFisica($personaFisica);
-                                    $solicitud->setPersonaJuridica($personaJuridica);
-                                    $solicitud->setDispositivo($dispositivo);
-                                }
-                            }
-
-                            break;
                         case '3':
-                            $message = 'Sin permisos suficientes para aceptar o rechazar una solicitud';
+                            $message = 'No se puede continuar con la solicitud, ya que el dispositivo tiene asociado a la persona y su usuario.';
                             $flagOk = false;
                             $redirectForError = true;
                             $data = null;
                             $solicitud = null;
                             break;
                     }
-
-                    break;
-
-                case 'Intranet':
-                    switch ($paso) {
-                        case '1':
-                            $solicitudActiva = $this->em->getRepository('App\Entity\Solicitud')->findSolicitudActiva($solicitud->getMail(), $solicitud->getNicname(), $solicitud->getCuit(), $solicitud->getCuil());
-                            if ($solicitudActiva) {
-                                $flagOk = false;
-                                $redirectForError = true;
-                                $data = null;
-                                $solicitud = null;
-                                $message = 'No se puede continuar con la solicitud, ya que está activa (esperando datos del invitado).';
-                            } else {
-                                $flagOk = true;
-                                $redirectForError = false;
-                                $data = null;
-                                $solicitud->setPersonaFisica($personaFisica);
-                                $solicitud->setPersonaJuridica($personaJuridica);
-                                $solicitud->setDispositivo($dispositivo);
-                                $message = 'Solicitud creada correctamente';
-                            }
-                            break;
-
-                        case '2':
-                            $flagOk = false;
-                            $redirectForError = true;
-                            $data = null;
-                            $solicitud = null;
-                            $message = 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>';
-                            break;
-
-                        case '3':
-                            $flagOk = false;
-                            $redirectForError = false;
-                            $data = null;
-                            $solicitud->setFechaAlta(new \DateTime('now'));
-                            $message = 'La persona ' . $personaFisica->getNombres() . ' ' . $personaFisica->getApellido() . ' ya está vinculado a ese dispositivo. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>';
-                            break;
-                    }
-
                     break;
             }
 
@@ -230,40 +142,18 @@ class ValidarSolicitudSrv extends AbstractController
                 case 'Intranet':
                     switch ($paso) {
                         case '1':
-                            $datos = [
-                                'personaFisica' => $personaFisica,
-                                'personaJuridica' => $personaJuridica,
-                                'dispositivo' => $dispositivo,
-                                'usuario' => $usuario,
-                                'usuarioDispositivo' => null,
-                                'ambiente' => $ambiente,
-                                'paso' => $paso,
-                            ];
-                            //return $datos;
-                            //$flagOk = false;
-                            //$redirectForError = true;
-                            //$data = null;
-                            //$solicitud = null;
-
-                            break;
                         case '2':
                             $message = 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>';
-                            //$flagOk = false;
-                            //$redirectForError = true;
-                            //$data = null;
-                            //$solicitud = null;
-
+                            $flagOk = false;
+                            $redirectForError = true;
+                            $data = null;
+                            $solicitud = null;
                             break;
                         case '3':
+                            //TODO: Paso 3 deberia ir en extra. lo dejo acá hasta refactorizar la extra
                             $this->auxSrv->createUsuarioDispositivo($dispositivo, $usuario);
                             $message = 'El usuario, la persona física, la persona jurídica y el dispositivo existían con anterioridad.';
                             $message .= 'Se ha vinculado el usuario ' . $usuario->getPersonaFisica()->getNombres() . ' ' . $usuario->getPersonaFisica()->getApellido() . '(' . $usuario->getUsername() . ')' . ' a ' . $dispositivo->getNicname();
-
-                            //$flagOk = false;
-                            //$redirectForError = true;
-                            //$data = null;
-                            //$solicitud = null;
-
                             break;
                     }
 
@@ -345,41 +235,20 @@ class ValidarSolicitudSrv extends AbstractController
                 case 'Intranet':
                     switch ($paso) {
                         case '1':
-                            $datos = [
-                                'personaFisica' => $personaFisica,
-                                'personaJuridica' => $personaJuridica,
-                                'dispositivo' => $dispositivo,
-                                'usuario' => $usuario,
-                                'usuarioDispositivo' => $usuarioDispositivo,
-                                'ambiente' => $ambiente,
-                                'paso' => $paso,
-                            ];
-                            //$flagOk = false;
-                            //$redirectForError = true;
-                            //$data = null;
-                            //$solicitud = null;
-
-                            //return $datos;
-                            break;
-
                         case '2':
-                            $message = 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>';
-                            //$flagOk = false;
-                            //$redirectForError = true;
-                            //$data = null;
-                            //$solicitud = null;
-
-                            break;
-
                         case '3':
+                            $message = 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>';
+                            $flagOk = false;
+                            $redirectForError = true;
+                            $data = null;
+                            $solicitud = null;
                             //Crea un nuevo usuario de Extranet en KC, en la DB y envía un email con los datos de acceso
-                            $this->auxSrv->createKeycloakcAndDatabaseUser($personaFisica, $solicitud, 'Extranet');
+                            /*   $this->auxSrv->createKeycloakcAndDatabaseUser($personaFisica, $solicitud, 'Extranet');
+                            $this->auxSrv->createUsuarioDispositivo($dispositivo,$solicitud->getUsuario(),UsuarioDispositivo::NIVEL_2); */
                             //$flagOk = false;
                             //$redirectForError = true;
                             //$data = null;
                             //$solicitud = null;
-
-
                             break;
                     }
 
@@ -398,6 +267,7 @@ class ValidarSolicitudSrv extends AbstractController
          * Observaciones: El usuario existe en otro dispositivo
          */
         if ($personaFisica && $personaJuridica && !$dispositivo && $usuario && $usuarioDispositivo) {
+            //TODO: Revisar inconsistencia ? usuarioDispositivo depende de dispositivo. por ende esto nunca se cumpliria
             // $this->addFlash('danger', 'Escenario # 5: El usuario existe en otro dispositivo');
             if ($debugMode) {
                 $this->addFlash('success', 'Escenario: 5 - Paso: ' . $paso . ' - Ambiente: ' . $ambiente);
@@ -599,11 +469,15 @@ class ValidarSolicitudSrv extends AbstractController
                 case 'Intranet':
                     switch ($paso) {
                         case '1':
-                            //$flagOk = false;
-                            //$redirectForError = true;
-                            //$data = null;
-                            //$solicitud = null;
-
+                            $hash = md5(uniqid(rand(), true));
+                            $solicitud->setHash($hash);
+                            $solicitud->setPersonaFisica($personaFisica);
+                            $solicitud->setPersonaJuridica($personaJuridica);
+                            $this->auxSrv->EnviarCorreoInvitacion($solicitud);
+                            $flagOk = true;
+                            $redirectForError = false;
+                            $data = null;
+                            $message = 'Invitación generada correctamente.';
                             break;
                         case '2':
                             $message = 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>';
@@ -816,18 +690,22 @@ class ValidarSolicitudSrv extends AbstractController
                 case 'Intranet':
                     switch ($paso) {
                         case '1':
-                            //$flagOk = false;
-                            //$redirectForError = true;
-                            //$data = null;
-                            //$solicitud = null;
-
+                            $hash = md5(uniqid(rand(), true));
+                            $solicitud->setHash($hash);
+                            $solicitud->setPersonaFisica($personaFisica);
+                            $solicitud->setUsuario($usuario);
+                            $this->auxSrv->EnviarCorreoInvitacion($solicitud);
+                            $flagOk = true;
+                            $redirectForError = false;
+                            $data = null;
+                            $message = 'Invitación generada correctamente.';
                             break;
                         case '2':
                             $message = 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>';
-                            //$flagOk = false;
-                            //$redirectForError = true;
-                            //$data = null;
-                            //$solicitud = null;
+                            $flagOk = false;
+                            $redirectForError = true;
+                            $data = null;
+                            $solicitud = null;
 
                             break;
                         case '3':
@@ -905,25 +783,28 @@ class ValidarSolicitudSrv extends AbstractController
                 case 'Intranet':
                     switch ($paso) {
                         case '1':
-                            //$flagOk = false;
-                            //$redirectForError = true;
-                            //$data = null;
-                            //$solicitud = null;
-
+                            $$hash = md5(uniqid(rand(), true));
+                            $solicitud->setHash($hash);
+                            $solicitud->setPersonaFisica($personaFisica);
+                            $this->auxSrv->EnviarCorreoInvitacion($solicitud);
+                            $flagOk = true;
+                            $redirectForError = false;
+                            $data = null;
+                            $message = 'Invitación generada correctamente.';
                             break;
                         case '2':
                             $message = 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>';
-                            //$flagOk = false;
-                            //$redirectForError = true;
-                            //$data = null;
-                            //$solicitud = null;
+                            $flagOk = false;
+                            $redirectForError = true;
+                            $data = null;
+                            $solicitud = null;
 
                             break;
                         case '3':
-                            //$flagOk = false;
-                            //$redirectForError = true;
-                            //$data = null;
-                            //$solicitud = null;
+                            $flagOk = false;
+                            $redirectForError = true;
+                            $data = null;
+                            $solicitud = null;
 
                             break;
                     }
@@ -1077,6 +958,7 @@ class ValidarSolicitudSrv extends AbstractController
                             $solicitud = null;
                             break;
                         case '2':
+                            //TODO: Escenario 24 extranet paso 2
                             //$flagOk = false;
                             //$redirectForError = true;
                             //$data = null;
@@ -1098,26 +980,29 @@ class ValidarSolicitudSrv extends AbstractController
                 case 'Intranet':
                     switch ($paso) {
                         case '1':
-                            //$flagOk = false;
-                            //$redirectForError = true;
-                            //$data = null;
-                            //$solicitud = null;
-
+                            $hash = md5(uniqid(rand(), true));
+                            $solicitud->setHash($hash);
+                            $solicitud->setPersonaJuridica($personaJuridica);
+                            $this->auxSrv->EnviarCorreoInvitacion($solicitud);
+                            $flagOk = true;
+                            $redirectForError = false;
+                            $data = null;
+                            $message = 'Invitación generada correctamente.';
                             break;
                         case '2':
                             $message = 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>';
-                            //$flagOk = false;
-                            //$redirectForError = true;
-                            //$data = null;
-                            //$solicitud = null;
+                            $flagOk = false;
+                            $redirectForError = true;
+                            $data = null;
+                            $solicitud = null;
 
                             break;
                         case '3':
-                            //$flagOk = false;
-                            //$redirectForError = true;
-                            //$data = null;
-                            //$solicitud = null;
-
+                            $message = 'Sin permisos suficientes para aceptar o rechazar una solicitud';
+                            $flagOk = false;
+                            $redirectForError = true;
+                            $data = null;
+                            $solicitud = null;
                             break;
                     }
 
@@ -1154,7 +1039,7 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if (!$personaFisica && !$personaJuridica && $dispositivo && $usuario && !$usuarioDispositivo) {
             if ($debugMode) {
-                $this->addFlash('success', 'Escenario: 26 - Paso: ' . $paso. ' - Ambiente: '.$ambiente);
+                $this->addFlash('success', 'Escenario: 26 - Paso: ' . $paso . ' - Ambiente: ' . $ambiente);
             }
             $salida = $this->accionesSobreInconsistencias('26');
 
@@ -1171,7 +1056,7 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if (!$personaFisica && !$personaJuridica && $dispositivo && !$usuario && $usuarioDispositivo) {
             if ($debugMode) {
-                $this->addFlash('success', 'Escenario: 27 - Paso: ' . $paso. ' - Ambiente: '.$ambiente);
+                $this->addFlash('success', 'Escenario: 27 - Paso: ' . $paso . ' - Ambiente: ' . $ambiente);
             }
             $salida = $this->accionesSobreInconsistencias('27');
 
@@ -1188,7 +1073,7 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if (!$personaFisica && !$personaJuridica && $dispositivo && !$usuario && !$usuarioDispositivo) {
             if ($debugMode) {
-                $this->addFlash('success', 'Escenario: 28 - Paso: ' . $paso. ' - Ambiente: '.$ambiente);
+                $this->addFlash('success', 'Escenario: 28 - Paso: ' . $paso . ' - Ambiente: ' . $ambiente);
             }
             $salida = $this->accionesSobreInconsistencias('28');
 
@@ -1205,7 +1090,7 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if (!$personaFisica && !$personaJuridica && !$dispositivo && $usuario && $usuarioDispositivo) {
             if ($debugMode) {
-                $this->addFlash('success', 'Escenario: 29 - Paso: ' . $paso. ' - Ambiente: '.$ambiente);
+                $this->addFlash('success', 'Escenario: 29 - Paso: ' . $paso . ' - Ambiente: ' . $ambiente);
             }
             $salida = $this->accionesSobreInconsistencias('29');
 
@@ -1222,7 +1107,7 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if (!$personaFisica && !$personaJuridica && !$dispositivo && $usuario && !$usuarioDispositivo) {
             if ($debugMode) {
-                $this->addFlash('success', 'Escenario: 30 - Paso: ' . $paso. ' - Ambiente: '.$ambiente);
+                $this->addFlash('success', 'Escenario: 30 - Paso: ' . $paso . ' - Ambiente: ' . $ambiente);
             }
             $salida = $this->accionesSobreInconsistencias('30');
 
@@ -1239,7 +1124,7 @@ class ValidarSolicitudSrv extends AbstractController
          */
         if (!$personaFisica && !$personaJuridica && !$dispositivo && !$usuario && $usuarioDispositivo) {
             if ($debugMode) {
-                $this->addFlash('success', 'Escenario: 31 - Paso: ' . $paso. ' - Ambiente: '.$ambiente);
+                $this->addFlash('success', 'Escenario: 31 - Paso: ' . $paso . ' - Ambiente: ' . $ambiente);
             }
             $salida = $this->accionesSobreInconsistencias('31');
 
@@ -1257,7 +1142,7 @@ class ValidarSolicitudSrv extends AbstractController
         if (!$personaFisica && !$personaJuridica && !$dispositivo && !$usuario && !$usuarioDispositivo) {
             //$this->addFlash('danger', 'Escenario # 32: Alta persona fisica, dispositivo, usuario, usuario_dispositivo');
             if ($debugMode) {
-                $this->addFlash('success', 'Escenario: 32 - Paso: ' . $paso. ' - Ambiente: '.$ambiente);
+                $this->addFlash('success', 'Escenario: 32 - Paso: ' . $paso . ' - Ambiente: ' . $ambiente);
             }
             switch ($ambiente) {
                 case 'Extranet':

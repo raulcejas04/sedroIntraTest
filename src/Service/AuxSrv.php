@@ -68,6 +68,7 @@ class AuxSrv extends AbstractController
         $usuarioDB->setPersonaFisica($personaFisica);
         $usuarioDB->setKeycloakId($usuarioKC[0]->id);
         $usuarioDB->setRealm($realmDB);
+        $personaFisica->addUser($usuarioDB);
         //Envia mail con los datos de acceso
         $email = (new TemplatedEmail())
             ->from($this->getParameter('direccion_email_salida'))
