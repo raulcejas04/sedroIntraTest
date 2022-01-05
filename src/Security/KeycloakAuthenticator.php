@@ -2,6 +2,7 @@
 
 namespace App\Security;
 
+use App\Entity\Realm;
 use App\Entity\User;
 use App\Entity\UserGrupo;
 use KnpU\OAuth2ClientBundle\Security\Authenticator\SocialAuthenticator;
@@ -94,6 +95,8 @@ class KeycloakAuthenticator extends SocialAuthenticator
             return null;
         }
 
+        $realm = $this->em->getRepository(Realm::class)->findOneBy(["realm"=>$this->parameterBag->get('keycloak_realm')]);
+
         /** GRUPO Y ROLES * */
         if (array_key_exists("groups", $data)) {
             $userGroups = $this->em->getRepository(\App\Entity\UserGrupo::class)->findBy([
@@ -108,6 +111,7 @@ class KeycloakAuthenticator extends SocialAuthenticator
                 $res = $this->keycloakService->getGroup($group, $this->parameterBag->get('keycloak_realm'));
                 $existingGroup = $this->em->getRepository(\App\Entity\Grupo::class)->findOneBy(["KeycloakGroupId" => $res->id]);
                 $g = $existingGroup ? $existingGroup : new \App\Entity\Grupo();
+                $g->setRealm($realm);
                 $g->setKeycloakGroupId($res->id);
                 $g->setNombre($res->name);  
                 
@@ -137,6 +141,7 @@ class KeycloakAuthenticator extends SocialAuthenticator
                 $res = $this->keycloakService->getRole(str_replace("ROLE_", "", $role),$this->parameterBag->get('keycloak_realm'));
                 $existingRole = $this->em->getRepository(\App\Entity\Role::class)->findOneBy(["keycloakRoleId" => $res->id]);
                 $r = $existingRole ? $existingRole : new \App\Entity\Role();
+                $r->setRealm($realm);
                 $r->setKeycloakRoleId($res->id);
                 $r->setCode("ROLE_" . $res->name);
                 //TODO: Traer la descripción del role (puede sacarse de atributos, pero quiero ver si hay una forma directa)

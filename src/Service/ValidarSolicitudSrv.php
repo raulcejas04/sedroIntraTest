@@ -71,7 +71,6 @@ class ValidarSolicitudSrv extends AbstractController
             if ($debugMode) {
                 $this->addFlash('success', 'Escenario: 1 - Paso: ' . $paso . ' - Ambiente: ' . $ambiente);
             }
-            //TODO: Verificar que la PJ Del dispositivo coincida con PJ
             switch ($ambiente) {
                 case 'Intranet':
                 case 'Extranet':
@@ -783,7 +782,7 @@ class ValidarSolicitudSrv extends AbstractController
                 case 'Intranet':
                     switch ($paso) {
                         case '1':
-                            $$hash = md5(uniqid(rand(), true));
+                            $hash = md5(uniqid(rand(), true));
                             $solicitud->setHash($hash);
                             $solicitud->setPersonaFisica($personaFisica);
                             $this->auxSrv->EnviarCorreoInvitacion($solicitud);

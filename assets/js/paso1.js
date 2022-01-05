@@ -17,7 +17,7 @@ $(document).ready(function() {
 			async:true,
 			success: function(data){
 				console.log(data);
-				alert(data);
+				//alert(data);
 				//ret = eval('('+data+')');		
 				//console.log('ret '+ret);	
 				if(data.status=='Found'){
@@ -37,7 +37,7 @@ $(document).ready(function() {
 			async:true,
 			success: function(data){
 				console.log(data);
-				alert(data);
+				//alert(data);
 				//ret = eval('('+data+')');		
 				//console.log('ret '+ret);	
 				if(data.status=='Found'){
