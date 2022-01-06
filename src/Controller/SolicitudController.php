@@ -100,6 +100,9 @@ class SolicitudController extends AbstractController
      */
     public function verSolicitud($hash): Response
     {
+
+        //TODO: Validar acceso(Realm, usuarioDispositivo)
+
         $entityManager = $this->getDoctrine()->getManager();
         $solicitud = $entityManager->getRepository('App\Entity\Solicitud')->findOneBy([
             "hash" => $hash,
@@ -204,13 +207,13 @@ class SolicitudController extends AbstractController
             ]);
         }
 
-        /*  if ($solicitud->getFechaUso()) {
-            $this->addFlash('danger', 'Los datos de la solicitud ya han sido completados.');
+        if ($solicitud->getFechaAlta()) {
+            $this->addFlash('danger', 'No se puede rechazar la solicitud porque ya fue dada de alta.');
             return new JsonResponse([
                 "status" => "error",
                 "html" => $this->renderView('modales/flashAlertsModal.html.twig')
             ]);
-        } */
+        }
 
         $form = $this->createForm(RechazarSolicitudType::class, $solicitud);
         $form->handleRequest($request);

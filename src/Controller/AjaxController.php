@@ -31,12 +31,13 @@ class AjaxController extends AbstractController
 {
 
     #[Route('/ajax/persona_fisica_x_cuil', name: 'get_persona_fisica_x_cuil')]
-    public function get_persona_fisica_x_cuil(Request $request ): Response
+    public function get_persona_fisica_x_cuil(Request $request): Response
     {
-        $formData = $request->request->all();        
+        $formData = $request->request->all();
         $cuil = $formData['cuil'];
+        $cuil = str_replace("-", "", $cuil);
         $personaFisica = $this->getDoctrine()->getRepository(PersonaFisica::class)->findOneBy(['cuitCuil' => $cuil]);
-    	
+
         if ($personaFisica) {
             $status = 'Found';
             $message = $personaFisica->getApellido() . ', ' . $personaFisica->getNombres();
@@ -44,61 +45,59 @@ class AjaxController extends AbstractController
             $status = 'Not_Found';
             $message = 'Not_Found';
         }
-    	
-    	$response = array(
+
+        $response = array(
             'status' => $status,
             'message' => $message
         );
 
         return new JsonResponse($response);
-  
     }
 
     #[Route('/ajax/persona_juridica_x_cuit', name: 'get_persona_juridica_x_cuit')]
-    public function get_persona_juridica_x_cuit(Request $request ): Response
+    public function get_persona_juridica_x_cuit(Request $request): Response
     {
-    	$formData = $request->request->all();        
+        $formData = $request->request->all();
         $cuit = $formData['cuit'];
+        $cuit = str_replace("-", "", $cuit);
         $personaJuridica = $this->getDoctrine()->getRepository(PersonaJuridica::class)->findOneBy(['cuit' => $cuit]);
-    	
+
         if ($personaJuridica) {
             $status = 'Found';
             $message = $personaJuridica->getRazonSocial();
         } else {
             $status = 'Not_Found';
             $message = 'Not_Found';
-        }        
-    	$response = array(
+        }
+        $response = array(
             'status' => $status,
             'message' => $message
         );
 
         return new JsonResponse($response);
-  
     }
 
     #[Route('/ajax/dispositivo', name: 'get_dispositivo')]
-    public function get_dispositivo(Request $request ): Response
+    public function get_dispositivo(Request $request): Response
     {
-      	//recibe cuit nicname
-    	$status = 'Not_Found'; // o 'Error' si hay algún problema, si existe 'Found'
-    	$response = array(
+        //recibe cuit nicname
+        $status = 'Not_Found'; // o 'Error' si hay algún problema, si existe 'Found'
+        $response = array(
             'status' => $status,
             'message' => 'ACA VA EL NOMBRE'
         );
 
         return new JsonResponse($response);
-  
     }
 
     #[Route('/ajax/usuario', name: 'get_usuario')]
-    public function get_usuario(Request $request ): Response
+    public function get_usuario(Request $request): Response
     {
-        $formData = $request->request->all();        
+        $formData = $request->request->all();
         $nicname = $formData['nicname'];
 
         $dispositivo = $this->getDoctrine()->getRepository(Dispositivo::class)->findOneBy(['nicname' => $nicname]);
-    	
+
         if ($dispositivo) {
             $status = 'Found';
             $message = $dispositivo->getNicname();
@@ -106,34 +105,30 @@ class AjaxController extends AbstractController
             $status = 'Not_Found';
             $message = 'Not_Found';
         }
-    	$response = array(
+        $response = array(
             'status' => $status,
             'message' => $message
         );
 
         return new JsonResponse($response);
-  
     }
 
     #[Route('/ajax/usuario_dispositivo', name: 'get_usuario_dispositivo')]
-    public function get_usuario_dispositivo(Request $request ): Response
+    public function get_usuario_dispositivo(Request $request): Response
     {
-    	$formData = $request->request->all();        
+        $formData = $request->request->all();
         $nicname = $formData['nicname'];
         $cuil = $formData['cuil'];
         $cuit = $formData['cuit'];
 
         $usuarioDispositivo = $this->getDoctrine()->getRepository(Dispositivo::class)->findOneBy(['nicname' => $nicname, 'cuil' => $cuil, 'cuit' => $cuit]);
 
-    	$status = 'Not_Found'; // o 'Error' si hay algún problema, si existe 'Found'
-    	$response = array(
+        $status = 'Not_Found'; // o 'Error' si hay algún problema, si existe 'Found'
+        $response = array(
             'status' => $status,
             'message' => 'ACA VA EL NOMBRE'
         );
 
         return new JsonResponse($response);
-  
     }
-
-
 }

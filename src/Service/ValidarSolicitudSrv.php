@@ -115,7 +115,7 @@ class ValidarSolicitudSrv extends AbstractController
                             $solicitud = null;
                             break;
                         case '2':
-                            $flahOk = true;
+                            $flashOk = true;
                             $redirectForError = false;
                             $data = [
                                 'personaFisica' => $personaFisica,
@@ -354,11 +354,14 @@ class ValidarSolicitudSrv extends AbstractController
 
                             break;
                         case '2':
-                            //$flagOk = false;
-                            //$redirectForError = true;
-                            //$data = null;
-                            //$solicitud = null;
-
+                            $solicitud->setPersonaFisica($personaFisica);
+                            $solicitud->setPersonaJuridica($personaJuridica);
+                            $solicitud->setFechaUso(new \DateTime('now'));
+                            $solicitud->setUsada(true);
+                            $message = 'Datos completados con Exito.';
+                            $flagOk = true;
+                            $redirectForError = false;
+                            $data = null;
                             break;
                         case '3':
                             $message = 'Sin permisos suficientes para aceptar o rechazar una solicitud';
@@ -449,7 +452,14 @@ class ValidarSolicitudSrv extends AbstractController
                             $solicitud = null;
                             break;
                         case '2':
-                            # code...
+                            $solicitud->setPersonaJuridica($personaJuridica);
+                            $solicitud->setPersonaFisica($personaFisica);
+                            $solicitud->setFechaUso(new \DateTime('now'));
+                            $solicitud->setUsada(true);
+                            $message = 'Datos completados con Exito.';
+                            $flagOk = true;
+                            $redirectForError = false;
+                            $data = null;
                             break;
                         case '3':
                             $message = 'Sin permisos suficientes para aceptar o rechazar una solicitud';
@@ -583,65 +593,8 @@ class ValidarSolicitudSrv extends AbstractController
             if ($debugMode) {
                 $this->addFlash('success', 'Escenario: 13 - Paso: ' . $paso . ' - Ambiente: ' . $ambiente);
             }
-            switch ($ambiente) {
-                case 'Extranet':
-                    switch ($paso) {
-                        case '1':
-                            $message = 'Sin permisos suficientes para iniciar una solicitud';
-                            $flagOk = false;
-                            $redirectForError = true;
-                            $data = null;
-                            $solicitud = null;
-                            break;
-                        case '2':
-                            //$flagOk = false;
-                            //$redirectForError = true;
-                            //$data = null;
-                            //$solicitud = null;
-
-                            break;
-                        case '3':
-                            $message = 'Sin permisos suficientes para aceptar o rechazar una solicitud';
-                            $flagOk = false;
-                            $redirectForError = true;
-                            $data = null;
-                            $solicitud = null;
-
-                            break;
-                    }
-
-                    break;
-
-                case 'Intranet':
-                    switch ($paso) {
-                        case '1':
-                            //$flagOk = false;
-                            //$redirectForError = true;
-                            //$data = null;
-                            //$solicitud = null;
-
-                            break;
-                        case '2':
-                            $message = 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="{{ path("issue_report_new") }}>haciendo clic aquí y danos un poco de contexto.</a>';
-                            //$flagOk = false;
-                            //$redirectForError = true;
-                            //$data = null;
-                            //$solicitud = null;
-
-                            break;
-                        case '3':
-                            //$flagOk = false;
-                            //$redirectForError = true;
-                            //$data = null;
-                            //$solicitud = null;
-
-                            break;
-                    }
-
-                    break;
-            }
-
-            //return $this->redirectToRoute('dashboard');
+            $salida = $this->accionesSobreInconsistencias('13');
+            return $salida;
         }
 
         /**
@@ -668,11 +621,13 @@ class ValidarSolicitudSrv extends AbstractController
                             $solicitud = null;
                             break;
                         case '2':
-                            //$flagOk = false;
-                            //$redirectForError = true;
-                            //$data = null;
-                            //$solicitud = null;
-
+                            $solicitud->setPersonaFisica($personaFisica);
+                            $solicitud->setFechaUso(new \DateTime('now'));
+                            $solicitud->setUsada(true);
+                            $message = 'Datos completados con Exito.';
+                            $flagOk = true;
+                            $redirectForError = false;
+                            $data = null;
                             break;
                         case '3':
                             $message = 'Sin permisos suficientes para aceptar o rechazar una solicitud';
@@ -761,11 +716,13 @@ class ValidarSolicitudSrv extends AbstractController
                             $solicitud = null;
                             break;
                         case '2':
-                            //$flagOk = false;
-                            //$redirectForError = true;
-                            //$data = null;
-                            //$solicitud = null;
-
+                            $solicitud->setPersonaFisica($personaFisica);
+                            $solicitud->setFechaUso(new \DateTime('now'));
+                            $solicitud->setUsada(true);
+                            $message = 'Datos completados con Exito.';
+                            $flagOk = true;
+                            $redirectForError = false;
+                            $data = null;
                             break;
                         case '3':
                             $message = 'Sin permisos suficientes para aceptar o rechazar una solicitud';
@@ -957,12 +914,13 @@ class ValidarSolicitudSrv extends AbstractController
                             $solicitud = null;
                             break;
                         case '2':
-                            //TODO: Escenario 24 extranet paso 2
-                            //$flagOk = false;
-                            //$redirectForError = true;
-                            //$data = null;
-                            //$solicitud = null;
-
+                            $solicitud->setPersonaJuridica($personaJuridica);
+                            $solicitud->setFechaUso(new \DateTime('now'));
+                            $solicitud->setUsada(true);
+                            $message = 'Datos completados con Exito.';
+                            $flagOk = true;
+                            $redirectForError = false;
+                            $data = null;
                             break;
                         case '3':
                             $message = 'Sin permisos suficientes para aceptar o rechazar una solicitud';
@@ -1154,11 +1112,12 @@ class ValidarSolicitudSrv extends AbstractController
                             $solicitud = null;
                             break;
                         case '2':
-                            //$flagOk = false;
-                            //$redirectForError = true;
-                            //$data = null;
-                            //$solicitud = null;
-
+                            $solicitud->setFechaUso(new \DateTime('now'));
+                            $solicitud->setUsada(true);
+                            $message = 'Datos completados con Exito.';
+                            $flagOk = true;
+                            $redirectForError = false;
+                            $data = null;
                             break;
                         case '3':
                             $message = 'Sin permisos suficientes para aceptar o rechazar una solicitud';
