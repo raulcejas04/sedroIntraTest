@@ -85,10 +85,13 @@ class SolicitudController extends AbstractController
     public function solicitudes(): Response
     {
         $entityManager = $this->getDoctrine()->getManager();
-        $solicitudes = $entityManager->getRepository('App\Entity\Solicitud')->findBy([
+/*         $solicitudes = $entityManager->getRepository('App\Entity\Solicitud')->findBy([
             "fechaEliminacion" => null
         ]);
-
+        dd($solicitudes); */
+        $realm = $entityManager->getRepository(Realm::class)->findOneBy(['realm'=>$this->getParameter('keycloak_realm')]);
+        $solicitudes = $entityManager->getRepository('App\Entity\Solicitud')->findSolicitudes($realm);
+        //dd($solicitudes);
         $response = $this->renderView('solicitud\solicitudes.html.twig', [
             'solicitudes' => $solicitudes
         ]);
@@ -220,7 +223,7 @@ class SolicitudController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $solicitud->setAceptada(false);
-
+            $solicitud->setCorrecion(false);
             $email = (new TemplatedEmail())
                 ->from($this->getParameter('direccion_email_salida'))
                 ->to($solicitud->getMail())

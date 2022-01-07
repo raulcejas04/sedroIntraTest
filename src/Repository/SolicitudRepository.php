@@ -36,6 +36,16 @@ class SolicitudRepository extends ServiceEntityRepository
     }
     */
 
+    public function findSolicitudes($realm)
+    {
+        return $this->createQueryBuilder('s')
+            ->andWhere('s.realm = :realm')
+            ->andWhere('s.fechaEliminacion IS NULL')
+            ->setParameter('realm', $realm)
+            ->orderBy('s.creacion', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
 
     public function findSolicitudActiva($mail, $nicname, $cuit, $cuil)
     {

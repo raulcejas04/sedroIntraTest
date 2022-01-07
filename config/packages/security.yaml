@@ -45,13 +45,15 @@ security:
     access_control:
         
         - { path: ^/oauth/login, roles: IS_AUTHENTICATED_ANONYMOUSLY } //el login entra como anonimo porque sino se queda en loop
-        - { path: ^/public, roles: IS_AUTHENTICATED_ANONYMOUSLY } //el login entra como anonimo porque sino se queda en loop                
-        - { path: ^/, roles: ROLE_USER }
         - { path: ^/account/failure, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/api/add/user, roles: IS_AUTHENTICATED_ANONYMOUSLY,ips: [127.0.0.1],port: 9005 }
-        - { path: ^/api/add/group/user, roles: IS_AUTHENTICATED_ANONYMOUSLY,ips: [127.0.0.1],port: 9005 }
-        - { path: ^/api/get/group, roles: IS_AUTHENTICATED_ANONYMOUSLY,ips: [127.0.0.1],port: 9005 }
-        - { path: ^/api/get/role, roles: IS_AUTHENTICATED_ANONYMOUSLY,ips: [127.0.0.1],port: 9005 }
+        - { path: ^/public, roles: IS_AUTHENTICATED_ANONYMOUSLY } //el login entra como anonimo porque sino se queda en loop     
+        # PONGO EL API EN PUBLIC PORQUE SINO NO FUNCIONAN LOS CALLS EN LA EXTRANET, LO LIMITO A QUE SOLO SEA LA IP DE LA EXTRA  
+        - { path: ^/public/api/add/user, roles: IS_AUTHENTICATED_ANONYMOUSLY,ips: [127.0.0.1],port: 9005 }
+        - { path: ^/public/api/add/group/user, roles: IS_AUTHENTICATED_ANONYMOUSLY,ips: [127.0.0.1],port: 9005 }
+        - { path: ^/public/api/get/group, roles: IS_AUTHENTICATED_ANONYMOUSLY,ips: [127.0.0.1],port: 9005 }
+        - { path: ^/public/api/get/role, roles: IS_AUTHENTICATED_ANONYMOUSLY,ips: [127.0.0.1],port: 9005 }         
+        - { path: ^/, roles: ROLE_USER }
+        
         # - { path: ^/admin, roles: ROLE_ADMIN }
         # - { path: ^/profile, roles: ROLE_USER }
         
