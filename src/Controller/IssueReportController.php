@@ -28,14 +28,13 @@ class IssueReportController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $user = $this->getUser();
-            
-            $this->sendAlertsSrv->sendIssueReportAlertsToSuperAdmins($issueReport, $user);
-            
+            $user = $this->getUser();      
             $issueReport->setUsuario($user);
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($issueReport);
             $entityManager->flush();
+            //Fix error de ID null. si no lo llamo despueś del persist, el ID no llega a la ruta que se manda en el mensaje a los
+            $this->sendAlertsSrv->sendIssueReportAlertsToSuperAdmins($issueReport, $user);
             $this->addFlash('success', 'Gracias por reportar un problema. Lo solucionaremos lo antes posible');
             return $this->redirectToRoute('solicitudes', [], Response::HTTP_SEE_OTHER);
         }
