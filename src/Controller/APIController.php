@@ -58,22 +58,22 @@ class APIController extends AbstractController
     #[Route('/add/group/user', name: 'api_add_group_user', methods: ['POST'])]
     public function addGroupToUser(Request $request): JsonResponse
     {
-        $data = json_decode($request->getContent(),true);
+        $data = json_decode($request->getContent(), true);
         $username = $data["username"];
         $groups = $data["groups"];
-        
+
         if (empty($username) || empty($groups)) {
             throw new NotFoundHttpException("Expecting mandatory parameters!");
         }
 
         $user = $this->keycloakService->getUserByUsernameAndRealm($username, $this->getParameter('keycloak_extranet_realm'));
 
-        if(empty($user[0])){
+        if (empty($user[0])) {
             return new JsonResponse(["status" => "error", "message" => "El usuario no se encuentra en keycloak."]);
         }
 
         foreach ($groups as $_group) {
-            $group = $this->keycloakService->getGroup($_group,$this->getParameter('keycloak_extranet_realm'));
+            $group = $this->keycloakService->getGroup($_group, $this->getParameter('keycloak_extranet_realm'));
             $putGroupResponse = $this->keycloakService->addUserToGroup(
                 $this->getParameter('keycloak_extranet_realm'),
                 $user[0]->id,
@@ -99,13 +99,13 @@ class APIController extends AbstractController
             throw new NotFoundHttpException("Expecting mandatory parameters!");
         }
 
-        $res = $this->keycloakService->getGroup($group,$realm);
+        $res = $this->keycloakService->getGroup($group, $realm);
 
-       /*  if ($res->getStatusCode() == 500) {
+        /*  if ($res->getStatusCode() == 500) {
             return new JsonResponse(["status" => "error", "message" => "Ha ocurrido un error y la operación no pudo completarse."]);
         } */
 
-        return new JsonResponse((array)$res,Response::HTTP_OK);
+        return new JsonResponse((array)$res, Response::HTTP_OK);
     }
 
     #[Route('/get/role', name: 'api_get_role')]
@@ -119,13 +119,13 @@ class APIController extends AbstractController
             throw new NotFoundHttpException("Expecting mandatory parameters!");
         }
 
-        $res = $this->keycloakService->getRole($role,$realm);
+        $res = $this->keycloakService->getRole($role, $realm);
 
-     /*    if ($res->getStatusCode() == 500) {
+        /*    if ($res->getStatusCode() == 500) {
             return new JsonResponse(["status" => "error", "message" => "Ha ocurrido un error y la operación no pudo completarse."]);
         } */
 
-        return new JsonResponse((array)$res,Response::HTTP_OK);
+        return new JsonResponse((array)$res, Response::HTTP_OK);
     }
 
     #[Route('/get/user/username', name: 'api_get_user_username')]
@@ -138,13 +138,13 @@ class APIController extends AbstractController
             throw new NotFoundHttpException("Expecting mandatory parameters!");
         }
 
-        $res = $this->keycloakService->getUserByUsernameAndRealm($username,$realm);
+        $res = $this->keycloakService->getUserByUsernameAndRealm($username, $realm);
 
-     /*    if ($res->getStatusCode() == 500) {
+        /*    if ($res->getStatusCode() == 500) {
             return new JsonResponse(["status" => "error", "message" => "Ha ocurrido un error y la operación no pudo completarse."]);
         } */
 
-        return new JsonResponse((array)$res,Response::HTTP_OK);
+        return new JsonResponse((array)$res, Response::HTTP_OK);
     }
 
     #[Route('/get/user/email', name: 'api_get_user_email')]
@@ -157,13 +157,33 @@ class APIController extends AbstractController
             throw new NotFoundHttpException("Expecting mandatory parameters!");
         }
 
-        $res = $this->keycloakService->getUserByEmailAndRealm($email,$realm);
+        $res = $this->keycloakService->getUserByEmailAndRealm($email, $realm);
 
-     /*    if ($res->getStatusCode() == 500) {
+        /*    if ($res->getStatusCode() == 500) {
             return new JsonResponse(["status" => "error", "message" => "Ha ocurrido un error y la operación no pudo completarse."]);
         } */
 
-        return new JsonResponse((array)$res,Response::HTTP_OK);
+        return new JsonResponse((array)$res, Response::HTTP_OK);
     }
 
+    #[Route('/update/user/password', name: 'api_update_user_password')]
+    public function updateUserPassword(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $id = $data["id"];
+        $realm = $data["realm"];
+        $password = $data["password"];
+
+        if (empty($id) || empty($realm) || empty($password)) {
+            throw new NotFoundHttpException("Expecting mandatory parameters!");
+        }
+
+        $res = $this->keycloakService->changeUserPassword($id, $realm, $password);
+
+        /*    if ($res->getStatusCode() == 500) {
+            return new JsonResponse(["status" => "error", "message" => "Ha ocurrido un error y la operación no pudo completarse."]);
+        } */
+
+        return new JsonResponse((array)$res, Response::HTTP_OK);
+    }
 }

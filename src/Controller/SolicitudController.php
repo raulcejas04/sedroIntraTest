@@ -69,7 +69,7 @@ class SolicitudController extends AbstractController
 
             $solicitud = $validacion["solicitud"];
             $entityManager->persist($solicitud);
-            $entityManager->flush();          
+            $entityManager->flush();
             $this->addFlash('success', $validacion["message"]);
             return $this->redirectToRoute('dashboard');
         }
@@ -85,11 +85,11 @@ class SolicitudController extends AbstractController
     public function solicitudes(): Response
     {
         $entityManager = $this->getDoctrine()->getManager();
-/*         $solicitudes = $entityManager->getRepository('App\Entity\Solicitud')->findBy([
+        /*         $solicitudes = $entityManager->getRepository('App\Entity\Solicitud')->findBy([
             "fechaEliminacion" => null
         ]);
         dd($solicitudes); */
-        $realm = $entityManager->getRepository(Realm::class)->findOneBy(['realm'=>$this->getParameter('keycloak_realm')]);
+        $realm = $entityManager->getRepository(Realm::class)->findOneBy(['realm' => $this->getParameter('keycloak_realm')]);
         $solicitudes = $entityManager->getRepository('App\Entity\Solicitud')->findSolicitudes($realm);
         //dd($solicitudes);
         $response = $this->renderView('solicitud\solicitudes.html.twig', [
@@ -168,6 +168,10 @@ class SolicitudController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            if ($solicitud->getFechaExpiracion() < new DateTime()) {
+                $fechaExpiracion = (new DateTime())->modify('+7 days');
+                $solicitud->setFechaExpiracion($fechaExpiracion);
+            }
             $url = $this->getParameter('extranet_url') . '/public/' . $solicitud->getHash() . '/completar-datos';
             $email = (new TemplatedEmail())
                 ->from($this->getParameter('direccion_email_salida'))
@@ -180,6 +184,9 @@ class SolicitudController extends AbstractController
                 ]);
 
             $mailer->send($email);
+
+            $entityManager->persist($solicitud);
+            $entityManager->flush();
 
             return new JsonResponse([
                 "status" => "success",
@@ -288,12 +295,16 @@ class SolicitudController extends AbstractController
 
         $solicitudActiva = $entityManager->getRepository('App\Entity\Solicitud')->findSolicitudActiva($solicitud->getMail(), $solicitud->getNicname(), $solicitud->getCuit(), $solicitud->getCuil());
         if ($solicitudActiva) {
-            $this->addFlash('danger', 'Existe una solicitud activa con esos datos. (La persona con CUIT ' . $solicitud->getCuil() . ' aún no envió los datos solicitados)');
+            if (!$solicitudActiva->getFechaUso()) {
+                $this->addFlash('danger', 'Existe una solicitud activa con esos datos. (La persona con CUIT ' . $solicitud->getCuil() . ' aún no envió los datos solicitados)');
+            } else {
+                $this->addFlash('danger', 'Existe una solicitud activa con esos datos.');
+            }
+
             return true;
         } else {
             return false;
         }
-        //TODO: verificar más escenarios
     }
 
     private function verificaUsuarioKeycloakPreexistente($username, $email)

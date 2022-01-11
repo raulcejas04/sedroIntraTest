@@ -51,7 +51,8 @@ security:
         - { path: ^/public/api/add/user, roles: IS_AUTHENTICATED_ANONYMOUSLY,ips: [127.0.0.1],port: 9005 }
         - { path: ^/public/api/add/group/user, roles: IS_AUTHENTICATED_ANONYMOUSLY,ips: [127.0.0.1],port: 9005 }
         - { path: ^/public/api/get/group, roles: IS_AUTHENTICATED_ANONYMOUSLY,ips: [127.0.0.1],port: 9005 }
-        - { path: ^/public/api/get/role, roles: IS_AUTHENTICATED_ANONYMOUSLY,ips: [127.0.0.1],port: 9005 }         
+        - { path: ^/public/api/get/role, roles: IS_AUTHENTICATED_ANONYMOUSLY,ips: [127.0.0.1],port: 9005 }   
+        - { path: ^/public/update/user/password, roles: IS_AUTHENTICATED_ANONYMOUSLY,ips: [127.0.0.1],port: 9005 }            
         - { path: ^/, roles: ROLE_USER }
         
         # - { path: ^/admin, roles: ROLE_ADMIN }

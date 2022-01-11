@@ -28,7 +28,7 @@ class ValidarSolicitudSrv extends AbstractController
     private $sendAlertsSrv;
     private $router;
 
-    public function __construct(ParameterBagInterface $parameterBag, KeycloakApiSrv $kc, EntityManagerInterface $em, SendAlertsSrv $sendAlertsSrv, AuxSrv $auxSrv,RouterInterface $router)
+    public function __construct(ParameterBagInterface $parameterBag, KeycloakApiSrv $kc, EntityManagerInterface $em, SendAlertsSrv $sendAlertsSrv, AuxSrv $auxSrv, RouterInterface $router)
     {
         $this->client = new GuzzleHttp\Client();
         $this->parameterBag = $parameterBag;
@@ -60,7 +60,7 @@ class ValidarSolicitudSrv extends AbstractController
         $redirectForError = false;
         $data = null;
         $message = "";
-        $issuePath =  $this->router->generate('issue_report_new',[],UrlGeneratorInterface::ABSOLUTE_URL);
+        $issuePath =  $this->router->generate('issue_report_new', [], UrlGeneratorInterface::ABSOLUTE_URL);
 
         //El debugMode habilita los flash para saber a que escenario entró el validador.
         //Poner en false en producción.
@@ -130,6 +130,7 @@ class ValidarSolicitudSrv extends AbstractController
                             $redirectForError = false;
                             $data = null;
                             $message = 'Invitación generada correctamente.';
+                            break;
                         case '2':
                             $solicitud->setDispositivo($dispositivo);
                             $solicitud->setPersonaFisica($personaFisica);
@@ -160,12 +161,21 @@ class ValidarSolicitudSrv extends AbstractController
                     switch ($paso) {
                         case '1':
                         case '2':
-                        case '3':
-                            $message = 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="'.$issuePath.'">haciendo clic aquí y danos un poco de contexto.</a>';
+                            $message = 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="' . $issuePath . '">haciendo clic aquí y danos un poco de contexto.</a>';
                             $flagOk = false;
                             $redirectForError = true;
                             $data = null;
                             $solicitud = null;
+                            break;
+                        case '3':
+                            $this->auxSrv->createUsuarioDispositivo($dispositivo, $usuario, UsuarioDispositivo::NIVEL_1);
+                            $solicitud->setFechaAlta(new DateTime());
+                            $solicitud->setCorreccion(false);
+                            $message = 'El usuario, la persona física, la persona jurídica y el dispositivo existían con anterioridad.';
+                            $message .= 'Se ha vinculado el usuario ' . $usuario->getPersonaFisica()->getNombres() . ' ' . $usuario->getPersonaFisica()->getApellido() . '(' . $usuario->getUsername() . ')' . ' a ' . $dispositivo->getNicname();
+                            $flagOk = true;
+                            $redirectForError = false;
+                            $data = null;
                             break;
                     }
 
@@ -220,6 +230,7 @@ class ValidarSolicitudSrv extends AbstractController
                             $redirectForError = false;
                             $data = null;
                             $message = 'Invitación generada correctamente.';
+                            break;
                         case '2':
                             $solicitud->setDispositivo($dispositivo);
                             $solicitud->setPersonaFisica($personaFisica);
@@ -250,7 +261,7 @@ class ValidarSolicitudSrv extends AbstractController
                         case '1':
                         case '2':
                         case '3':
-                            $message = 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="'.$issuePath.'">haciendo clic aquí y danos un poco de contexto.</a>';
+                            $message = 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="' . $issuePath . '">haciendo clic aquí y danos un poco de contexto.</a>';
                             $flagOk = false;
                             $redirectForError = true;
                             $data = null;
@@ -314,7 +325,7 @@ class ValidarSolicitudSrv extends AbstractController
 
                             break;
                         case '2':
-                            $message = 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="'.$issuePath.'">haciendo clic aquí y danos un poco de contexto.</a>';
+                            $message = 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="' . $issuePath . '">haciendo clic aquí y danos un poco de contexto.</a>';
                             //$flagOk = false;
                             //$redirectForError = true;
                             //$data = null;
@@ -398,7 +409,7 @@ class ValidarSolicitudSrv extends AbstractController
                             $message = 'Invitación generada correctamente.';
                             break;
                         case '2':
-                            $message = 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="'.$issuePath.'">haciendo clic aquí y danos un poco de contexto.</a>';
+                            $message = 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="' . $issuePath . '">haciendo clic aquí y danos un poco de contexto.</a>';
                             $flagOk = false;
                             $redirectForError = true;
                             $data = null;
@@ -502,7 +513,7 @@ class ValidarSolicitudSrv extends AbstractController
                             $message = 'Invitación generada correctamente.';
                             break;
                         case '2':
-                            $message = 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="'.$issuePath.'">haciendo clic aquí y danos un poco de contexto.</a>';
+                            $message = 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="' . $issuePath . '">haciendo clic aquí y danos un poco de contexto.</a>';
                             //$flagOk = false;
                             //$redirectForError = true;
                             //$data = null;
@@ -672,7 +683,7 @@ class ValidarSolicitudSrv extends AbstractController
                             $message = 'Invitación generada correctamente.';
                             break;
                         case '2':
-                            $message = 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="'.$issuePath.'">haciendo clic aquí y danos un poco de contexto.</a>';
+                            $message = 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="' . $issuePath . '">haciendo clic aquí y danos un poco de contexto.</a>';
                             $flagOk = false;
                             $redirectForError = true;
                             $data = null;
@@ -768,7 +779,7 @@ class ValidarSolicitudSrv extends AbstractController
                             $message = 'Invitación generada correctamente.';
                             break;
                         case '2':
-                            $message = 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="'.$issuePath.'">haciendo clic aquí y danos un poco de contexto.</a>';
+                            $message = 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="' . $issuePath . '">haciendo clic aquí y danos un poco de contexto.</a>';
                             $flagOk = false;
                             $redirectForError = true;
                             $data = null;
@@ -869,6 +880,7 @@ class ValidarSolicitudSrv extends AbstractController
                             $redirectForError = false;
                             $data = null;
                             $message = 'Invitación generada correctamente.';
+                            break;
                         case '2':
                             $solicitud->setPersonaJuridica($personaJuridica);
                             $solicitud->setFechaUso(new \DateTime('now'));
@@ -879,7 +891,7 @@ class ValidarSolicitudSrv extends AbstractController
                             $data = null;
                             break;
                         case '3':
-                            $message = 'Ha ocurrido un error en el proceso de generar los datos de la Persona Física. contacta a soporte <a href="'.$issuePath.'">haciendo clic aquí y danos un poco de contexto.';
+                            $message = 'Ha ocurrido un error en el proceso de generar los datos de la Persona Física. contacta a soporte <a href="' . $issuePath . '">haciendo clic aquí y danos un poco de contexto.';
                             $flagOk = false;
                             $redirectForError = true;
                             $data = null;
@@ -893,7 +905,7 @@ class ValidarSolicitudSrv extends AbstractController
                         case '1':
                         case '2':
                         case '3':
-                            $message = 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="'.$issuePath.'">haciendo clic aquí y danos un poco de contexto.</a>';
+                            $message = 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="' . $issuePath . '">haciendo clic aquí y danos un poco de contexto.</a>';
                             $flagOk = false;
                             $redirectForError = true;
                             $data = null;
@@ -1022,7 +1034,7 @@ class ValidarSolicitudSrv extends AbstractController
                             $message = 'Invitación generada correctamente.';
                             break;
                         case '2':
-                            $message = 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="'.$issuePath.'">haciendo clic aquí y danos un poco de contexto.</a>';
+                            $message = 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="' . $issuePath . '">haciendo clic aquí y danos un poco de contexto.</a>';
                             $flagOk = false;
                             $redirectForError = true;
                             $data = null;
@@ -1220,7 +1232,7 @@ class ValidarSolicitudSrv extends AbstractController
                             $message = 'Invitación generada correctamente.';
                             break;
                         case '2':
-                            $message = 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="'.$issuePath.'">haciendo clic aquí y danos un poco de contexto.</a>';
+                            $message = 'Seccion destinada a invitados en la extranet por solicitud. Si crees que es un error contacta a soporte <a href="' . $issuePath . '">haciendo clic aquí y danos un poco de contexto.</a>';
                             //$flagOk = false;
                             //$redirectForError = true;
                             //$data = null;
