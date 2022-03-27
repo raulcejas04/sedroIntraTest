@@ -181,6 +181,10 @@ class AddSuperAdminCommand extends Command
         }
 
         
+        $output->writeln([                
+                '<info>Paso1<info>',
+                '',
+            ]);
         
         //***************************************************************************
         //********** paso 1, Verificar el realm en KC y en la DB **********************************
@@ -222,6 +226,10 @@ class AddSuperAdminCommand extends Command
             $realmKC = $this->crearRealmKC();
         }
 
+        $output->writeln([                
+                '<info>Paso2<info>',
+                '',
+            ]);
         //***************************************************************************
         // paso 2, verificar el Rol ROLE_SUPER_ADMIN en Keycloak y en la DB ***********************
         //***************************************************************************
@@ -235,6 +243,7 @@ class AddSuperAdminCommand extends Command
             $roleDB = $this->em->getRepository(Role::class)->findOneBy(['code' => $roleCode]);
         }
 
+	echo "paso21<br>";
         if ($escenarioRol['roleKC'] == true && $escenarioRol['roleDB'] == false) {
             $output->writeln([                
                 '<info>Existe el rol en KC y no en la DB... creando rol en la DB<info>',
@@ -244,6 +253,7 @@ class AddSuperAdminCommand extends Command
             $roleDB = $this->crearRoleDB($realmDB, $grupoDB, $roleName, $roleCode, $roleKC);
         }
 
+	echo "paso22<br>";
         if ($escenarioRol['roleKC'] == false && $escenarioRol['roleDB'] == true) {
             $output->writeln([                
                 '<info>Existe el rol en la DB y no en KC... creando rol en KC<info>',
@@ -253,6 +263,7 @@ class AddSuperAdminCommand extends Command
             $roleDB = $this->em->getRepository(Role::class)->findOneBy(['code' => $roleCode]);
         }
 
+	echo "paso23<br>";
         if ($escenarioRol['roleKC'] == false && $escenarioRol['roleDB'] == false) {
             $output->writeln([                
                 '<info>No existe el rol en la DB ni en KC... creando rol en la DB y KC<info>',
@@ -263,6 +274,10 @@ class AddSuperAdminCommand extends Command
             $roleDB = $this->crearRoleDB($realmDB, $grupoDB, $roleName, $roleCode, $roleKC);
         }
 
+        $output->writeln([                
+                '<info>Paso3<info>',
+                '',
+            ]);
         
         //***************************************************************************
         //****** paso 3, verificar el grupo en Keycloak y en la DB ********************************
@@ -510,6 +525,7 @@ class AddSuperAdminCommand extends Command
     }
 
     private function verificarRealm($realm) {
+
         $realmDB = $this->em->getRepository(Realm::class)->findOneBy(["realm"=>$realm]);
         $realmKC = $this->kc->getRealmByName($realm);
         if (!$realmDB){
@@ -626,8 +642,10 @@ class AddSuperAdminCommand extends Command
         //De existir ver si hay incosistencias, (de haberlas repararlas). 
         //Finalmente ver si el rol está asignados al grupo (de no estarlo asignarlo)
         $roleKC = $this->kc->getRoleInRealmbyName($realm, $roleName);        
+	echo "entro verificarRol -$roleCode-<br>";
         $roleDB = $this->em->getRepository(Role::class)->findOneBy(["code"=>$roleCode]);       
 
+	echo "entro verificarRol2<br>";
         if ($roleDB == false) {
             $roleDB = false;
         } else {
